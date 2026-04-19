@@ -57,6 +57,15 @@ public class NumeratorService : INumeratorService
         var result = await command.ExecuteScalarAsync();
         var sequenceNumber = Convert.ToInt32(result);
 
+        if (sequenceNumber == 0)
+        {
+            command.CommandText = $"SELECT NEXT VALUE FOR {sequenceName}";
+            if (_context.Database.CurrentTransaction != null)
+                command.Transaction = _context.Database.CurrentTransaction.GetDbTransaction();
+            result = await command.ExecuteScalarAsync();
+            sequenceNumber = Convert.ToInt32(result);
+        }
+
         return BuildCode(template, sequenceNumber);
     }
 
@@ -87,7 +96,8 @@ public class NumeratorService : INumeratorService
             command.Transaction = _context.Database.CurrentTransaction.GetDbTransaction();
 
         var result = await command.ExecuteScalarAsync();
-        var sequenceNumber = result != DBNull.Value && result != null ? Convert.ToInt32(result) : 1;
+        var sequenceNumber = result != DBNull.Value && result != null ? Convert.ToInt32(result) : 0;
+        if (sequenceNumber == 0) sequenceNumber = 1;
 
         var previewCode = BuildCode(template, sequenceNumber);
         return (previewCode, template.IsManualEntryAllowed);
@@ -106,7 +116,7 @@ public class NumeratorService : INumeratorService
         command.CommandText = $"SELECT CAST(ISNULL(current_value, start_value) AS INT) FROM sys.sequences WHERE name = '{sequenceName}'";
         
         var result = await command.ExecuteScalarAsync();
-        return result != DBNull.Value && result != null ? Convert.ToInt32(result) : 1;
+        return result != DBNull.Value && result != null ? Convert.ToInt32(result) : 0;
     }
 
     public async Task RestartSequenceAsync(DocumentType type, int newStartValue)

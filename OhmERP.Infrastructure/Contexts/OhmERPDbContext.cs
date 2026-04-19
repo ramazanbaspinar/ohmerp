@@ -33,8 +33,8 @@ public class OhmERPDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.HasSequence<int>("CompanyCode_Seq").StartsAt(1).IncrementsBy(1);
-        modelBuilder.HasSequence<int>("ItemCode_Seq").StartsAt(1).IncrementsBy(1);
+        modelBuilder.HasSequence<int>("CompanyCode_Seq").StartsAt(0).IncrementsBy(1);
+        modelBuilder.HasSequence<int>("ItemCode_Seq").StartsAt(0).IncrementsBy(1);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OhmERPDbContext).Assembly);
 

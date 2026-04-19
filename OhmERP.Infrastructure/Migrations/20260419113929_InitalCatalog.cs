@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -7,17 +7,19 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace OhmERP.Infrastructure.Migrations
 {
-
-    public partial class InitialCatalog : Migration
+    /// <inheritdoc />
+    public partial class InitalCatalog : Migration
     {
-
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateSequence<int>(
-                name: "CompanyCode_Seq");
+                name: "CompanyCode_Seq",
+                startValue: 0L);
 
             migrationBuilder.CreateSequence<int>(
-                name: "ItemCode_Seq");
+                name: "ItemCode_Seq",
+                startValue: 0L);
 
             migrationBuilder.CreateTable(
                 name: "AuditLogs",
@@ -409,7 +411,7 @@ namespace OhmERP.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "Id", "Code", "CreatedBy", "CreatedDate", "DeletedBy", "DeletedDate", "Description", "IsActive", "IsDeleted", "Name", "RowVersion", "UpdatedBy", "UpdatedDate" },
-                values: new object[] { new Guid("d865c2e3-aa4c-4f46-9187-012112b96475"), "ADMIN", new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, "Sistem Yönetici Rolü", true, false, "Admin", new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 }, null, null });
+                values: new object[] { new Guid("d865c2e3-aa4c-4f46-9187-012112b96475"), "ADMIN", new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, "Sistem YÃ¶netici RolÃ¼", true, false, "Admin", new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 }, null, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuditLogs_DateTime",
@@ -545,6 +547,7 @@ namespace OhmERP.Infrastructure.Migrations
                 unique: true);
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

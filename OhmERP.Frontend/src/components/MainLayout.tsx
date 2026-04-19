@@ -156,10 +156,10 @@ const MainLayout: React.FC = () => {
             <Input
               className="menu-search-input"
               placeholder="Menüde Ara..."
-              prefix={<SearchOutlined style={{ color: 'rgba(255,255,255,0.4)' }}/>}
+              prefix={<SearchOutlined />}
               value={menuSearchText}
               onChange={(e) => setMenuSearchText(e.target.value)}
-              style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none' }}
+              style={{ background: 'rgba(128,128,128,0.2)', border: 'none' }}
               allowClear
             />
           </div>
