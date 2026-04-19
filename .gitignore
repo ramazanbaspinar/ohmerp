@@ -18,6 +18,10 @@ node_modules/
 dist/
 dist-ssr/
 
+# Stray node/npm executables
+**/node
+**/npm
+
 # Logs
 logs/
 *.log
