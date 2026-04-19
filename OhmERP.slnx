@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="OhmERP.Application/OhmERP.Application.csproj" />
+  <Project Path="OhmERP.Domain/OhmERP.Domain.csproj" />
+  <Project Path="OhmERP.Infrastructure/OhmERP.Infrastructure.csproj" />
+  <Project Path="OhmERP.WebApi/OhmERP.WebApi.csproj" />
+</Solution>

@@ -1,0 +1,17 @@
+using FluentValidation;
+using OhmERP.Application.DTOs.District;
+
+namespace OhmERP.Application.Validators.District;
+
+public class CreateDistrictValidator : AbstractValidator<CreateDistrictRequest>
+{
+    public CreateDistrictValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithMessage("Ýlçe adý boþ býrakýlamaz!")
+            .MaximumLength(100).WithMessage("Ýlçe adý en fazla 100 karakter olabilir.");
+
+        RuleFor(x => x.CityId)
+            .NotEmpty().WithMessage("Ýlçe eklemek için geçerli bir þehir seçmelisiniz.");
+    }
+}

@@ -1,0 +1,329 @@
+# ============================================================
+# COMBINED .gitignore — Full-stack project (Frontend + Backend)
+# ============================================================
+
+
+# ───────────────────────────────────────────────
+# ENVIRONMENT & SECRETS
+# ───────────────────────────────────────────────
+.env
+.env.*
+*.local
+
+
+# ───────────────────────────────────────────────
+# NODE / FRONTEND
+# ───────────────────────────────────────────────
+node_modules/
+dist/
+dist-ssr/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+
+# ───────────────────────────────────────────────
+# .NET / BACKEND BUILD OUTPUTS
+# ───────────────────────────────────────────────
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+Generated\ Files/
+
+
+# ───────────────────────────────────────────────
+# VISUAL STUDIO
+# ───────────────────────────────────────────────
+.vs/
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.usertasks
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+.history/
+
+# JetBrains Rider
+*.sln.iml
+.idea/
+
+
+# ───────────────────────────────────────────────
+# TEST & COVERAGE
+# ───────────────────────────────────────────────
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+TestResult.xml
+nunit-*.xml
+*.VisualState.xml
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+*.coveragexml
+BenchmarkDotNet.Artifacts/
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+OpenCover/
+
+
+# ───────────────────────────────────────────────
+# NUGET & .NET PACKAGES
+# ───────────────────────────────────────────────
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+
+
+# ───────────────────────────────────────────────
+# COMPILED / GENERATED FILES
+# ───────────────────────────────────────────────
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.tlog
+*.vspscc
+*.vssscc
+*.pidb
+*.svclog
+*.scc
+*.rsp
+!Directory.Build.rsp
+dlldata.c
+FodyWeavers.xsd
+
+# Python (PTVS)
+__pycache__/
+*.pyc
+
+
+# ───────────────────────────────────────────────
+# AZURE & CLOUD
+# ───────────────────────────────────────────────
+csx/
+*.build.csdef
+ecf/
+rcf/
+PublishScripts/
+*.[Pp]ublish.xml
+*.azurePubxml
+*.pubxml
+*.publishproj
+ASALocalRun/
+
+
+# ───────────────────────────────────────────────
+# WINDOWS APP PACKAGES
+# ───────────────────────────────────────────────
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+*.appx
+*.appxbundle
+*.appxupload
+
+
+# ───────────────────────────────────────────────
+# SQL SERVER
+# ───────────────────────────────────────────────
+*.mdf
+*.ldf
+*.ndf
+
+
+# ───────────────────────────────────────────────
+# MISC TOOLS & ADD-INS
+# ───────────────────────────────────────────────
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+*.dotCover
+.axoCover/*
+!.axoCover/settings.json
+.sass-cache/
+.localhistory/
+.vshistory/
+.tye/
+.mfractor/
+.ionide/
+.fake/
+.paket/paket.exe
+paket-files/
+.cr/personal
+healthchecksdb
+MigrationBackup/
+FakesAssemblies/
+ScaffoldingReadMe.txt
+StyleCopReport.xml
+AutoTest.Net/
+_Chutzpah*
+*.GhostDoc.xml
+.ntvs_analysis.dat
+*.jmconfig
+*.tss
+*.binlog
+*.nvuser
+*.meta
+*.builds
+*.e2e
+*.psess
+*.vsp
+*.vspx
+*.sap
+*.gpState
+$tf/
+_Pvt_Extensions
+mono_crash.*
+ipch/
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+*.[Cc]ache
+!?*.[Cc]ache/
+
+
+# ───────────────────────────────────────────────
+# VISUAL STUDIO 6
+# ───────────────────────────────────────────────
+*.plg
+*.opt
+*.vbw
+*.vbp
+*.dsw
+*.dsp
+
+
+# ───────────────────────────────────────────────
+# BUSINESS INTELLIGENCE
+# ───────────────────────────────────────────────
+*.rdl.data
+*.bim.layout
+*.bim_*.settings
+*.rptproj.rsuser
+*- [Bb]ackup.rdl
+*- [Bb]ackup ([0-9]).rdl
+*- [Bb]ackup ([0-9][0-9]).rdl
+
+
+# ───────────────────────────────────────────────
+# MACOS
+# ───────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+
+# ───────────────────────────────────────────────
+# WINDOWS
+# ───────────────────────────────────────────────
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+
+# ───────────────────────────────────────────────
+# MISC FILES
+# ───────────────────────────────────────────────
+~$*
+*~
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pfx
+*.publishsettings
+orleans.codegen.cs
+*.sw?
+ClientBin/
+Generated_Code/
+_UpgradeReport_Files/
+Backup*/
+UpgradeLog*.XML
+UpgradeLog*.htm
+ServiceFabricBackup/
+*.rptproj.bak
+Makefile.in
+config.make
+config.status
+aclocal.m4
+install-sh
+autom4te.cache/
+*.tar.gz
+tarballs/
+test-results/
