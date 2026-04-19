@@ -317,7 +317,7 @@ const KullaniciYonetimi: React.FC = () => {
         onCancel={handleModalClose}
         footer={null}
         maskClosable={false}
-        destroyOnClose
+        destroyOnHidden
         width={700} 
       >
         <Form 

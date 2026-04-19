@@ -3,6 +3,7 @@ using OhmERP.Application.Interfaces.Services;
 using OhmERP.Domain.Common;
 using OhmERP.Domain.Entities;
 using OhmERP.Domain.Enums;
+using OhmERP.Domain.Exceptions;
 using OhmERP.Infrastructure.Auditing;
 
 namespace OhmERP.Infrastructure.Contexts;
@@ -115,9 +116,48 @@ public class OhmERPDbContext : DbContext
             }
         }
 
+        ValidateSoftDeleteRelations();
+
         var result = await base.SaveChangesAsync(cancellationToken);
         await OnAfterSaveChangesAsync(auditEntries, cancellationToken);
         return result;
+    }
+
+    private void ValidateSoftDeleteRelations()
+    {
+        var softDeletedEntries = ChangeTracker.Entries<AuditableEntity>()
+            .Where(e => e.State == EntityState.Modified)
+            .Where(e =>
+            {
+                var prop = e.Property(x => x.IsDeleted);
+                return prop.IsModified && (bool)prop.CurrentValue! == true && (bool)prop.OriginalValue! == false;
+            })
+            .ToList();
+
+        foreach (var entry in softDeletedEntries)
+        {
+            var collectionNavigations = entry.Metadata.GetNavigations()
+                .Where(n => n.IsCollection)
+                .ToList();
+
+            foreach (var navigation in collectionNavigations)
+            {
+                var collectionEntry = entry.Collection(navigation.Name);
+                collectionEntry.Load();
+
+                var relatedEntities = collectionEntry.CurrentValue;
+                if (relatedEntities == null) continue;
+
+                foreach (var related in relatedEntities)
+                {
+                    if (related is AuditableEntity auditable && !auditable.IsDeleted)
+                    {
+                        throw new RelationExistsException(
+                            "Seçilen kaydın işlem görmüş hareketleri (bağlı alt kayıtları) bulunmaktadır. Bu kayıt silinemez.");
+                    }
+                }
+            }
+        }
     }
 
     private List<AuditEntry> OnBeforeSaveChanges()

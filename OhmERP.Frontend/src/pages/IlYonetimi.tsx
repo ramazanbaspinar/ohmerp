@@ -231,7 +231,7 @@ const IlYonetimi: React.FC = () => {
         exportPdfUrl={`/Cities/export/pdf${getExportQueryString()}`}
       />
 
-      <Modal title={editingCity ? "İl Bilgilerini Güncelle" : "Yeni İl Ekle"} open={isModalOpen} onCancel={handleModalClose} footer={null} maskClosable={false} destroyOnClose width={500}>
+      <Modal title={editingCity ? "İl Bilgilerini Güncelle" : "Yeni İl Ekle"} open={isModalOpen} onCancel={handleModalClose} footer={null} maskClosable={false} destroyOnHidden width={500}>
         <Form form={form} layout="vertical" onFinish={handleSubmit} onValuesChange={() => setIsFormDirty(true)}>
           <Row gutter={16}>
             <Col span={8}>

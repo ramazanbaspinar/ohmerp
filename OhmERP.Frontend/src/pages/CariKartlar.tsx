@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
 import {
   Button, Tag, Typography, Space, Input, Select, Drawer, 
-  Form, Row, Col, Tabs, Switch, InputNumber, Popconfirm, message, Radio, Checkbox
+  Form, Row, Col, Tabs, Switch, InputNumber, Popconfirm, message, Radio
 } from 'antd';
 import {
   BankOutlined, PlusOutlined, EditOutlined, DeleteOutlined,
@@ -15,7 +15,7 @@ import { formatSystemCode } from '../utils/helpers';
 
 const { Text } = Typography;
 const { Option } = Select;
-const { TabPane } = Tabs;
+
 
 interface CompanyListDto {
   id: string;
@@ -364,9 +364,12 @@ const CariKartlar: React.FC = () => {
           <Space>
             <Button onClick={() => setIsDrawerVisible(false)}>İptal</Button>
             {editingId && (
-              <Button onClick={() => {
+              <Button onClick={async () => {
                 form.resetFields();
-                if (originalData) form.setFieldsValue(originalData);
+                if (originalData) {
+                  if (originalData.cityId) await fetchDistricts(originalData.cityId);
+                  form.setFieldsValue(originalData);
+                }
               }}>
                 Geri Al
               </Button>
@@ -376,82 +379,107 @@ const CariKartlar: React.FC = () => {
         }
       >
         <Form layout="vertical" form={form} disabled={formLoading}>
-          <Tabs activeKey={activeTab} onChange={setActiveTab}>
-            <TabPane tab="Genel Bilgiler" key="1" forceRender={true}>
-              <Row gutter={16}>
-                <Col span={8}>
-                  <Form.Item 
-                    name="code" 
-                    label="Cari Kodu"
-                    rules={[{ required: true, message: 'Zorunlu' }]}
-                  >
-                    <Input 
-                      disabled={!isCodeManualAllowed}
-                      placeholder="Örn: MUSTERI_001"
-                      onChange={(e) => form.setFieldsValue({ code: formatSystemCode(e.target.value) })} 
-                    />
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item name="type" label="Firma Tipi" rules={[{ required: true }]}>
-                    <Select><Option value={1}>Müşteri (Alıcı)</Option><Option value={2}>Tedarikçi (Satıcı)</Option><Option value={3}>Hem Müşteri Hem Tedarikçi</Option></Select>
-                  </Form.Item>
-                </Col>
-                <Col span={8}><Form.Item name="isActive" label="Durum" valuePropName="checked"><Switch checkedChildren="Aktif" unCheckedChildren="Pasif" /></Form.Item></Col>
-              </Row>
-              <Row gutter={16}>
-                <Col span={16}><Form.Item name="name" label="Firma/Şahıs Adı" rules={[{ required: true, message: 'Zorunlu' }]}><Input placeholder="Tam Unvan" /></Form.Item></Col>
-                <Col span={8}><Form.Item name="shortName" label="Kısa Ad"><Input /></Form.Item></Col>
-              </Row>
-              <Form.Item name="description" label="Açıklama"><Input.TextArea rows={2} /></Form.Item>
-            </TabPane>
-            <TabPane tab="İletişim & Lokasyon" key="2" forceRender={true}>
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item name="cityId" label="Şehir" rules={[{ required: true, message: 'Lütfen şehir seçiniz' }]}>
-                    <Select showSearch allowClear optionFilterProp="children" filterOption={filterOptionTurkish} onChange={handleCityChange} placeholder="Seçin">
-                      {cities.map(c => <Option key={c.id} value={c.id}>{c.name}</Option>)}
-                    </Select>
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item name="districtId" label="İlçe" rules={[{ required: true, message: 'Lütfen ilçe seçiniz' }]}>
-                    <Select showSearch allowClear optionFilterProp="children" filterOption={filterOptionTurkish} placeholder="Seçin" disabled={districts.length === 0}>
-                      {districts.map(d => <Option key={d.id} value={d.id}>{d.name}</Option>)}
-                    </Select>
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Form.Item name="address" label="Sokak / Mahalle (Açık Adres)" extra={<span style={{ fontSize: '12px', color: '#8c8c8c' }}><InfoCircleOutlined style={{ marginRight: 4 }} /> Şehir/İlçe bilgisini buraya tekrar YAZMAYINIZ.</span>}>
-                <Input.TextArea rows={2} />
-              </Form.Item>
-              <Row gutter={16}>
-                <Col span={8}><Form.Item name="primaryContactPerson" label="Yetkili"><Input /></Form.Item></Col>
-                <Col span={8}><Form.Item name="phone1" label="Telefon 1" rules={[{ pattern: /^[+0-9\s\-()]+$/, message: 'Geçersiz' }]}><Input /></Form.Item></Col>
-                <Col span={8}><Form.Item name="phone2" label="Telefon 2" rules={[{ pattern: /^[+0-9\s\-()]+$/, message: 'Geçersiz' }]}><Input /></Form.Item></Col>
-              </Row>
-              <Row gutter={16}>
-                <Col span={12}><Form.Item name="email" label="E-Posta" rules={[{ type: 'email' }]}><Input /></Form.Item></Col>
-                <Col span={12}><Form.Item name="website" label="Web Sitesi"><Input /></Form.Item></Col>
-              </Row>
-            </TabPane>
-            <TabPane tab="Resmi & Finans" key="3" forceRender={true}>
-              <Row gutter={16}>
-                <Col span={12}><Form.Item name="taxOffice" label="Vergi Dairesi"><Input /></Form.Item></Col>
-                <Col span={12}><Form.Item name="taxNumber" label="Vergi / TC No"><Input maxLength={11} /></Form.Item></Col>
-              </Row>
-              <Row gutter={16}>
-                <Col span={8}><Form.Item name="isEInvoiceUser" label="e-Fatura" valuePropName="checked"><Switch onChange={setIsEInvoiceUser} /></Form.Item></Col>
-                <Col span={16}><Form.Item name="eInvoiceAlias" label="Posta Kutusu (URN)"><Input disabled={!isEInvoiceUser} /></Form.Item></Col>
-              </Row>
-              <Row gutter={16}>
-                <Col span={8}><Form.Item name="paymentTermDays" label="Vade (Gün)"><InputNumber min={0} style={{ width: '100%' }} /></Form.Item></Col>
-                <Col span={8}><Form.Item name="creditLimit" label="Kredi Limiti (TL)"><InputNumber min={0} style={{ width: '100%' }} formatter={val => `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} /></Form.Item></Col>
-                <Col span={8}><Form.Item name="defaultCurrency" label="Döviz"><Select><Option value="TRY">TRY</Option><Option value="USD">USD</Option><Option value="EUR">EUR</Option></Select></Form.Item></Col>
-              </Row>
-              <Form.Item name="gLCode" label="Muhasebe Kodu"><Input placeholder="120.01..." /></Form.Item>
-            </TabPane>
-          </Tabs>
+          <Tabs 
+            activeKey={activeTab} 
+            onChange={setActiveTab}
+            items={[
+              {
+                key: '1',
+                label: 'Genel Bilgiler',
+                forceRender: true,
+                children: (
+                  <>
+                    <Row gutter={16}>
+                      <Col span={8}>
+                        <Form.Item 
+                          name="code" 
+                          label="Cari Kodu"
+                          rules={[{ required: true, message: 'Zorunlu' }]}
+                        >
+                          <Input 
+                            disabled={!isCodeManualAllowed}
+                            placeholder="Örn: MUSTERI_001"
+                            onChange={(e) => form.setFieldsValue({ code: formatSystemCode(e.target.value) })} 
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}>
+                        <Form.Item name="type" label="Firma Tipi" rules={[{ required: true }]}>
+                          <Select><Option value={1}>Müşteri (Alıcı)</Option><Option value={2}>Tedarikçi (Satıcı)</Option><Option value={3}>Hem Müşteri Hem Tedarikçi</Option></Select>
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}><Form.Item name="isActive" label="Durum" valuePropName="checked"><Switch checkedChildren="Aktif" unCheckedChildren="Pasif" /></Form.Item></Col>
+                    </Row>
+                    <Row gutter={16}>
+                      <Col span={16}><Form.Item name="name" label="Firma/Şahıs Adı" rules={[{ required: true, message: 'Zorunlu' }]}><Input placeholder="Tam Unvan" /></Form.Item></Col>
+                      <Col span={8}><Form.Item name="shortName" label="Kısa Ad"><Input /></Form.Item></Col>
+                    </Row>
+                    <Form.Item name="description" label="Açıklama"><Input.TextArea rows={2} /></Form.Item>
+                  </>
+                )
+              },
+              {
+                key: '2',
+                label: 'İletişim & Lokasyon',
+                forceRender: true,
+                children: (
+                  <>
+                    <Row gutter={16}>
+                      <Col span={12}>
+                        <Form.Item name="cityId" label="Şehir" rules={[{ required: true, message: 'Lütfen şehir seçiniz' }]}>
+                          <Select showSearch allowClear optionFilterProp="children" filterOption={filterOptionTurkish} onChange={handleCityChange} placeholder="Seçin">
+                            {cities.map(c => <Option key={c.id} value={c.id}>{c.name}</Option>)}
+                          </Select>
+                        </Form.Item>
+                      </Col>
+                      <Col span={12}>
+                        <Form.Item name="districtId" label="İlçe" rules={[{ required: true, message: 'Lütfen ilçe seçiniz' }]}>
+                          <Select showSearch allowClear optionFilterProp="children" filterOption={filterOptionTurkish} placeholder="Seçin" disabled={districts.length === 0}>
+                            {districts.map(d => <Option key={d.id} value={d.id}>{d.name}</Option>)}
+                          </Select>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                    <Form.Item name="address" label="Sokak / Mahalle (Açık Adres)" extra={<span style={{ fontSize: '12px', color: '#8c8c8c' }}><InfoCircleOutlined style={{ marginRight: 4 }} /> Şehir/İlçe bilgisini buraya tekrar YAZMAYINIZ.</span>}>
+                      <Input.TextArea rows={2} />
+                    </Form.Item>
+                    <Row gutter={16}>
+                      <Col span={8}><Form.Item name="primaryContactPerson" label="Yetkili"><Input /></Form.Item></Col>
+                      <Col span={8}><Form.Item name="phone1" label="Telefon 1" rules={[{ pattern: /^[+0-9\s\-()]+$/, message: 'Geçersiz' }]}><Input /></Form.Item></Col>
+                      <Col span={8}><Form.Item name="phone2" label="Telefon 2" rules={[{ pattern: /^[+0-9\s\-()]+$/, message: 'Geçersiz' }]}><Input /></Form.Item></Col>
+                    </Row>
+                    <Row gutter={16}>
+                      <Col span={12}><Form.Item name="email" label="E-Posta" rules={[{ type: 'email' }]}><Input /></Form.Item></Col>
+                      <Col span={12}><Form.Item name="website" label="Web Sitesi"><Input /></Form.Item></Col>
+                    </Row>
+                  </>
+                )
+              },
+              {
+                key: '3',
+                label: 'Resmi & Finans',
+                forceRender: true,
+                children: (
+                  <>
+                    <Row gutter={16}>
+                      <Col span={12}><Form.Item name="taxOffice" label="Vergi Dairesi"><Input /></Form.Item></Col>
+                      <Col span={12}><Form.Item name="taxNumber" label="Vergi / TC No"><Input maxLength={11} /></Form.Item></Col>
+                    </Row>
+                    <Row gutter={16}>
+                      <Col span={8}><Form.Item name="isEInvoiceUser" label="e-Fatura" valuePropName="checked"><Switch onChange={setIsEInvoiceUser} /></Form.Item></Col>
+                      <Col span={16}><Form.Item name="eInvoiceAlias" label="Posta Kutusu (URN)"><Input disabled={!isEInvoiceUser} /></Form.Item></Col>
+                    </Row>
+                    <Row gutter={16}>
+                      <Col span={8}><Form.Item name="paymentTermDays" label="Vade (Gün)"><InputNumber min={0} style={{ width: '100%' }} /></Form.Item></Col>
+                      <Col span={8}><Form.Item name="creditLimit" label="Kredi Limiti (TL)"><InputNumber min={0} style={{ width: '100%' }} formatter={val => `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} /></Form.Item></Col>
+                      <Col span={8}><Form.Item name="defaultCurrency" label="Döviz"><Select><Option value="TRY">TRY</Option><Option value="USD">USD</Option><Option value="EUR">EUR</Option></Select></Form.Item></Col>
+                    </Row>
+                    <Form.Item name="gLCode" label="Muhasebe Kodu"><Input placeholder="120.01..." /></Form.Item>
+                  </>
+                )
+              }
+            ]}
+          />
         </Form>
       </Drawer>
     </>

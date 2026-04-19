@@ -280,7 +280,7 @@ const IlceYonetimi: React.FC = () => {
         exportPdfUrl={`/Districts/export/pdf${getExportQueryString()}`}
       />
 
-      <Modal title={editingDistrict ? "İlçe Bilgilerini Güncelle" : "Yeni İlçe Ekle"} open={isModalOpen} onCancel={handleModalClose} footer={null} maskClosable={false} destroyOnClose width={500}>
+      <Modal title={editingDistrict ? "İlçe Bilgilerini Güncelle" : "Yeni İlçe Ekle"} open={isModalOpen} onCancel={handleModalClose} footer={null} maskClosable={false} destroyOnHidden width={500}>
         <Form form={form} layout="vertical" onFinish={handleSubmit} onValuesChange={() => setIsFormDirty(true)}>
           <Row gutter={16}>
             <Col span={24}>

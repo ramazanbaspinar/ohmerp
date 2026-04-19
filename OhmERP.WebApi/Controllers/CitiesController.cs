@@ -27,6 +27,7 @@ public class CitiesController : BaseCrudController<CityDto, CreateCityRequest, U
     public Task<IActionResult> GetAll([FromQuery] PaginationFilter filter) => GetAllBase(filter);
 
     [HttpGet("lookup")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetLookup()
     {
         var cities = await _cityService.GetAllAsync();

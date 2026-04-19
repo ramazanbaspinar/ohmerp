@@ -1,4 +1,4 @@
-using FluentValidation;
+ï»¿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -27,7 +27,7 @@ builder.Services.AddControllers()
             var errors = context.ModelState
                 .Where(e => e.Value != null && e.Value.Errors.Count > 0)
                 .SelectMany(x => x.Value!.Errors)
-                .Select(x => "Gönderilen veri formatý hatalý veya geçersiz.")
+                .Select(x => "GÃ¶nderilen veri formatÄ± hatalÄ± veya geÃ§ersiz.")
                 .FirstOrDefault();
 
             return new BadRequestObjectResult(new { message = errors });
@@ -38,7 +38,7 @@ var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["Secret"];
 
 if (string.IsNullOrEmpty(secretKey))
-    throw new InvalidOperationException("JWT Secret appsettings.json dosyasýnda bulunamadý!");
+    throw new InvalidOperationException("JWT Secret appsettings.json dosyasÄ±nda bulunamadÄ±!");
 
 builder.Services.AddAuthentication(options =>
 {
@@ -100,7 +100,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "http://localhost:3000")
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -127,7 +127,8 @@ app.MapControllers();
 
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
-    DashboardTitle = "OhmERP Arka Plan Görev Yöneticisi"
+    DashboardTitle = "OhmERP Arka Plan GÃ¶rev YÃ¶neticisi"
 });
 
 app.Run();
+

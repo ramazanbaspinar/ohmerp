@@ -27,6 +27,7 @@ public class DistrictsController : BaseCrudController<DistrictDto, CreateDistric
     public Task<IActionResult> GetAll([FromQuery] PaginationFilter filter) => GetAllBase(filter);
 
     [HttpGet("lookup/{cityId}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetLookup(Guid cityId)
     {
         var districts = await _districtService.GetByCityIdAsync(cityId);
@@ -35,6 +36,7 @@ public class DistrictsController : BaseCrudController<DistrictDto, CreateDistric
     }
 
     [HttpGet("city/{cityId}/lookup")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetByCityId(Guid cityId)
     {
         var districts = await _districtService.GetByCityIdAsync(cityId);

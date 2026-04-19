@@ -494,7 +494,7 @@ const RolYonetimi: React.FC = () => {
         exportPdfUrl={`/Role/export/pdf${getExportQueryString()}`}
       />
 
-      <Modal title={editingRole ? "Rol Güncelle" : "Yeni Rol Tanımla"} open={isModalOpen} onCancel={handleModalClose} footer={null} destroyOnClose maskClosable={false} width={600}>
+      <Modal title={editingRole ? "Rol Güncelle" : "Yeni Rol Tanımla"} open={isModalOpen} onCancel={handleModalClose} footer={null} destroyOnHidden maskClosable={false} width={600}>
         <Form form={form} layout="vertical" onFinish={handleSubmit} onValuesChange={() => setIsFormDirty(true)}>
           <Row gutter={16}>
             <Col span={12}>

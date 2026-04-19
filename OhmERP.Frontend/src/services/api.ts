@@ -24,16 +24,24 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-
     if (error.response) {
       if (error.response.status === 401) {
         message.warning('Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.');
         localStorage.removeItem('token');
         window.location.href = '/login';
-      } 
-      else if (error.response.status === 403) {
+      } else if (error.response.status === 403) {
         message.error('Bu işlemi gerçekleştirmek için yeterli yetkiniz bulunmamaktadır!');
+      } else {
+        const backendMessage =
+          error.response.data?.message ||
+          error.response.data?.detail ||
+          error.response.data?.title;
+        if (backendMessage) {
+          message.error(backendMessage);
+        }
       }
+    } else {
+      message.error('Sunucuya bağlanılamadı. Lütfen ağ bağlantınızı kontrol ediniz.');
     }
     return Promise.reject(error);
   }
