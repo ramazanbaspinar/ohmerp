@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { message } from 'antd'; // YENİ EKLENDİ
+import { message } from 'antd';
 
 const api = axios.create({
-  baseURL: 'https://localhost:7138/api', // Kendi portuna göre ayarla
+  baseURL: 'https://localhost:7138/api',
   headers: {
     'Content-Type': 'application/json',
   },

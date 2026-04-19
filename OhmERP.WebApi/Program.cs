@@ -72,6 +72,7 @@ builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>(
 
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICityService, CityService>();
 builder.Services.AddScoped<IDistrictService, DistrictService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
