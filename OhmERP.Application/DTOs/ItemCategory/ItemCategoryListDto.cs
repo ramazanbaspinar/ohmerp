@@ -20,6 +20,13 @@ public class ItemCategoryListDto
     [Display(Name = "Durum")]
     public bool IsActive { get; set; }
 
+    public bool ShowInMenu { get; set; }
+
     [Display(Name = "Açıklama")]
     public string? Description { get; set; }
+
+    public Guid? DefaultUnitOfMeasureId { get; set; }
+    
+    [Display(Name = "Varsayılan Ölçü Birimi")]
+    public string? DefaultUnitOfMeasureName { get; set; }
 }

@@ -48,6 +48,36 @@ public class CodeTemplateService : ICodeTemplateService
         return dtos;
     }
 
+    public async Task<Guid> CreateAsync(CreateCodeTemplateRequest request)
+    {
+        var exists = await _repository.AnyAsync(x => x.DocumentType == request.DocumentType && x.IsActive);
+        if (exists && request.IsActive)
+        {
+            throw new BusinessException("Bu modül için zaten aktif bir şablon bulunmaktadır. Lütfen mevcut şablonu güncelleyiniz veya pasife çekiniz.");
+        }
+
+        var entity = _mapper.Map<CodeTemplate>(request);
+        
+        if (!request.UseDate)
+        {
+            entity.DateFormat = null;
+        }
+        
+        await _repository.AddAsync(entity);
+        await _unitOfWork.SaveChangesAsync();
+
+        if (request.CurrentNumber > 0)
+        {
+            var currentVal = await _numeratorService.GetCurrentSequenceValueAsync(entity.DocumentType);
+            if (request.CurrentNumber != currentVal)
+            {
+                await _numeratorService.RestartSequenceAsync(entity.DocumentType, request.CurrentNumber);
+            }
+        }
+
+        return entity.Id;
+    }
+
     public async Task UpdateAsync(Guid id, UpdateCodeTemplateRequest request)
     {
         var entity = await _repository.GetByIdAsync(id);

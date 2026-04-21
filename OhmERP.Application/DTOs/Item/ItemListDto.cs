@@ -40,8 +40,14 @@ public class ItemListDto
     [Display(Name = "Durum")]
     public bool IsActive { get; set; }
 
-    public string? PropertiesJson { get; set; }
+    public List<OhmERP.Application.DTOs.ItemAttributeValue.ItemAttributeValueDto> DynamicAttributes { get; set; } = new();
 
     [Display(Name = "Açıklama")]
     public string? Description { get; set; }
+
+    [Display(Name = "Birim Maliyet")]
+    public decimal UnitCost { get; set; }
+
+    [Display(Name = "Para Birimi")]
+    public CurrencyType CostCurrency { get; set; }
 }

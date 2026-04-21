@@ -15,24 +15,31 @@ const CariKartlar = React.lazy(() => import('./pages/CariKartlar'));
 const MalzemeKartlari = React.lazy(() => import('./pages/MalzemeKartlari'));
 const BirimTanimlari = React.lazy(() => import('./pages/BirimTanimlari'));
 const KategoriTanimlari = React.lazy(() => import('./pages/KategoriTanimlari'));
+const CategorySettings = React.lazy(() => import('./pages/CategorySettings'));
 const NumaratorYonetimi = React.lazy(() => import('./pages/NumaratorYonetimi'));
+const WorkCenters = React.lazy(() => import('./pages/WorkCenters'));
+const BOMs = React.lazy(() => import('./pages/BOMs'));
+const CostSimulation = React.lazy(() => import('./pages/CostSimulation'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 
 const FallbackLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5' }}>
-    <Spin size="large" tip="Sistem Modülü Yükleniyor..." />
+    <Spin size="large" tip="Sistem Modülü Yükleniyor...">
+      <div style={{ padding: '24px' }} />
+    </Spin>
   </div>
 );
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Suspense fallback={<FallbackLoader />}>
         <Routes>
           <Route path="/login" element={<Login />} />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<MainLayout />}>
-              <Route path="/" element={<Navigate to="/kullanicilar" replace />} />
+              <Route path="/" element={<Dashboard />} />
 
               <Route element={<ProtectedRoute requiredPermission="Permissions.Companies.View" />}>
                 <Route path="/cari-kartlar" element={<CariKartlar />} />
@@ -64,6 +71,7 @@ const App: React.FC = () => {
 
               <Route element={<ProtectedRoute requiredPermission="Permissions.ItemCategories.View" />}>
                 <Route path="/malzeme-kategorileri" element={<KategoriTanimlari />} />
+                <Route path="/kategori-ayarlari" element={<CategorySettings />} />
               </Route>
 
               <Route element={<ProtectedRoute requiredPermission="Permissions.AuditLogs.View" />}>
@@ -74,10 +82,14 @@ const App: React.FC = () => {
               <Route element={<ProtectedRoute requiredPermission="Permissions.Roles.View" />}>
                 <Route path="/numarator-yonetimi" element={<NumaratorYonetimi />} />
               </Route>
+
+              <Route path="/is-merkezleri" element={<WorkCenters />} />
+              <Route path="/urun-receteleri" element={<BOMs />} />
+              <Route path="/maliyet-simulatoru" element={<CostSimulation />} />
             </Route>
           </Route>
 
-          <Route path="*" element={<Navigate to="/kullanicilar" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </Router>

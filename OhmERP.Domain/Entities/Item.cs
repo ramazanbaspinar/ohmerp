@@ -18,15 +18,19 @@ public class Item : AuditableEntity
 
     public ItemType Type { get; set; }
 
-    public decimal TaxRate { get; set; } = 20m; // Varsayýlan KDV
+    public decimal TaxRate { get; set; } = 20m; // VarsayÄ±lan KDV
     public string? Barcode { get; set; }
 
     public decimal CriticalStockLevel { get; set; } = 0;
 
     public bool IsActive { get; set; } = true;
 
+    public decimal UnitCost { get; set; } = 0m;
+    public CurrencyType CostCurrency { get; set; } = CurrencyType.TL;
 
     public string? PropertiesJson { get; set; }
 
     public string? Description { get; set; }
+
+    public ICollection<ItemAttributeValue> AttributeValues { get; set; } = new List<ItemAttributeValue>();
 }

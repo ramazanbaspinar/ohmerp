@@ -17,6 +17,7 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
         builder.Property(x => x.CriticalStockLevel).HasColumnType("decimal(18,2)");
         builder.Property(x => x.Description).HasMaxLength(500);
 
+        builder.Property(x => x.UnitCost).HasColumnType("decimal(18,4)");
 
         builder.Property(x => x.PropertiesJson).HasColumnType("nvarchar(max)");
 

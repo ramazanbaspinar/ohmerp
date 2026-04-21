@@ -272,7 +272,7 @@ const BirimTanimlari: React.FC = () => {
           >
             <Input 
               maxLength={10} 
-              placeholder="Örn: ADET"
+              placeholder="Örn: KG"
               onChange={(e) => form.setFieldsValue({ code: formatSystemCode(e.target.value) })}
             />
           </Form.Item>

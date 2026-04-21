@@ -24,6 +24,13 @@ public class CodeTemplatesController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateCodeTemplateRequest request)
+    {
+        var id = await _service.CreateAsync(request);
+        return Ok(new { Id = id });
+    }
+
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCodeTemplateRequest request)
     {

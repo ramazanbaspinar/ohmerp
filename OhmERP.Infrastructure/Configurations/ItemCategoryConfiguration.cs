@@ -19,6 +19,11 @@ public class ItemCategoryConfiguration : IEntityTypeConfiguration<ItemCategory>
         builder.HasOne(x => x.Parent)
                .WithMany(x => x.SubCategories)
                .HasForeignKey(x => x.ParentId)
-               .OnDelete(DeleteBehavior.Restrict); // Üst kategori silinirse alt kategoriler patlamasın
+               .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(x => x.DefaultUnitOfMeasure)
+               .WithMany()
+               .HasForeignKey(x => x.DefaultUnitOfMeasureId)
+               .OnDelete(DeleteBehavior.SetNull);
     }
 }

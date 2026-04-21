@@ -1,4 +1,4 @@
-﻿using OhmERP.Domain.Enums;
+using OhmERP.Domain.Enums;
 
 namespace OhmERP.Application.DTOs.Item;
 
@@ -12,6 +12,9 @@ public class CreateItemRequest
     public decimal TaxRate { get; set; } = 20m;
     public string? Barcode { get; set; }
     public decimal CriticalStockLevel { get; set; } = 0;
+    public decimal UnitCost { get; set; } = 0m;
+    public CurrencyType CostCurrency { get; set; } = CurrencyType.TL;
     public string? PropertiesJson { get; set; } // Örn: "{\"Ohm\": 12.5, \"Cap\": 0.35}"
     public string? Description { get; set; }
+    public System.Collections.Generic.List<OhmERP.Application.DTOs.ItemAttributeValue.ItemAttributeValueDto>? DynamicAttributes { get; set; }
 }

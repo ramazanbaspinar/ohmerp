@@ -12,13 +12,25 @@ public class UnitOfMeasureService : BaseService<UnitOfMeasure, UnitOfMeasureList
 {
     protected override string CacheKey => "uom_list_all";
 
+    private readonly IGenericRepository<Item> _itemRepository;
+
     public UnitOfMeasureService(
         IGenericRepository<UnitOfMeasure> repository,
+        IGenericRepository<Item> itemRepository,
         IUnitOfWork unitOfWork,
         IMapper mapper,
         ICacheService cacheService)
         : base(repository, unitOfWork, mapper, cacheService)
     {
+        _itemRepository = itemRepository;
+    }
+
+    public override async Task DeleteAsync(Guid id)
+    {
+        if (await _itemRepository.AnyAsync(x => x.UnitOfMeasureId == id && !x.IsDeleted))
+            throw new RelationExistsException("Seçilen ölçü birimi malzemelerde kullanılmaktadır, silinemez.");
+            
+        await base.DeleteAsync(id);
     }
 
     protected override Func<IQueryable<UnitOfMeasure>, IQueryable<UnitOfMeasure>> BuildFilter(PaginationFilter filter)

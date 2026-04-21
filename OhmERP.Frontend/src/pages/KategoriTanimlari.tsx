@@ -28,6 +28,7 @@ interface LookupDto {
 const KategoriTanimlari: React.FC = () => {
   const [data, setData] = useState<ItemCategoryDto[]>([]);
   const [lookupData, setLookupData] = useState<LookupDto[]>([]);
+  const [uoms, setUoms] = useState<{ id: string; name: string; code: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,6 +68,13 @@ const KategoriTanimlari: React.FC = () => {
       setLookupData(response.data ?? []);
     } catch {
       message.error('Üst kategori listesi alınamadı.');
+    }
+    
+    try {
+      const uomRes = await api.get('/UnitOfMeasure/lookup');
+      setUoms(uomRes.data ?? []);
+    } catch {
+      message.error('Ölçü birimleri alınamadı.');
     }
   }, []);
 
@@ -276,11 +284,11 @@ const KategoriTanimlari: React.FC = () => {
           >
             <Input 
               maxLength={50} 
-              placeholder="Örn: HAMMADDE_01"
+              placeholder="Örn: HAMMADDE_TEL"
               onChange={(e) => form.setFieldsValue({ code: formatSystemCode(e.target.value) })} 
             />
           </Form.Item>
-          <Form.Item name="name" label="Kategori Adı (Örn: Teller)" rules={[{ required: true }]}>
+          <Form.Item name="name" label="Kategori Adı (Örn: Tel)" rules={[{ required: true }]}>
             <Input maxLength={100} />
           </Form.Item>
           <Form.Item name="parentId" label="Üst Kategori (Opsiyonel)">
@@ -292,6 +300,16 @@ const KategoriTanimlari: React.FC = () => {
           </Form.Item>
           <Form.Item name="isActive" label="Durum" valuePropName="checked">
             <Switch checkedChildren="Aktif" unCheckedChildren="Pasif" />
+          </Form.Item>
+          <Form.Item name="defaultUnitOfMeasureId" label="Varsayılan Ölçü Birimi">
+            <Select showSearch optionFilterProp="children" filterOption={filterOptionTurkish} allowClear placeholder="Seçiniz">
+              {uoms.map(u => (
+                <Option key={u.id} value={u.id}>{u.name} {u.code ? `(${u.code})` : ''}</Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item name="showInMenu" label="Sol Menüde Göster" valuePropName="checked">
+            <Switch checkedChildren="Evet" unCheckedChildren="Hayır" />
           </Form.Item>
           <Form.Item name="description" label="Açıklama">
             <Input.TextArea rows={3} maxLength={500} />

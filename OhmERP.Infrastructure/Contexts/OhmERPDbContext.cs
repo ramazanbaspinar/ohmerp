@@ -28,7 +28,14 @@ public class OhmERPDbContext : DbContext
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemCategory> ItemCategories => Set<ItemCategory>();
     public DbSet<UnitOfMeasure> UnitOfMeasures => Set<UnitOfMeasure>();
+    public DbSet<CategoryAttribute> CategoryAttributes => Set<CategoryAttribute>();
+    public DbSet<ItemAttributeValue> ItemAttributeValues => Set<ItemAttributeValue>();
     public DbSet<CodeTemplate> CodeTemplates { get; set; }
+    public DbSet<WorkCenter> WorkCenters => Set<WorkCenter>();
+    public DbSet<BOM> BOMs => Set<BOM>();
+    public DbSet<BOMLine> BOMLines => Set<BOMLine>();
+    public DbSet<BOMOperation> BOMOperations => Set<BOMOperation>();
+    public DbSet<CurrencyRate> CurrencyRates => Set<CurrencyRate>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -57,32 +64,7 @@ public class OhmERPDbContext : DbContext
             }
         );
 
-        modelBuilder.Entity<CodeTemplate>().HasData(
-            new CodeTemplate
-            {
-                Id = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567801"),
-                DocumentType = DocumentType.Company,
-                Prefix = "CAR",
-                Suffix = "",
-                Padding = 5,
-                UseDate = false,
-                DateFormat = "",
-                IsActive = true,
-                IsManualEntryAllowed = false
-            },
-            new CodeTemplate
-            {
-                Id = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567802"),
-                DocumentType = DocumentType.Item,
-                Prefix = "STK",
-                Suffix = "",
-                Padding = 5,
-                UseDate = false,
-                DateFormat = "",
-                IsActive = true,
-                IsManualEntryAllowed = false
-            }
-        );
+        // Seed data removed per requirements
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

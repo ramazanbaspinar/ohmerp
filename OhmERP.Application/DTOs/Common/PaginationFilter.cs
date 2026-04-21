@@ -8,4 +8,5 @@ public class PaginationFilter
     public bool? IsActive { get; set; }
     public int? Type { get; set; }
     public Guid? CityId { get; set; }
+    public Guid? CategoryId { get; set; }
 }

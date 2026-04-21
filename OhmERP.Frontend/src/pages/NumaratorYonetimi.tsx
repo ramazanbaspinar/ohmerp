@@ -46,9 +46,28 @@ const NumaratorYonetimi: React.FC = () => {
     fetchTemplates();
   }, []);
 
+  const openDrawerForCreate = () => {
+    setEditingId(null);
+    form.resetFields();
+    form.setFieldsValue({
+      padding: 5,
+      useDate: false,
+      isActive: true,
+      isManualEntryAllowed: false,
+      currentNumber: 1
+    });
+    setPreviewPrefix('');
+    setPreviewSuffix('');
+    setPreviewPadding(5);
+    setPreviewUseDate(false);
+    setPreviewDateFormat('');
+    setIsDrawerVisible(true);
+  };
+
   const openDrawerForEdit = (record: CodeTemplateDto) => {
     setEditingId(record.id);
     form.setFieldsValue({
+      documentType: record.documentType,
       prefix: record.prefix,
       suffix: record.suffix,
       padding: record.padding,
@@ -57,7 +76,7 @@ const NumaratorYonetimi: React.FC = () => {
       isActive: record.isActive,
       isManualEntryAllowed: record.isManualEntryAllowed,
       currentNumber: record.currentNumber
-    });
+    } as any);
     setPreviewPrefix(record.prefix || '');
     setPreviewSuffix(record.suffix || '');
     setPreviewPadding(record.padding || 5);
@@ -69,15 +88,19 @@ const NumaratorYonetimi: React.FC = () => {
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
-      if (!editingId) return;
 
       if (!values.useDate) {
         values.dateFormat = null;
       }
 
       setFormLoading(true);
-      await codeTemplateService.update(editingId, values);
-      message.success('Şablon başarıyla güncellendi.');
+      if (editingId) {
+        await codeTemplateService.update(editingId, values);
+        message.success('Şablon başarıyla güncellendi.');
+      } else {
+        await codeTemplateService.create(values);
+        message.success('Şablon başarıyla oluşturuldu.');
+      }
       setIsDrawerVisible(false);
       fetchTemplates();
     } catch (error) {
@@ -200,19 +223,22 @@ const NumaratorYonetimi: React.FC = () => {
             </Space>
           </Col>
           <Col span={8}>
-            <Input.Search 
-              placeholder="Modül veya Önek Ara... (En az 3 karakter)" 
-              allowClear
-              onChange={(e) => {
-                setSearchText(e.target.value);
-                setIsManualSearch(false);
-              }}
-              onSearch={(value) => {
-                setSearchText(value);
-                setIsManualSearch(true);
-              }}
-              style={{ width: '100%' }}
-            />
+            <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+              <Input.Search 
+                placeholder="Modül veya Önek Ara... (En az 3 karakter)" 
+                allowClear
+                onChange={(e) => {
+                  setSearchText(e.target.value);
+                  setIsManualSearch(false);
+                }}
+                onSearch={(value) => {
+                  setSearchText(value);
+                  setIsManualSearch(true);
+                }}
+                style={{ width: 250 }}
+              />
+              <Button type="primary" onClick={openDrawerForCreate}>Yeni Ekle</Button>
+            </Space>
           </Col>
         </Row>
       </div>
@@ -259,6 +285,17 @@ const NumaratorYonetimi: React.FC = () => {
             showIcon 
             style={{ marginBottom: 24 }}
           />
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="documentType" label="Modül / Kayıt Tipi" rules={[{ required: true, message: 'Zorunlu' }]}>
+                <Select disabled={!!editingId}>
+                  <Select.Option value={1}>Cari Kart</Select.Option>
+                  <Select.Option value={2}>Malzeme Kartı</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Row gutter={16}>
             <Col span={12}>

@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import api from '../services/api';
 
 const { Header, Sider, Content } = Layout;
 
@@ -29,6 +30,7 @@ const MainLayout: React.FC = () => {
   const [userName, setUserName] = useState<string>('Kullanıcı');
   const [menuSearchText, setMenuSearchText] = useState('');
   const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const [dynamicCategories, setDynamicCategories] = useState<any[]>([]);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,6 +51,19 @@ const MainLayout: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const response = await api.get('/ItemCategory?pageSize=1000');
+        if (response.data && response.data.items) {
+           setDynamicCategories(response.data.items.filter((x: any) => x.isActive && x.showInMenu));
+        }
+      } catch (e) {
+      }
+    };
+    fetchCats();
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
@@ -63,22 +78,57 @@ const MainLayout: React.FC = () => {
   };
 
   const baseMenuItems = [
+    {
+      key: '/',
+      icon: <AppstoreAddOutlined />, // Wait, maybe a different icon like DashboardOutlined
+      label: 'Ana Sayfa'
+    },
     hasPermission('Permissions.Companies.View') ? { 
       key: '/cari-kartlar', 
       icon: <BankOutlined />, 
       label: 'Cari Hesaplar' 
     } : null,
     
+    (hasPermission('Permissions.Items.View') && dynamicCategories.length > 0) ? {
+      key: 'hammadde_tanimlari', 
+      icon: <AppstoreAddOutlined />, 
+      label: 'Hammadde / Malzeme Tanımları',
+      children: dynamicCategories.map(cat => ({
+        key: `/malzeme-kartlari?categoryId=${cat.id}`,
+        label: `${cat.name} Tanımları`
+      }))
+    } : null,
+    
     (hasPermission('Permissions.Items.View') || hasPermission('Permissions.ItemCategories.View') || hasPermission('Permissions.UnitOfMeasures.View')) ? {
       key: 'stok_yonetimi', 
       icon: <AppstoreAddOutlined />, 
-      label: 'Stok Yönetimi',
+      label: 'Tanımlar',
       children: [
-        hasPermission('Permissions.Items.View') ? { key: '/malzeme-kartlari', icon: <AppstoreAddOutlined />, label: 'Malzeme Kartları' } : null,
+        hasPermission('Permissions.Items.View') ? { key: '/malzeme-kartlari', icon: <AppstoreAddOutlined />, label: 'Hammadde ve Malzemeler' } : null,
         hasPermission('Permissions.ItemCategories.View') ? { key: '/malzeme-kategorileri', icon: <TagsOutlined />, label: 'Malzeme Kategorileri' } : null,
+        hasPermission('Permissions.ItemCategories.View') ? { key: '/kategori-ayarlari', icon: <SettingOutlined />, label: 'Malzeme Sınıfları ve Şablonları' } : null,
         hasPermission('Permissions.UnitOfMeasures.View') ? { key: '/birim-tanimlari', icon: <DatabaseOutlined />, label: 'Ölçü Birimleri' } : null,
       ].filter(Boolean)
     } : null,
+
+    {
+      key: 'uretim_yonetimi',
+      icon: <SettingOutlined />,
+      label: 'Üretim Yönetimi',
+      children: [
+        { key: '/urun-receteleri', icon: <AppstoreAddOutlined />, label: 'Ürün Reçeteleri (BOM)' },
+        { key: '/is-merkezleri', icon: <AppstoreAddOutlined />, label: 'İş Merkezleri (Makineler)' }
+      ]
+    },
+
+    {
+      key: 'satis_teklifler',
+      icon: <AppstoreAddOutlined />,
+      label: 'Satış ve Teklifler',
+      children: [
+        { key: '/maliyet-simulatoru', icon: <AppstoreAddOutlined />, label: 'Maliyet Simülatörü' }
+      ]
+    },
 
     (hasPermission('Permissions.Users.View') || hasPermission('Permissions.Roles.View') || hasPermission('Permissions.AuditLogs.View') || hasPermission('Permissions.Cities.View') || hasPermission('Permissions.Districts.View')) ? {
       key: 'sistem', icon: <SettingOutlined />, label: 'Sistem Yönetimi',

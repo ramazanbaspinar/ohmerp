@@ -34,6 +34,7 @@ public static class ServiceRegistration
         services.AddScoped<ICacheService, RedisCacheService>();
         services.AddScoped<INumeratorService, NumeratorService>();
         services.AddScoped<ICodeTemplateService, CodeTemplateService>();
+        services.AddScoped<ICategoryAttributeService, CategoryAttributeService>();
 
         services.AddHangfire(config => config
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)

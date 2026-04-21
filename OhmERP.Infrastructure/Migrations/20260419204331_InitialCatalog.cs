@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OhmERP.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitalCatalog : Migration
+    public partial class InitialCatalog : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -209,6 +209,36 @@ namespace OhmERP.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CategoryAttributes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemCategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DataType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Precision = table.Column<int>(type: "int", nullable: true),
+                    IsRequired = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CategoryAttributes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CategoryAttributes_ItemCategories_ItemCategoryId",
+                        column: x => x.ItemCategoryId,
+                        principalTable: "ItemCategories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RolePermissions",
                 columns: table => new
                 {
@@ -365,6 +395,41 @@ namespace OhmERP.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ItemAttributeValues",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CategoryAttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StringValue = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    DecimalValue = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemAttributeValues", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ItemAttributeValues_CategoryAttributes_CategoryAttributeId",
+                        column: x => x.CategoryAttributeId,
+                        principalTable: "CategoryAttributes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ItemAttributeValues_Items_ItemId",
+                        column: x => x.ItemId,
+                        principalTable: "Items",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CompanyContacts",
                 columns: table => new
                 {
@@ -429,6 +494,11 @@ namespace OhmERP.Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CategoryAttributes_ItemCategoryId",
+                table: "CategoryAttributes",
+                column: "ItemCategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Cities_IsDeleted",
                 table: "Cities",
                 column: "IsDeleted");
@@ -486,6 +556,16 @@ namespace OhmERP.Infrastructure.Migrations
                 name: "IX_Districts_Name",
                 table: "Districts",
                 column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ItemAttributeValues_CategoryAttributeId",
+                table: "ItemAttributeValues",
+                column: "CategoryAttributeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ItemAttributeValues_ItemId",
+                table: "ItemAttributeValues",
+                column: "ItemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ItemCategories_Code",
@@ -560,7 +640,7 @@ namespace OhmERP.Infrastructure.Migrations
                 name: "CompanyContacts");
 
             migrationBuilder.DropTable(
-                name: "Items");
+                name: "ItemAttributeValues");
 
             migrationBuilder.DropTable(
                 name: "RolePermissions");
@@ -572,10 +652,10 @@ namespace OhmERP.Infrastructure.Migrations
                 name: "Company");
 
             migrationBuilder.DropTable(
-                name: "ItemCategories");
+                name: "CategoryAttributes");
 
             migrationBuilder.DropTable(
-                name: "UnitOfMeasures");
+                name: "Items");
 
             migrationBuilder.DropTable(
                 name: "Roles");
@@ -585,6 +665,12 @@ namespace OhmERP.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Districts");
+
+            migrationBuilder.DropTable(
+                name: "ItemCategories");
+
+            migrationBuilder.DropTable(
+                name: "UnitOfMeasures");
 
             migrationBuilder.DropTable(
                 name: "Cities");

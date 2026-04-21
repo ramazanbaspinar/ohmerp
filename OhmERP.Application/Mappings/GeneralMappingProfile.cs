@@ -9,6 +9,8 @@ using OhmERP.Application.DTOs.Role;
 using OhmERP.Application.DTOs.UnitOfMeasure;
 using OhmERP.Application.DTOs.User;
 using OhmERP.Application.DTOs.CodeTemplate;
+using OhmERP.Application.DTOs.CategoryAttribute;
+using OhmERP.Application.DTOs.ItemAttributeValue;
 using OhmERP.Domain.Entities;
 
 namespace OhmERP.Application.Mappings;
@@ -37,7 +39,16 @@ public class GeneralMappingProfile : Profile
         CreateMap<ItemCategory, ItemCategoryListDto>()
             .ForMember(dest => dest.ParentName, opt => opt.MapFrom(src => src.Parent != null ? src.Parent.Name : null));
         CreateMap<CreateItemCategoryRequest, ItemCategory>();
-        CreateMap<UpdateItemCategoryRequest, ItemCategory>().ReverseMap(); // Eklendi
+        CreateMap<UpdateItemCategoryRequest, ItemCategory>()
+            .ForMember(dest => dest.RowVersion, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+            .ReverseMap();
 
         CreateMap<UnitOfMeasure, UnitOfMeasureListDto>();
         CreateMap<CreateUnitOfMeasureRequest, UnitOfMeasure>();
@@ -45,11 +56,40 @@ public class GeneralMappingProfile : Profile
 
         CreateMap<Item, ItemListDto>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty))
-            .ForMember(dest => dest.UnitOfMeasureName, opt => opt.MapFrom(src => src.UnitOfMeasure != null ? src.UnitOfMeasure.Name : string.Empty));
-        CreateMap<CreateItemRequest, Item>();
-        CreateMap<UpdateItemRequest, Item>().ReverseMap(); // Eklendi
+            .ForMember(dest => dest.UnitOfMeasureName, opt => opt.MapFrom(src => src.UnitOfMeasure != null ? src.UnitOfMeasure.Name : string.Empty))
+            .ForMember(dest => dest.DynamicAttributes, opt => opt.MapFrom(src => src.AttributeValues));
+        CreateMap<CreateItemRequest, Item>()
+            .ForMember(dest => dest.AttributeValues, opt => opt.Ignore());
+
+        CreateMap<UpdateItemRequest, Item>()
+            .ForMember(dest => dest.AttributeValues, opt => opt.Ignore())
+            .ForMember(dest => dest.RowVersion, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+            .ReverseMap();
 
         CreateMap<CodeTemplate, CodeTemplateDto>().ReverseMap();
+        CreateMap<CreateCodeTemplateRequest, CodeTemplate>();
         CreateMap<UpdateCodeTemplateRequest, CodeTemplate>();
+
+        CreateMap<CategoryAttribute, CategoryAttributeDto>().ReverseMap();
+        CreateMap<CreateCategoryAttributeRequest, CategoryAttribute>();
+        CreateMap<UpdateCategoryAttributeRequest, CategoryAttribute>()
+            .ForMember(dest => dest.RowVersion, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+            .ReverseMap();
+
+        CreateMap<ItemAttributeValue, ItemAttributeValueDto>().ReverseMap();
     }
 }

@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -80,6 +80,10 @@ builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IUnitOfMeasureService, UnitOfMeasureService>();
 builder.Services.AddScoped<IItemCategoryService, ItemCategoryService>();
 builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<IWorkCenterService, WorkCenterService>();
+builder.Services.AddScoped<IBOMService, BOMService>();
+builder.Services.AddScoped<ICostEngineService, CostEngineService>();
+builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
@@ -92,6 +96,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<OhmERP.Application.Validato
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<GeneralMappingProfile>();
+    cfg.AddProfile<WorkCenterProfile>();
+    cfg.AddProfile<OhmERP.Application.Profiles.BOMProfile>();
 });
 
 builder.Services.AddOpenApi();

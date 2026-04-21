@@ -49,7 +49,8 @@ public class ItemCategoryService : BaseService<ItemCategory, ItemCategoryListDto
         return categories.Select(c => new LookupDto
         {
             Id = c.Id,
-            Name = c.Name ?? string.Empty
+            Name = c.Name ?? string.Empty,
+            DefaultUnitOfMeasureId = c.DefaultUnitOfMeasureId
         }).OrderBy(x => x.Name).ToList();
     }
 

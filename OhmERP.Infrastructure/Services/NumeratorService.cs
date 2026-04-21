@@ -36,9 +36,25 @@ public class NumeratorService : INumeratorService
 
         if (template == null)
         {
-            template = _defaultTemplates.TryGetValue(type, out var defaultTpl)
+            var fallbackTemplate = _defaultTemplates.TryGetValue(type, out var defaultTpl)
                 ? defaultTpl
                 : new CodeTemplate { Prefix = type.ToString().ToUpper()[..3], Padding = 5, UseDate = false, IsManualEntryAllowed = false };
+
+            template = new CodeTemplate
+            {
+                Id = Guid.NewGuid(),
+                DocumentType = type,
+                Prefix = fallbackTemplate.Prefix,
+                Suffix = fallbackTemplate.Suffix,
+                Padding = fallbackTemplate.Padding,
+                UseDate = fallbackTemplate.UseDate,
+                DateFormat = fallbackTemplate.DateFormat,
+                IsActive = true,
+                IsManualEntryAllowed = fallbackTemplate.IsManualEntryAllowed
+            };
+
+            _context.CodeTemplates.Add(template);
+            await _context.SaveChangesAsync();
         }
 
         if (!_sequenceMap.TryGetValue(type, out var sequenceName))
@@ -77,9 +93,25 @@ public class NumeratorService : INumeratorService
 
         if (template == null)
         {
-            template = _defaultTemplates.TryGetValue(type, out var defaultTpl)
+            var fallbackTemplate = _defaultTemplates.TryGetValue(type, out var defaultTpl)
                 ? defaultTpl
                 : new CodeTemplate { Prefix = type.ToString().ToUpper()[..3], Padding = 5, UseDate = false, IsManualEntryAllowed = false };
+
+            template = new CodeTemplate
+            {
+                Id = Guid.NewGuid(),
+                DocumentType = type,
+                Prefix = fallbackTemplate.Prefix,
+                Suffix = fallbackTemplate.Suffix,
+                Padding = fallbackTemplate.Padding,
+                UseDate = fallbackTemplate.UseDate,
+                DateFormat = fallbackTemplate.DateFormat,
+                IsActive = true,
+                IsManualEntryAllowed = fallbackTemplate.IsManualEntryAllowed
+            };
+
+            _context.CodeTemplates.Add(template);
+            await _context.SaveChangesAsync();
         }
 
         if (!_sequenceMap.TryGetValue(type, out var sequenceName))

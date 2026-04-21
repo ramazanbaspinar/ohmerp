@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
+import { useEnterpriseTabs } from '../hooks/useEnterpriseTabs';
 import {
   Button, Tag, Typography, Space, Input, Select, Drawer, 
   Form, Row, Col, Tabs, Switch, InputNumber, Popconfirm, message, Radio
@@ -57,7 +58,13 @@ const CariKartlar: React.FC = () => {
   const [cities, setCities] = useState<LookupDto[]>([]);
   const [districts, setDistricts] = useState<LookupDto[]>([]);
   const [isEInvoiceUser, setIsEInvoiceUser] = useState(false);
-  const [activeTab, setActiveTab] = useState('1');
+  const { 
+    activeTabKey, 
+    setActiveTabKey, 
+    resetTabs, 
+    validateAndHandleErrors, 
+    renderTabLabel 
+  } = useEnterpriseTabs('1');
   const [isCodeManualAllowed, setIsCodeManualAllowed] = useState(false);
   const [originalData, setOriginalData] = useState<any>(null);
 
@@ -130,7 +137,7 @@ const CariKartlar: React.FC = () => {
     form.setFieldsValue({ code: 'Yükleniyor...', isActive: true, type: 1, creditLimit: 0, paymentTermDays: 0, defaultCurrency: 'TRY' });
     setIsEInvoiceUser(false);
     setDistricts([]);
-    setActiveTab('1');
+    resetTabs();
     setIsDrawerVisible(true);
     setOriginalData(null);
     try {
@@ -150,7 +157,7 @@ const CariKartlar: React.FC = () => {
     form.resetFields();
     setIsCodeManualAllowed(false);
     setDistricts([]);
-    setActiveTab('1');
+    resetTabs();
     try {
       const response = await api.get(`/Company/${id}`);
       const companyData = response.data;
@@ -170,8 +177,18 @@ const CariKartlar: React.FC = () => {
   };
 
   const handleSave = async () => {
+    const tabMap: Record<string, string> = {
+      cityId: '2', districtId: '2', address: '2', primaryContactPerson: '2', phone1: '2', phone2: '2', email: '2', website: '2',
+      taxOffice: '3', taxNumber: '3', isEInvoiceUser: '3', eInvoiceAlias: '3', paymentTermDays: '3', creditLimit: '3', defaultCurrency: '3', gLCode: '3'
+    };
+    
+    const { values, isValid } = await validateAndHandleErrors(form, tabMap, '1');
+    if (!isValid || !values) {
+      message.warning('Lütfen zorunlu alanları kontrol ediniz.');
+      return;
+    }
+
     try {
-      const values = await form.validateFields();
       const payload = { ...values, creditLimit: values.creditLimit ?? 0, paymentTermDays: values.paymentTermDays ?? 0 };
       if (editingId) {
         await api.put(`/Company/${editingId}`, payload);
@@ -184,23 +201,7 @@ const CariKartlar: React.FC = () => {
       fetchCompanies(1, pageSize, searchText, filterType, viewMode);
       setCurrentPage(1);
     } catch (error: any) {
-      if (error.errorFields && error.errorFields.length > 0) {
-        message.warning('Lütfen diğer sekmelerdeki zorunlu alanları da kontrol ediniz.');
-        
-        const firstErrorField = error.errorFields[0].name[0];
-        
-        const tab1Fields = ['code', 'type', 'isActive', 'name', 'shortName', 'description'];
-        const tab2Fields = ['cityId', 'districtId', 'address', 'primaryContactPerson', 'phone1', 'phone2', 'email', 'website'];
-        const tab3Fields = ['taxOffice', 'taxNumber', 'isEInvoiceUser', 'eInvoiceAlias', 'paymentTermDays', 'creditLimit', 'defaultCurrency', 'gLCode'];
-        
-        if (tab1Fields.includes(firstErrorField)) {
-          setActiveTab('1');
-        } else if (tab2Fields.includes(firstErrorField)) {
-          setActiveTab('2');
-        } else if (tab3Fields.includes(firstErrorField)) {
-          setActiveTab('3');
-        }
-      } else if (error?.response?.data) {
+      if (error?.response?.data) {
         message.error(getErrorMessage(error));
       }
     }
@@ -374,18 +375,18 @@ const CariKartlar: React.FC = () => {
                 Geri Al
               </Button>
             )}
-            <Button type="primary" onClick={handleSave} loading={formLoading}>Kaydet</Button>
+            <Button type="primary" htmlType="submit" form="cariForm" loading={formLoading}>Kaydet</Button>
           </Space>
         }
       >
-        <Form layout="vertical" form={form} disabled={formLoading}>
+        <Form id="cariForm" onFinish={handleSave} layout="vertical" form={form} disabled={formLoading}>
           <Tabs 
-            activeKey={activeTab} 
-            onChange={setActiveTab}
+            activeKey={activeTabKey} 
+            onChange={setActiveTabKey}
             items={[
               {
                 key: '1',
-                label: 'Genel Bilgiler',
+                label: renderTabLabel('Genel Bilgiler', '1'),
                 forceRender: true,
                 children: (
                   <>
@@ -420,7 +421,7 @@ const CariKartlar: React.FC = () => {
               },
               {
                 key: '2',
-                label: 'İletişim & Lokasyon',
+                label: renderTabLabel('İletişim & Lokasyon', '2'),
                 forceRender: true,
                 children: (
                   <>
@@ -457,7 +458,7 @@ const CariKartlar: React.FC = () => {
               },
               {
                 key: '3',
-                label: 'Resmi & Finans',
+                label: renderTabLabel('Resmi & Finans', '3'),
                 forceRender: true,
                 children: (
                   <>
