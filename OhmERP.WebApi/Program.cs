@@ -16,6 +16,7 @@ using OhmERP.WebApi.Security;
 using OhmERP.WebApi.Services;
 using Scalar.AspNetCore;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -114,6 +115,61 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<OhmERP.Infrastructure.Contexts.OhmERPDbContext>();
+    await context.Database.MigrateAsync();
+
+    var kgUnit = await context.UnitOfMeasures.FirstOrDefaultAsync(x => x.Code == "KG");
+    if (kgUnit == null)
+    {
+        kgUnit = new OhmERP.Domain.Entities.UnitOfMeasure 
+        { 
+            Code = "KG", 
+            Name = "Kilogram", 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.UnitOfMeasures.Add(kgUnit);
+        await context.SaveChangesAsync();
+    }
+
+    var telCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "TEL");
+    if (telCategory == null)
+    {
+        telCategory = new OhmERP.Domain.Entities.ItemCategory 
+        { 
+            Code = "TEL", 
+            Name = "Tel Tanımları", 
+            DefaultUnitOfMeasureId = kgUnit.Id, 
+            ShowInMenu = false, 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.ItemCategories.Add(telCategory);
+        await context.SaveChangesAsync();
+    }
+
+    var sacCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "SAC");
+    if (sacCategory == null)
+    {
+        sacCategory = new OhmERP.Domain.Entities.ItemCategory 
+        { 
+            Code = "SAC", 
+            Name = "Sac Tanımları", 
+            DefaultUnitOfMeasureId = kgUnit.Id, 
+            ShowInMenu = false, 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.ItemCategories.Add(sacCategory);
+        await context.SaveChangesAsync();
+    }
+}
+
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
@@ -135,6 +191,19 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
     DashboardTitle = "OhmERP Arka Plan Görev Yöneticisi"
 });
+
+using (var scope = app.Services.CreateScope())
+{
+    var recurringJobManager = scope.ServiceProvider.GetRequiredService<Hangfire.IRecurringJobManager>();
+    recurringJobManager.AddOrUpdate<OhmERP.Application.Interfaces.Services.ICurrencyService>(
+        "ExchangeRateSync",
+        service => service.SyncDailyRatesAsync(),
+        "31 15 * * 1-5",
+        new Hangfire.RecurringJobOptions
+        {
+            TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time")
+        });
+}
 
 app.Run();
 

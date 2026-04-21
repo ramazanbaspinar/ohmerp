@@ -21,7 +21,8 @@ const WorkCenters = React.lazy(() => import('./pages/WorkCenters'));
 const BOMs = React.lazy(() => import('./pages/BOMs'));
 const CostSimulation = React.lazy(() => import('./pages/CostSimulation'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
-
+const TelTanimlari = React.lazy(() => import('./pages/TelTanimlari'));
+const SacTanimlari = React.lazy(() => import('./pages/SacTanimlari'));
 const FallbackLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5' }}>
     <Spin size="large" tip="Sistem Modülü Yükleniyor...">
@@ -47,6 +48,8 @@ const App: React.FC = () => {
 
               <Route element={<ProtectedRoute requiredPermission="Permissions.Items.View" />}>
                 <Route path="/malzeme-kartlari" element={<MalzemeKartlari />} />
+                <Route path="/tanimlar/tel-tanimlari" element={<TelTanimlari />} />
+                <Route path="/tanimlar/sac-tanimlari" element={<SacTanimlari />} />
               </Route>
 
               <Route element={<ProtectedRoute requiredPermission="Permissions.Users.View" />}>

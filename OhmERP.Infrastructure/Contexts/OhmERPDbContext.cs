@@ -63,20 +63,21 @@ public class OhmERPDbContext : DbContext
                 RowVersion = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 }
             }
         );
-
-        // Seed data removed per requirements
     }
+
+
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var auditEntries = OnBeforeSaveChanges();
+        DateTime turkeyTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time"));
 
         foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
         {
             switch (entry.State)
             {
                 case EntityState.Added:
-                    entry.Entity.CreatedDate = DateTime.UtcNow;
+                    entry.Entity.CreatedDate = turkeyTime;
                     entry.Entity.CreatedBy = _currentUserService.UserId;
                     entry.Entity.RowVersion = Guid.NewGuid().ToByteArray();
                     break;
@@ -85,12 +86,12 @@ public class OhmERPDbContext : DbContext
                     var isDeletedProperty = entry.Property(x => x.IsDeleted);
                     if (isDeletedProperty.IsModified && (bool)isDeletedProperty.CurrentValue! == true && (bool)isDeletedProperty.OriginalValue! == false)
                     {
-                        entry.Entity.DeletedDate = DateTime.UtcNow;
+                        entry.Entity.DeletedDate = turkeyTime;
                         entry.Entity.DeletedBy = _currentUserService.UserId;
                     }
                     else
                     {
-                        entry.Entity.UpdatedDate = DateTime.UtcNow;
+                        entry.Entity.UpdatedDate = turkeyTime;
                         entry.Entity.UpdatedBy = _currentUserService.UserId;
                     }
                     entry.Entity.RowVersion = Guid.NewGuid().ToByteArray();

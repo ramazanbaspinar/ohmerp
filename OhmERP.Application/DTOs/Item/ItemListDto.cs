@@ -45,6 +45,8 @@ public class ItemListDto
     [Display(Name = "Açıklama")]
     public string? Description { get; set; }
 
+    public string? PropertiesJson { get; set; }
+
     [Display(Name = "Birim Maliyet")]
     public decimal UnitCost { get; set; }
 

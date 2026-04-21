@@ -27,6 +27,10 @@ public class UnitOfMeasureService : BaseService<UnitOfMeasure, UnitOfMeasureList
 
     public override async Task DeleteAsync(Guid id)
     {
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity != null && entity.Code == "KG")
+            throw new BusinessException("Sistem için kritik olan varsayılan değerler silinemez.");
+
         if (await _itemRepository.AnyAsync(x => x.UnitOfMeasureId == id && !x.IsDeleted))
             throw new RelationExistsException("Seçilen ölçü birimi malzemelerde kullanılmaktadır, silinemez.");
             

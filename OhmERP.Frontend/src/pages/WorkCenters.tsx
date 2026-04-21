@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
-import { Button, Typography, Space, Input, Drawer, Form, Popconfirm, message, Switch, Row, Col, Radio, Select } from 'antd';
+import { Button, Typography, Space, Input, Form, Popconfirm, message, Switch, Row, Col, Radio, Select } from 'antd';
 import { AppstoreAddOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
 import api from '../services/api';
 import { OhmTable } from '../components/OhmTable';
+import { OhmFormDrawer } from '../components/OhmFormDrawer';
 import { getErrorMessage } from '../utils/turkishSearch';
 import { formatSystemCode } from '../utils/helpers';
 import { OhmInputNumber } from '../components/OhmInputNumber';
@@ -46,6 +47,7 @@ const WorkCenters: React.FC = () => {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [originalData, setOriginalData] = useState<any>(null);
   
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -94,7 +96,9 @@ const WorkCenters: React.FC = () => {
   const openDrawerForCreate = () => {
     setEditingId(null);
     form.resetFields();
-    form.setFieldsValue({ isActive: true, currency: 1, type: 1 });
+    const initVals = { isActive: true, currency: 1, type: 1 };
+    form.setFieldsValue(initVals);
+    setOriginalData(initVals);
     setIsDrawerVisible(true);
   };
 
@@ -105,6 +109,7 @@ const WorkCenters: React.FC = () => {
     try {
       const response = await api.get(`/WorkCenters/${id}`);
       form.setFieldsValue(response.data);
+      setOriginalData(response.data);
     } catch {
       message.error('Makine bilgileri alınamadı.');
       setIsDrawerVisible(false);
@@ -113,9 +118,10 @@ const WorkCenters: React.FC = () => {
     }
   };
 
-  const handleSave = async (values: any) => {
+  const handleSave = async () => {
     setFormLoading(true);
     try {
+      const values = await form.validateFields();
       if (editingId) {
         await api.put(`/WorkCenters/${editingId}`, values);
         message.success('İş Merkezi başarıyla güncellendi.');
@@ -281,19 +287,16 @@ const WorkCenters: React.FC = () => {
         }}
       />
 
-      <Drawer
+      <OhmFormDrawer
         title={editingId ? 'Makine Düzenle' : 'Yeni Makine'}
         width={400}
         onClose={() => setIsDrawerVisible(false)}
         open={isDrawerVisible}
-        extra={
-          <Space>
-            <Button onClick={() => setIsDrawerVisible(false)}>İptal</Button>
-            <Button form="workCenterForm" htmlType="submit" type="primary" loading={formLoading}>{editingId ? 'Güncelle' : 'Kaydet'}</Button>
-          </Space>
-        }
+        onSave={handleSave}
+        loading={formLoading}
+        form={form}
+        initialValues={originalData}
       >
-        <Form id="workCenterForm" layout="vertical" form={form} disabled={formLoading} onFinish={handleSave}>
           <Form.Item 
             name="code" 
             label="Makine Kodu" 
@@ -322,8 +325,7 @@ const WorkCenters: React.FC = () => {
           <Form.Item name="isActive" label="Durum" valuePropName="checked">
             <Switch checkedChildren="Aktif" unCheckedChildren="Pasif" />
           </Form.Item>
-        </Form>
-      </Drawer>
+      </OhmFormDrawer>
     </>
   );
 };

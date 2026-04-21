@@ -89,24 +89,21 @@ const MainLayout: React.FC = () => {
       label: 'Cari Hesaplar' 
     } : null,
     
-    (hasPermission('Permissions.Items.View') && dynamicCategories.length > 0) ? {
-      key: 'hammadde_tanimlari', 
-      icon: <AppstoreAddOutlined />, 
-      label: 'Hammadde / Malzeme Tanımları',
-      children: dynamicCategories.map(cat => ({
-        key: `/malzeme-kartlari?categoryId=${cat.id}`,
-        label: `${cat.name} Tanımları`
-      }))
-    } : null,
-    
     (hasPermission('Permissions.Items.View') || hasPermission('Permissions.ItemCategories.View') || hasPermission('Permissions.UnitOfMeasures.View')) ? {
       key: 'stok_yonetimi', 
       icon: <AppstoreAddOutlined />, 
       label: 'Tanımlar',
       children: [
+        {
+          key: 'hammadde_tanimlari_yeni',
+          icon: <AppstoreAddOutlined />,
+          label: 'Hammadde Tanımları',
+          children: [
+            { key: '/tanimlar/tel-tanimlari', icon: <AppstoreAddOutlined />, label: 'Tel Tanımları' },
+            { key: '/tanimlar/sac-tanimlari', icon: <AppstoreAddOutlined />, label: 'Sac Tanımları' }
+          ]
+        },
         hasPermission('Permissions.Items.View') ? { key: '/malzeme-kartlari', icon: <AppstoreAddOutlined />, label: 'Hammadde ve Malzemeler' } : null,
-        hasPermission('Permissions.ItemCategories.View') ? { key: '/malzeme-kategorileri', icon: <TagsOutlined />, label: 'Malzeme Kategorileri' } : null,
-        hasPermission('Permissions.ItemCategories.View') ? { key: '/kategori-ayarlari', icon: <SettingOutlined />, label: 'Malzeme Sınıfları ve Şablonları' } : null,
         hasPermission('Permissions.UnitOfMeasures.View') ? { key: '/birim-tanimlari', icon: <DatabaseOutlined />, label: 'Ölçü Birimleri' } : null,
       ].filter(Boolean)
     } : null,

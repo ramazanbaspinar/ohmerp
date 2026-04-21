@@ -22,10 +22,7 @@ public class CurrencyService : ICurrencyService
         var today = DateTime.Today;
         var existingRates = await _repository.FindAsync(x => x.Date == today && !x.IsDeleted);
 
-        if (existingRates.Any(x => x.CurrencyCode == "USD") && existingRates.Any(x => x.CurrencyCode == "EUR"))
-        {
-            return; // Today's rates already exist
-        }
+
 
         try
         {

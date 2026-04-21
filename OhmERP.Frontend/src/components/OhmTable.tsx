@@ -65,7 +65,14 @@ export const OhmTable = <T extends object>({
   const [exportLoading, setExportLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (columns) setMergedColumns(columns);
+    if (columns) {
+      const enhancedColumns = columns.map(col => {
+        const c = col as any;
+        if (c.key === 'actions' || c.dataIndex === 'actions') return col;
+        return { ...col, ellipsis: c.ellipsis ?? true };
+      });
+      setMergedColumns(enhancedColumns);
+    }
   }, [columns]);
 
   const handleResize = (index: number) => (_: React.SyntheticEvent<Element>, { size }: any) => {
@@ -170,6 +177,7 @@ export const OhmTable = <T extends object>({
     <div style={{ background: '#fff', padding: '24px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
       {renderHeader()}
       <Table
+        tableLayout="fixed"
         components={enableResize ? { header: { cell: ResizableTitle } } : undefined}
         dataSource={dataSource}
         columns={finalColumns}

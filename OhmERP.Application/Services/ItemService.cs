@@ -7,6 +7,9 @@ using OhmERP.Application.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
 using OhmERP.Domain.Entities;
 using OhmERP.Domain.Enums;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace OhmERP.Application.Services;
 
@@ -200,5 +203,319 @@ public class ItemService : BaseService<Item, ItemListDto, CreateItemRequest, Upd
     {
         if (await _repository.AnyAsync(x => x.Code == request.Code.Trim() && x.Id != id && !x.IsDeleted))
             throw new BusinessException("Girilen sistem kodu zaten başka bir kayıtta kullanılmaktadır. Lütfen farklı bir kod giriniz.");
+    }
+
+    public override async Task<byte[]> ExportToExcelAsync(string reportName = "Dışa Aktarım", PaginationFilter? filter = null)
+    {
+        if (filter?.CategoryId.HasValue == true)
+        {
+            var category = await _categoryRepository.GetByIdAsync(filter.CategoryId.Value);
+            if (category != null && category.Code == "TEL")
+            {
+                return await ExportTelToExcelAsync(filter);
+            }
+            if (category != null && category.Code == "SAC")
+            {
+                return await ExportSacToExcelAsync(filter);
+            }
+        }
+        return await base.ExportToExcelAsync(reportName, filter);
+    }
+
+    public override async Task<byte[]> ExportToPdfAsync(string reportName = "Sistem Çıktısı", PaginationFilter? filter = null)
+    {
+        if (filter?.CategoryId.HasValue == true)
+        {
+            var category = await _categoryRepository.GetByIdAsync(filter.CategoryId.Value);
+            if (category != null && category.Code == "TEL")
+            {
+                return await ExportTelToPdfAsync(filter);
+            }
+            if (category != null && category.Code == "SAC")
+            {
+                return await ExportSacToPdfAsync(filter);
+            }
+        }
+        return await base.ExportToPdfAsync(reportName, filter);
+    }
+
+    private async Task<byte[]> ExportTelToExcelAsync(PaginationFilter filter)
+    {
+        var filterFunc = BuildFilter(filter);
+        var entities = await _repository.FindWithQueryAsync(q => filterFunc(q.Where(x => !x.IsDeleted)).OrderByDescending(x => x.CreatedDate));
+
+        using var workbook = new ClosedXML.Excel.XLWorkbook();
+        var worksheet = workbook.Worksheets.Add("Tel Tanımları");
+
+        var headers = new[] { "Kodu", "Adı", "Çap", "Ağırlık", "Ohm", "Birim Maliyet", "Para Birimi", "Kritik Stok Seviyesi (KG)", "Durum" };
+        for (int i = 0; i < headers.Length; i++)
+        {
+            worksheet.Cell(1, i + 1).Value = headers[i];
+        }
+
+        var headerRow = worksheet.Range(1, 1, 1, headers.Length);
+        headerRow.Style.Font.Bold = true;
+        headerRow.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
+        headerRow.Style.Border.BottomBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+
+        int row = 2;
+        foreach (var item in entities)
+        {
+            decimal cap = 0, agirlik = 0, ohm = 0;
+            if (!string.IsNullOrEmpty(item.PropertiesJson))
+            {
+                try
+                {
+                    var props = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, decimal>>(item.PropertiesJson);
+                    if (props != null)
+                    {
+                        if (props.TryGetValue("Cap", out var c)) cap = c;
+                        if (props.TryGetValue("Agirlik", out var a)) agirlik = a;
+                        if (props.TryGetValue("Ohm", out var o)) ohm = o;
+                    }
+                }
+                catch { }
+            }
+
+            worksheet.Cell(row, 1).Value = item.Code;
+            worksheet.Cell(row, 2).Value = item.Name;
+            worksheet.Cell(row, 3).Value = cap;
+            worksheet.Cell(row, 4).Value = agirlik;
+            worksheet.Cell(row, 5).Value = ohm;
+            worksheet.Cell(row, 6).Value = item.UnitCost;
+            worksheet.Cell(row, 7).Value = item.CostCurrency.ToString();
+            worksheet.Cell(row, 8).Value = item.CriticalStockLevel;
+            worksheet.Cell(row, 9).Value = item.IsActive ? "Aktif" : "Pasif";
+            row++;
+        }
+
+        worksheet.Columns().AdjustToContents();
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        return stream.ToArray();
+    }
+
+    private async Task<byte[]> ExportTelToPdfAsync(PaginationFilter filter)
+    {
+        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+        var filterFunc = BuildFilter(filter);
+        var entities = await _repository.FindWithQueryAsync(q => filterFunc(q.Where(x => !x.IsDeleted)).OrderByDescending(x => x.CreatedDate));
+
+        var document = QuestPDF.Fluent.Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(QuestPDF.Helpers.PageSizes.A4.Landscape());
+                page.Margin(1, QuestPDF.Infrastructure.Unit.Centimetre);
+                page.PageColor(QuestPDF.Helpers.Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Arial"));
+
+                page.Header().Row(row =>
+                {
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text("Tel Tanımları Listesi").SemiBold().FontSize(20).FontColor(QuestPDF.Helpers.Colors.Blue.Darken2);
+                        col.Item().Text($"Oluşturulma Tarihi: {DateTime.Now:dd.MM.yyyy HH:mm}");
+                    });
+                });
+
+                page.Content().PaddingVertical(1, QuestPDF.Infrastructure.Unit.Centimetre).Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        for (int i = 0; i < 9; i++) columns.RelativeColumn();
+                    });
+
+                    var headers = new[] { "Kodu", "Adı", "Çap", "Ağırlık", "Ohm", "Birim Maliyet", "Para Birimi", "Kritik Stok Seviyesi (KG)", "Durum" };
+                    table.Header(header =>
+                    {
+                        foreach (var headerName in headers)
+                        {
+                            header.Cell().BorderBottom(2).BorderColor(QuestPDF.Helpers.Colors.Black).PaddingBottom(5).Text(headerName).SemiBold();
+                        }
+                    });
+
+                    foreach (var item in entities)
+                    {
+                        decimal cap = 0, agirlik = 0, ohm = 0;
+                        if (!string.IsNullOrEmpty(item.PropertiesJson))
+                        {
+                            try
+                            {
+                                var props = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, decimal>>(item.PropertiesJson);
+                                if (props != null)
+                                {
+                                    if (props.TryGetValue("Cap", out var c)) cap = c;
+                                    if (props.TryGetValue("Agirlik", out var a)) agirlik = a;
+                                    if (props.TryGetValue("Ohm", out var o)) ohm = o;
+                                }
+                            }
+                            catch { }
+                        }
+
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.Code);
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.Name);
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(cap.ToString());
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(agirlik.ToString());
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(ohm.ToString());
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.UnitCost.ToString());
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.CostCurrency.ToString());
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.CriticalStockLevel.ToString());
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.IsActive ? "Aktif" : "Pasif");
+                    }
+                });
+
+                page.Footer().AlignCenter().Text(x =>
+                {
+                    x.Span("Sayfa ");
+                    x.CurrentPageNumber();
+                    x.Span(" / ");
+                    x.TotalPages();
+                });
+            });
+        });
+
+        return document.GeneratePdf();
+    }
+
+    private async Task<byte[]> ExportSacToExcelAsync(PaginationFilter filter)
+    {
+        var filterFunc = BuildFilter(filter);
+        var entities = await _repository.FindWithQueryAsync(q => filterFunc(q.Where(x => !x.IsDeleted)).OrderByDescending(x => x.CreatedDate));
+
+        using var workbook = new ClosedXML.Excel.XLWorkbook();
+        var worksheet = workbook.Worksheets.Add("Sac Tanımları");
+
+        var headers = new[] { "Kodu", "Adı", "Sac Kalınlığı (mm)", "Sac Eni (mm)", "Yoğunluk", "Kritik Stok Seviyesi (KG)", "Durum" };
+        for (int i = 0; i < headers.Length; i++)
+        {
+            worksheet.Cell(1, i + 1).Value = headers[i];
+        }
+
+        var headerRow = worksheet.Range(1, 1, 1, headers.Length);
+        headerRow.Style.Font.Bold = true;
+        headerRow.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
+        headerRow.Style.Border.BottomBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+
+        int row = 2;
+        foreach (var item in entities)
+        {
+            decimal kalinlik = 0, en = 0, yogunluk = 0;
+            if (!string.IsNullOrEmpty(item.PropertiesJson))
+            {
+                try
+                {
+                    var props = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, decimal>>(item.PropertiesJson);
+                    if (props != null)
+                    {
+                        if (props.TryGetValue("Kalinlik", out var k)) kalinlik = k;
+                        else if (props.TryGetValue("kalinlik", out var k2)) kalinlik = k2;
+                        if (props.TryGetValue("En", out var e)) en = e;
+                        else if (props.TryGetValue("en", out var e2)) en = e2;
+                        if (props.TryGetValue("Yogunluk", out var y)) yogunluk = y;
+                        else if (props.TryGetValue("yogunluk", out var y2)) yogunluk = y2;
+                    }
+                }
+                catch { }
+            }
+
+            worksheet.Cell(row, 1).Value = item.Code;
+            worksheet.Cell(row, 2).Value = item.Name;
+            worksheet.Cell(row, 3).Value = kalinlik;
+            worksheet.Cell(row, 4).Value = en;
+            worksheet.Cell(row, 5).Value = yogunluk;
+            worksheet.Cell(row, 6).Value = item.CriticalStockLevel;
+            worksheet.Cell(row, 7).Value = item.IsActive ? "Aktif" : "Pasif";
+            row++;
+        }
+
+        worksheet.Columns().AdjustToContents();
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        return stream.ToArray();
+    }
+
+    private async Task<byte[]> ExportSacToPdfAsync(PaginationFilter filter)
+    {
+        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+        var filterFunc = BuildFilter(filter);
+        var entities = await _repository.FindWithQueryAsync(q => filterFunc(q.Where(x => !x.IsDeleted)).OrderByDescending(x => x.CreatedDate));
+
+        var document = QuestPDF.Fluent.Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(QuestPDF.Helpers.PageSizes.A4.Landscape());
+                page.Margin(1, QuestPDF.Infrastructure.Unit.Centimetre);
+                page.PageColor(QuestPDF.Helpers.Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Arial"));
+
+                page.Header().Row(row =>
+                {
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text("Sac Tanımları Listesi").SemiBold().FontSize(20).FontColor(QuestPDF.Helpers.Colors.Blue.Darken2);
+                        col.Item().Text($"Oluşturulma Tarihi: {DateTime.Now:dd.MM.yyyy HH:mm}");
+                    });
+                });
+
+                page.Content().PaddingVertical(1, QuestPDF.Infrastructure.Unit.Centimetre).Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        for (int i = 0; i < 7; i++) columns.RelativeColumn();
+                    });
+
+                    var headers = new[] { "Kodu", "Adı", "Sac Kalınlığı (mm)", "Sac Eni (mm)", "Yoğunluk", "Kritik Stok Seviyesi (KG)", "Durum" };
+                    table.Header(header =>
+                    {
+                        foreach (var headerName in headers)
+                        {
+                            header.Cell().BorderBottom(2).BorderColor(QuestPDF.Helpers.Colors.Black).PaddingBottom(5).Text(headerName).SemiBold();
+                        }
+                    });
+
+                    foreach (var item in entities)
+                    {
+                        decimal kalinlik = 0, en = 0, yogunluk = 0;
+                        if (!string.IsNullOrEmpty(item.PropertiesJson))
+                        {
+                            try
+                            {
+                                var props = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, decimal>>(item.PropertiesJson);
+                                if (props != null)
+                                {
+                                    if (props.TryGetValue("Kalinlik", out var k)) kalinlik = k;
+                                    else if (props.TryGetValue("kalinlik", out var k2)) kalinlik = k2;
+                                    if (props.TryGetValue("En", out var e)) en = e;
+                                    else if (props.TryGetValue("en", out var e2)) en = e2;
+                                    if (props.TryGetValue("Yogunluk", out var y)) yogunluk = y;
+                                    else if (props.TryGetValue("yogunluk", out var y2)) yogunluk = y2;
+                                }
+                            }
+                            catch { }
+                        }
+
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.Code);
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.Name);
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(kalinlik.ToString());
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(en.ToString());
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(yogunluk.ToString());
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.CriticalStockLevel.ToString());
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.IsActive ? "Aktif" : "Pasif");
+                    }
+                });
+
+                page.Footer().AlignCenter().Text(x =>
+                {
+                    x.Span("Sayfa ");
+                    x.CurrentPageNumber();
+                    x.Span(" / ");
+                    x.TotalPages();
+                });
+            });
+        });
+
+        return document.GeneratePdf();
     }
 }

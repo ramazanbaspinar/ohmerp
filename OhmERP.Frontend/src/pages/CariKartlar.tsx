@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
 import { useEnterpriseTabs } from '../hooks/useEnterpriseTabs';
 import {
-  Button, Tag, Typography, Space, Input, Select, Drawer, 
+  Button, Tag, Typography, Space, Input, Select, 
   Form, Row, Col, Tabs, Switch, InputNumber, Popconfirm, message, Radio
 } from 'antd';
 import {
@@ -11,6 +11,7 @@ import {
 } from '@ant-design/icons';
 import api from '../services/api';
 import { OhmTable } from '../components/OhmTable';
+import { OhmFormDrawer } from '../components/OhmFormDrawer';
 import { filterOptionTurkish, getErrorMessage } from '../utils/turkishSearch';
 import { formatSystemCode } from '../utils/helpers';
 
@@ -142,7 +143,9 @@ const CariKartlar: React.FC = () => {
     setOriginalData(null);
     try {
       const numRes = await api.get('/Numerator/PreviewNextCode/1');
-      form.setFieldsValue({ code: numRes.data.nextCode });
+      const initialVals = { code: numRes.data.nextCode, isActive: true, type: 1, creditLimit: 0, paymentTermDays: 0, defaultCurrency: 'TRY' };
+      form.setFieldsValue(initialVals);
+      setOriginalData(initialVals);
       setIsCodeManualAllowed(numRes.data.isManualEntryAllowed);
     } catch {
       message.error('Numaratör verisi alınamadı.');
@@ -354,32 +357,16 @@ const CariKartlar: React.FC = () => {
         exportPdfUrl={`/Company/export/pdf${getExportQueryString()}`}
       />
 
-      <Drawer
+      <OhmFormDrawer
         title={editingId ? 'Cari Kart Düzenle' : 'Yeni Cari Kart Oluştur'}
         width={800}
         onClose={() => setIsDrawerVisible(false)}
         open={isDrawerVisible}
-        destroyOnHidden
-        styles={{ body: { paddingBottom: 80 } }}
-        extra={
-          <Space>
-            <Button onClick={() => setIsDrawerVisible(false)}>İptal</Button>
-            {editingId && (
-              <Button onClick={async () => {
-                form.resetFields();
-                if (originalData) {
-                  if (originalData.cityId) await fetchDistricts(originalData.cityId);
-                  form.setFieldsValue(originalData);
-                }
-              }}>
-                Geri Al
-              </Button>
-            )}
-            <Button type="primary" htmlType="submit" form="cariForm" loading={formLoading}>Kaydet</Button>
-          </Space>
-        }
+        onSave={handleSave}
+        loading={formLoading}
+        form={form}
+        initialValues={originalData}
       >
-        <Form id="cariForm" onFinish={handleSave} layout="vertical" form={form} disabled={formLoading}>
           <Tabs 
             activeKey={activeTabKey} 
             onChange={setActiveTabKey}
@@ -481,8 +468,7 @@ const CariKartlar: React.FC = () => {
               }
             ]}
           />
-        </Form>
-      </Drawer>
+      </OhmFormDrawer>
     </>
   );
 };

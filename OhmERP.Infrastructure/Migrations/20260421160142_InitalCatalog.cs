@@ -3,12 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace OhmERP.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCatalog : Migration
+    public partial class InitalCatalog : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -81,15 +79,14 @@ namespace OhmERP.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ItemCategories",
+                name: "CurrencyRates",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    ParentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CurrencyCode = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
+                    BuyingRate = table.Column<decimal>(type: "decimal(18,4)", nullable: false),
+                    SellingRate = table.Column<decimal>(type: "decimal(18,4)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -101,13 +98,7 @@ namespace OhmERP.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ItemCategories", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ItemCategories_ItemCategories_ParentId",
-                        column: x => x.ParentId,
-                        principalTable: "ItemCategories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                    table.PrimaryKey("PK_CurrencyRates", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -182,6 +173,32 @@ namespace OhmERP.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "WorkCenters",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    HourlyMachineCost = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    HourlyLaborCost = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    Currency = table.Column<int>(type: "int", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WorkCenters", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Districts",
                 columns: table => new
                 {
@@ -204,36 +221,6 @@ namespace OhmERP.Infrastructure.Migrations
                         name: "FK_Districts_Cities_CityId",
                         column: x => x.CityId,
                         principalTable: "Cities",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CategoryAttributes",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemCategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    DataType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Precision = table.Column<int>(type: "int", nullable: true),
-                    IsRequired = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CategoryAttributes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CategoryAttributes_ItemCategories_ItemCategoryId",
-                        column: x => x.ItemCategoryId,
-                        principalTable: "ItemCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -266,21 +253,17 @@ namespace OhmERP.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Items",
+                name: "ItemCategories",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Code = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UnitOfMeasureId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
-                    TaxRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Barcode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    CriticalStockLevel = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ParentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    PropertiesJson = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ShowInMenu = table.Column<bool>(type: "bit", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    DefaultUnitOfMeasureId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -292,19 +275,19 @@ namespace OhmERP.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Items", x => x.Id);
+                    table.PrimaryKey("PK_ItemCategories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Items_ItemCategories_CategoryId",
-                        column: x => x.CategoryId,
+                        name: "FK_ItemCategories_ItemCategories_ParentId",
+                        column: x => x.ParentId,
                         principalTable: "ItemCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Items_UnitOfMeasures_UnitOfMeasureId",
-                        column: x => x.UnitOfMeasureId,
+                        name: "FK_ItemCategories_UnitOfMeasures_DefaultUnitOfMeasureId",
+                        column: x => x.DefaultUnitOfMeasureId,
                         principalTable: "UnitOfMeasures",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -395,14 +378,16 @@ namespace OhmERP.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ItemAttributeValues",
+                name: "CategoryAttributes",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CategoryAttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    StringValue = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    DecimalValue = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: true),
+                    ItemCategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DataType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Precision = table.Column<int>(type: "int", nullable: true),
+                    IsRequired = table.Column<bool>(type: "bit", nullable: false),
+                    SortOrder = table.Column<int>(type: "int", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -414,17 +399,55 @@ namespace OhmERP.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ItemAttributeValues", x => x.Id);
+                    table.PrimaryKey("PK_CategoryAttributes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ItemAttributeValues_CategoryAttributes_CategoryAttributeId",
-                        column: x => x.CategoryAttributeId,
-                        principalTable: "CategoryAttributes",
+                        name: "FK_CategoryAttributes_ItemCategories_ItemCategoryId",
+                        column: x => x.ItemCategoryId,
+                        principalTable: "ItemCategories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Items",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UnitOfMeasureId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    TaxRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Barcode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    CriticalStockLevel = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    UnitCost = table.Column<decimal>(type: "decimal(18,4)", nullable: false),
+                    CostCurrency = table.Column<int>(type: "int", nullable: false),
+                    PropertiesJson = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Items", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Items_ItemCategories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "ItemCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_ItemAttributeValues_Items_ItemId",
-                        column: x => x.ItemId,
-                        principalTable: "Items",
+                        name: "FK_Items_UnitOfMeasures_UnitOfMeasureId",
+                        column: x => x.UnitOfMeasureId,
+                        principalTable: "UnitOfMeasures",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -464,13 +487,147 @@ namespace OhmERP.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "CodeTemplates",
-                columns: new[] { "Id", "DateFormat", "DocumentType", "IsActive", "IsManualEntryAllowed", "Padding", "Prefix", "Suffix", "UseDate" },
-                values: new object[,]
+            migrationBuilder.CreateTable(
+                name: "BOMs",
+                columns: table => new
                 {
-                    { new Guid("a1b2c3d4-e5f6-7890-abcd-ef1234567801"), "", 1, true, false, 5, "CAR", "", false },
-                    { new Guid("a1b2c3d4-e5f6-7890-abcd-ef1234567802"), "", 2, true, false, 5, "STK", "", false }
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsDefault = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BOMs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BOMs_Items_ItemId",
+                        column: x => x.ItemId,
+                        principalTable: "Items",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ItemAttributeValues",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CategoryAttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StringValue = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    DecimalValue = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemAttributeValues", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ItemAttributeValues_CategoryAttributes_CategoryAttributeId",
+                        column: x => x.CategoryAttributeId,
+                        principalTable: "CategoryAttributes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ItemAttributeValues_Items_ItemId",
+                        column: x => x.ItemId,
+                        principalTable: "Items",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BOMLines",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BOMId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MaterialId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UnitOfMeasureId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Quantity = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    ScrapRate = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BOMLines", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BOMLines_BOMs_BOMId",
+                        column: x => x.BOMId,
+                        principalTable: "BOMs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BOMLines_Items_MaterialId",
+                        column: x => x.MaterialId,
+                        principalTable: "Items",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BOMLines_UnitOfMeasures_UnitOfMeasureId",
+                        column: x => x.UnitOfMeasureId,
+                        principalTable: "UnitOfMeasures",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BOMOperations",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BOMId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    WorkCenterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OperationOrder = table.Column<int>(type: "int", nullable: false),
+                    SetupTime = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    RunTime = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BOMOperations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BOMOperations_BOMs_BOMId",
+                        column: x => x.BOMId,
+                        principalTable: "BOMs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BOMOperations_WorkCenters_WorkCenterId",
+                        column: x => x.WorkCenterId,
+                        principalTable: "WorkCenters",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
@@ -492,6 +649,42 @@ namespace OhmERP.Infrastructure.Migrations
                 name: "IX_AuditLogs_UserId",
                 table: "AuditLogs",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BOMLines_BOMId",
+                table: "BOMLines",
+                column: "BOMId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BOMLines_MaterialId",
+                table: "BOMLines",
+                column: "MaterialId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BOMLines_UnitOfMeasureId",
+                table: "BOMLines",
+                column: "UnitOfMeasureId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BOMOperations_BOMId",
+                table: "BOMOperations",
+                column: "BOMId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BOMOperations_WorkCenterId",
+                table: "BOMOperations",
+                column: "WorkCenterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BOMs_Code",
+                table: "BOMs",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BOMs_ItemId",
+                table: "BOMs",
+                column: "ItemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CategoryAttributes_ItemCategoryId",
@@ -548,6 +741,13 @@ namespace OhmERP.Infrastructure.Migrations
                 column: "CompanyId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CurrencyRates_Date_CurrencyCode",
+                table: "CurrencyRates",
+                columns: new[] { "Date", "CurrencyCode" },
+                unique: true,
+                filter: "[IsDeleted] = 0");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Districts_CityId",
                 table: "Districts",
                 column: "CityId");
@@ -573,6 +773,11 @@ namespace OhmERP.Infrastructure.Migrations
                 column: "Code",
                 unique: true,
                 filter: "[IsDeleted] = 0");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ItemCategories_DefaultUnitOfMeasureId",
+                table: "ItemCategories",
+                column: "DefaultUnitOfMeasureId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ItemCategories_ParentId",
@@ -625,6 +830,12 @@ namespace OhmERP.Infrastructure.Migrations
                 table: "UserRoles",
                 columns: new[] { "UserId", "RoleId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WorkCenters_Code",
+                table: "WorkCenters",
+                column: "Code",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -634,10 +845,19 @@ namespace OhmERP.Infrastructure.Migrations
                 name: "AuditLogs");
 
             migrationBuilder.DropTable(
+                name: "BOMLines");
+
+            migrationBuilder.DropTable(
+                name: "BOMOperations");
+
+            migrationBuilder.DropTable(
                 name: "CodeTemplates");
 
             migrationBuilder.DropTable(
                 name: "CompanyContacts");
+
+            migrationBuilder.DropTable(
+                name: "CurrencyRates");
 
             migrationBuilder.DropTable(
                 name: "ItemAttributeValues");
@@ -649,13 +869,16 @@ namespace OhmERP.Infrastructure.Migrations
                 name: "UserRoles");
 
             migrationBuilder.DropTable(
+                name: "BOMs");
+
+            migrationBuilder.DropTable(
+                name: "WorkCenters");
+
+            migrationBuilder.DropTable(
                 name: "Company");
 
             migrationBuilder.DropTable(
                 name: "CategoryAttributes");
-
-            migrationBuilder.DropTable(
-                name: "Items");
 
             migrationBuilder.DropTable(
                 name: "Roles");
@@ -664,16 +887,19 @@ namespace OhmERP.Infrastructure.Migrations
                 name: "Users");
 
             migrationBuilder.DropTable(
+                name: "Items");
+
+            migrationBuilder.DropTable(
                 name: "Districts");
 
             migrationBuilder.DropTable(
                 name: "ItemCategories");
 
             migrationBuilder.DropTable(
-                name: "UnitOfMeasures");
+                name: "Cities");
 
             migrationBuilder.DropTable(
-                name: "Cities");
+                name: "UnitOfMeasures");
 
             migrationBuilder.DropSequence(
                 name: "CompanyCode_Seq");

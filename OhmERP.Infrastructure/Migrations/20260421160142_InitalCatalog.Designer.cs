@@ -12,8 +12,8 @@ using OhmERP.Infrastructure.Contexts;
 namespace OhmERP.Infrastructure.Migrations
 {
     [DbContext(typeof(OhmERPDbContext))]
-    [Migration("20260420175134_AddBOMStructure")]
-    partial class AddBOMStructure
+    [Migration("20260421160142_InitalCatalog")]
+    partial class InitalCatalog
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -617,6 +617,60 @@ namespace OhmERP.Infrastructure.Migrations
                     b.ToTable("CompanyContacts");
                 });
 
+            modelBuilder.Entity("OhmERP.Domain.Entities.CurrencyRate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("BuyingRate")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<decimal>("SellingRate")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Date", "CurrencyCode")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("CurrencyRates");
+                });
+
             modelBuilder.Entity("OhmERP.Domain.Entities.District", b =>
                 {
                     b.Property<Guid>("Id")
@@ -683,6 +737,9 @@ namespace OhmERP.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("CostCurrency")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
@@ -725,6 +782,9 @@ namespace OhmERP.Infrastructure.Migrations
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<Guid>("UnitOfMeasureId")
                         .HasColumnType("uniqueidentifier");
@@ -819,6 +879,9 @@ namespace OhmERP.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("DefaultUnitOfMeasureId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
@@ -861,6 +924,8 @@ namespace OhmERP.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("DefaultUnitOfMeasureId");
 
                     b.HasIndex("ParentId");
 
@@ -1365,10 +1430,17 @@ namespace OhmERP.Infrastructure.Migrations
 
             modelBuilder.Entity("OhmERP.Domain.Entities.ItemCategory", b =>
                 {
+                    b.HasOne("OhmERP.Domain.Entities.UnitOfMeasure", "DefaultUnitOfMeasure")
+                        .WithMany()
+                        .HasForeignKey("DefaultUnitOfMeasureId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("OhmERP.Domain.Entities.ItemCategory", "Parent")
                         .WithMany("SubCategories")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DefaultUnitOfMeasure");
 
                     b.Navigation("Parent");
                 });

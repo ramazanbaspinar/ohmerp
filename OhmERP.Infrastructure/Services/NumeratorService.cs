@@ -20,7 +20,7 @@ public class NumeratorService : INumeratorService
     private static readonly Dictionary<DocumentType, CodeTemplate> _defaultTemplates = new()
     {
         { DocumentType.Company, new CodeTemplate { DocumentType = DocumentType.Company, Prefix = "CAR", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } },
-        { DocumentType.Item,    new CodeTemplate { DocumentType = DocumentType.Item,    Prefix = "STK", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } }
+        { DocumentType.Item,    new CodeTemplate { DocumentType = DocumentType.Item,    Prefix = "MLZ", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } }
     };
 
     public NumeratorService(OhmERPDbContext context)

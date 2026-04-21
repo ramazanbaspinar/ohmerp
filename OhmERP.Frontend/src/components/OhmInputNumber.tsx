@@ -20,7 +20,7 @@ export const OhmInputNumber: React.FC<InputNumberProps> = (props) => {
         parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         return parts.join(',');
       }}
-      parser={(value) => (value ? value.replace(/\./g, '').replace(',', '.') : '') as any}
+      parser={(value) => (value ? value.replace(/\$\s?|(\.*)/g, '').replace(',', '.') : '') as any}
     />
   );
 };

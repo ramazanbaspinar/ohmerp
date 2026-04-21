@@ -63,6 +63,15 @@ public class ItemCategoryService : BaseService<ItemCategory, ItemCategoryListDto
         return _mapper.Map<UpdateItemCategoryRequest>(entity);
     }
 
+    public override async Task DeleteAsync(Guid id)
+    {
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity != null && (entity.Code == "TEL" || entity.Code == "SAC"))
+            throw new BusinessException("Sistem için kritik olan varsayılan değerler silinemez.");
+
+        await base.DeleteAsync(id);
+    }
+
     protected override async Task ValidateCreateAsync(CreateItemCategoryRequest request)
     {
         if (await _repository.AnyAsync(x => x.Code == request.Code.Trim() && !x.IsDeleted))
