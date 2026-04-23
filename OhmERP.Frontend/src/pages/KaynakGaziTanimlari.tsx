@@ -14,7 +14,7 @@ import { OhmFormDrawer } from '../components/OhmFormDrawer';
 import { OhmInputNumber } from '../components/OhmInputNumber';
 import { formatSystemCode } from '../utils/helpers';
 
-const TelTanimlari: React.FC = () => {
+const KaynakGaziTanimlari: React.FC = () => {
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [unitId, setUnitId] = useState<string | null>(null);
 
@@ -26,9 +26,9 @@ const TelTanimlari: React.FC = () => {
   
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const [originalData, setOriginalData] = useState<any>(null);
-  const [isActiveFilter, setIsActiveFilter] = useState<boolean | null>(true);
+  const [isActiveFilter, setIsActiveFilter] = useState<boolean | string | undefined>(true);
 
   const [searchText, setSearchText] = useState('');
   const debouncedSearchText = useDebounce(searchText, 500);
@@ -42,7 +42,7 @@ const TelTanimlari: React.FC = () => {
     try {
       let url = `/Item?page=${page}&pageSize=${size}&categoryId=${catId}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
-      if (activeState !== null) url += `&isActive=${activeState}`;
+      if (activeState !== null && activeState !== "" && activeState !== undefined) url += `&isActive=${activeState}`;
       const response = await api.get(url);
       setData(response.data?.items ?? []);
       setTotalCount(response.data?.totalCount ?? 0);
@@ -61,12 +61,20 @@ const TelTanimlari: React.FC = () => {
                 api.get('/UnitOfMeasure/lookup')
             ]);
             
-            const telCat = catRes.data.find((c: any) => c.name.toLowerCase().includes("tel"));
-            const kgUnit = unitRes.data.find((u: any) => u.name.toLowerCase().includes("kilogram") || u.name.toLowerCase() === "kg");
+            const gazCategory = catRes.data.find((c: any) => c.name?.toUpperCase().startsWith('KAYNAK GAZ') || c.code?.toUpperCase() === 'GAZ');
+            const m3Unit = unitRes.data.find((u: any) => u.name?.toUpperCase().startsWith('M3') || u.code?.toUpperCase() === 'M3');
+            if (!m3Unit) console.warn('Gelen Birim Listesi:', unitRes.data);
             
-            if (telCat) setCategoryId(telCat.id);
-            if (kgUnit) setUnitId(kgUnit.id);
-        } catch {}
+            if (gazCategory) {
+                setCategoryId(gazCategory.id);
+            }
+
+            if (m3Unit) {
+                setUnitId(m3Unit.id);
+            }
+        } catch (error) {
+            console.error("Kategori veya birim bilgileri çekilirken hata oluştu.", error);
+        }
     };
     init();
   }, []);
@@ -88,17 +96,17 @@ const TelTanimlari: React.FC = () => {
   }, [fetchData, currentPage, pageSize, debouncedSearchText, categoryId, isActiveFilter]);
 
   const openDrawerForCreate = async () => {
-    setEditingId(null);
+    setEditingId(undefined);
     form.resetFields();
     setIsDrawerVisible(true);
     setFormLoading(true);
     try {
       const numRes = await api.get('/Numerator/PreviewNextCode/2');
-      const initVals = { code: numRes.data.nextCode };
+      const initVals = { code: numRes.data.nextCode, isActive: true };
       form.setFieldsValue(initVals);
       setOriginalData(initVals);
     } catch {
-      const initVals = { code: '' };
+      const initVals = { code: '', isActive: true };
       form.setFieldsValue(initVals);
       setOriginalData(initVals);
     } finally {
@@ -115,29 +123,24 @@ const TelTanimlari: React.FC = () => {
     try {
       const response = await api.get(`/Item/${id}`);
       const itemData = response.data;
-      
-      let cap = 0;
-      let agirlik = 0;
-      let ohm = 0;
 
+      let miktar = undefined;
+      let verimlilik = undefined;
       if (itemData.propertiesJson) {
         try {
           const props = JSON.parse(itemData.propertiesJson);
-          cap = props.Cap || 0;
-          agirlik = props.Agirlik || 0;
-          ohm = props.Ohm || 0;
-        } catch (e) {
-        }
+          if (props.Miktar !== undefined) miktar = props.Miktar;
+          if (props.Verimlilik !== undefined) verimlilik = props.Verimlilik;
+        } catch (e) {}
       }
 
       const initVals = {
         code: itemData.code,
         name: itemData.name,
-        cap: cap,
-        agirlik: agirlik,
-        ohm: ohm,
-        criticalStockLevel: itemData.criticalStockLevel,
         barcode: itemData.barcode,
+        miktar: miktar,
+        verimlilik: verimlilik,
+        criticalStockLevel: itemData.criticalStockLevel,
         description: itemData.description,
         isActive: itemData.isActive
       };
@@ -157,16 +160,21 @@ const TelTanimlari: React.FC = () => {
       const values = await form.validateFields();
       setFormLoading(true);
 
-      if (!categoryId || !unitId) {
-        message.error("Kategori veya birim bilgisi yüklenemedi. Sayfayı yenileyin.");
+      if (!categoryId) {
+        message.error("Sistemde 'GAZ' kategorisi bulunamadı. Lütfen sistem yöneticisi ile iletişime geçiniz.");
+        setFormLoading(false);
+        return;
+      }
+      
+      if (!unitId) {
+        message.error("Sistemde 'm³' ölçü birimi bulunamadı. Lütfen sistem yöneticisi ile iletişime geçiniz.");
         setFormLoading(false);
         return;
       }
 
       const propertiesJson = JSON.stringify({
-        Cap: values.cap || 0,
-        Agirlik: values.agirlik || 0,
-        Ohm: values.ohm || 0
+        Miktar: Number(values.miktar) || 0,
+        Verimlilik: Number(values.verimlilik) || 1
       });
 
       const payload = {
@@ -220,15 +228,15 @@ const TelTanimlari: React.FC = () => {
 
   const columns = [
     { title: 'Kodu', dataIndex: 'code', key: 'code', width: '15%', sorter: true, render: (text: string) => <Text strong>{text}</Text> },
-    { title: 'Adı', dataIndex: 'name', key: 'name', width: '25%', sorter: true },
+    { title: 'Adı', dataIndex: 'name', key: 'name', width: '20%', sorter: true },
     { 
-      title: 'Tel Çapı (mm)', 
-      key: 'cap', 
+      title: 'Miktar (m³/N₂)', 
+      key: 'miktar', 
       render: (_: any, record: any) => {
         if (record.propertiesJson) {
            try {
              const props = typeof record.propertiesJson === 'string' ? JSON.parse(record.propertiesJson) : record.propertiesJson;
-             const val = props?.Cap ?? props?.cap;
+             const val = props?.Miktar ?? props?.miktar;
              if (val !== undefined && val !== null) return Number(val).toLocaleString('tr-TR', { maximumFractionDigits: 4 });
              return <small style={{color: 'red'}}>{record.propertiesJson}</small>;
            } catch { return <small style={{color: 'red'}}>{record.propertiesJson}</small>; }
@@ -237,13 +245,13 @@ const TelTanimlari: React.FC = () => {
       }
     },
     { 
-      title: 'Tel Ağırlığı (g/m)', 
-      key: 'agirlik', 
+      title: 'Verimlilik (m/N₂)', 
+      key: 'verimlilik', 
       render: (_: any, record: any) => {
         if (record.propertiesJson) {
            try {
              const props = typeof record.propertiesJson === 'string' ? JSON.parse(record.propertiesJson) : record.propertiesJson;
-             const val = props?.Agirlik ?? props?.agirlik;
+             const val = props?.Verimlilik ?? props?.verimlilik;
              if (val !== undefined && val !== null) return Number(val).toLocaleString('tr-TR', { maximumFractionDigits: 4 });
              return <small style={{color: 'red'}}>{record.propertiesJson}</small>;
            } catch { return <small style={{color: 'red'}}>{record.propertiesJson}</small>; }
@@ -251,27 +259,13 @@ const TelTanimlari: React.FC = () => {
         return '-';
       }
     },
-    { 
-      title: 'Ohm Değeri (ohm/m)', 
-      key: 'ohm', 
-      render: (_: any, record: any) => {
-        if (record.propertiesJson) {
-           try {
-             const props = typeof record.propertiesJson === 'string' ? JSON.parse(record.propertiesJson) : record.propertiesJson;
-             const val = props?.Ohm ?? props?.ohm;
-             if (val !== undefined && val !== null) return Number(val).toLocaleString('tr-TR', { maximumFractionDigits: 4 });
-             return <small style={{color: 'red'}}>{record.propertiesJson}</small>;
-           } catch { return <small style={{color: 'red'}}>{record.propertiesJson}</small>; }
-        }
-        return '-';
-      }
-    },
-    { title: 'Kritik Stok Seviyesi (KG)', dataIndex: 'criticalStockLevel', key: 'criticalStockLevel', width: 100, ellipsis: true, sorter: true, render: (val: number) => Number(val || 0).toLocaleString('tr-TR', { maximumFractionDigits: 4 }) },
     { title: 'Barkod', dataIndex: 'barcode', key: 'barcode', width: 100, ellipsis: true, sorter: true },
+    { title: 'Kritik Stok Seviyesi (m³)', dataIndex: 'criticalStockLevel', key: 'criticalStockLevel', width: 100, ellipsis: true, sorter: true, render: (val: number) => Number(val || 0).toLocaleString('tr-TR', { maximumFractionDigits: 4 }) },
     { 
       title: 'Durum', 
       dataIndex: 'isActive', 
       key: 'isActive', 
+      width: 100,
       render: (isActive: boolean) => <Tag color={isActive ? 'green' : 'red'}>{isActive ? 'Aktif' : 'Pasif'}</Tag>
     },
     { 
@@ -306,8 +300,8 @@ const TelTanimlari: React.FC = () => {
             <Col span={14}>
               <Space>
                 <Input.Search 
-                  placeholder="Tel Adı veya Kodu Ara... (En az 3 karakter)" 
-                  value={searchText} 
+                  placeholder="Gaz Adı veya Kodu Ara... (En az 3 karakter)" 
+                  value={searchText ?? ''} 
                   onChange={e => {
                     setSearchText(e.target.value);
                     isManualSearch.current = false;
@@ -322,7 +316,7 @@ const TelTanimlari: React.FC = () => {
                   style={{ width: '350px' }}
                 />
                 <Radio.Group 
-                  value={isActiveFilter} 
+                  value={isActiveFilter ?? ''} 
                   onChange={(e) => {
                     setIsActiveFilter(e.target.value);
                     setCurrentPage(1);
@@ -331,7 +325,7 @@ const TelTanimlari: React.FC = () => {
                   optionType="button"
                   buttonStyle="solid"
                 >
-                  <Radio.Button value={null}>Tümü</Radio.Button>
+                  <Radio.Button value="">Tümü</Radio.Button>
                   <Radio.Button value={true}>Aktifler</Radio.Button>
                   <Radio.Button value={false}>Pasifler</Radio.Button>
                 </Radio.Group>
@@ -340,15 +334,15 @@ const TelTanimlari: React.FC = () => {
             <Col>
                 <Space>
                 <Button icon={<ReloadOutlined />} onClick={() => fetchData(currentPage, pageSize, searchText, categoryId)}>Yenile</Button>
-                <Button type="primary" icon={<PlusOutlined />} onClick={openDrawerForCreate}>Yeni Tel Tanımı Ekle</Button>
+                <Button type="primary" icon={<PlusOutlined />} onClick={openDrawerForCreate}>Yeni Kaynak Gazı Ekle</Button>
                 </Space>
             </Col>
         </Row>
       </div>
 
       <OhmTable
-        tableName="Tel_Tanimlari"
-        tableTitle="Tel Tanımları Listesi"
+        tableName="Kaynak_Gazi_Tanimlari"
+        tableTitle="Kaynak Gazı Tanımları Listesi"
         titleIcon={<AppstoreAddOutlined />}
         dataSource={data}
         columns={columns}
@@ -366,7 +360,7 @@ const TelTanimlari: React.FC = () => {
       />
 
       <OhmFormDrawer
-        title={editingId ? 'Tel Tanımı Düzenle' : 'Yeni Tel Tanımı'}
+        title={editingId ? 'Kaynak Gazı Düzenle' : 'Yeni Kaynak Gazı'}
         width={500}
         onClose={() => setIsDrawerVisible(false)}
         open={isDrawerVisible}
@@ -383,30 +377,21 @@ const TelTanimlari: React.FC = () => {
           </Form.Item>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="cap" label="Tel Çapı (mm)" rules={[{ required: true, message: 'Zorunlu' }]}>
-                <OhmInputNumber precision={2} style={{ width: '100%' }} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="agirlik" label="Tel Ağırlığı (g/m)" rules={[{ required: true, message: 'Zorunlu' }]}>
+              <Form.Item name="miktar" label="Miktar (m³/N₂)" rules={[{ required: true, message: 'Bu alan zorunludur!' }]}>
                 <OhmInputNumber precision={4} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-          </Row>
-          <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="ohm" label="Ohm Değeri (ohm/m)" rules={[{ required: true, message: 'Zorunlu' }]}>
-                <OhmInputNumber precision={2} style={{ width: '100%' }} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="criticalStockLevel" label="Kritik Stok Seviyesi (KG)">
-                <OhmInputNumber precision={0} style={{ width: '100%' }} />
+              <Form.Item name="verimlilik" label="Verimlilik (m/N₂)" rules={[{ required: true, message: 'Bu alan zorunludur!' }]}>
+                <OhmInputNumber precision={4} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
           </Row>
           <Form.Item name="barcode" label="Barkod" rules={[{ max: 50, message: 'Barkod en fazla 50 karakter olabilir!' }]}>
             <Input maxLength={50} showCount />
+          </Form.Item>
+          <Form.Item name="criticalStockLevel" label="Kritik Stok Seviyesi (m³)">
+            <OhmInputNumber precision={0} style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item name="isActive" label="Durum" valuePropName="checked" initialValue={true}>
             <Switch checkedChildren="Aktif" unCheckedChildren="Pasif" />
@@ -419,4 +404,4 @@ const TelTanimlari: React.FC = () => {
   );
 };
 
-export default TelTanimlari;
+export default KaynakGaziTanimlari;

@@ -135,6 +135,36 @@ using (var scope = app.Services.CreateScope())
         await context.SaveChangesAsync();
     }
 
+    var adetUnit = await context.UnitOfMeasures.FirstOrDefaultAsync(x => x.Code == "ADET");
+    if (adetUnit == null)
+    {
+        adetUnit = new OhmERP.Domain.Entities.UnitOfMeasure 
+        { 
+            Code = "ADET", 
+            Name = "ADET", 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.UnitOfMeasures.Add(adetUnit);
+        await context.SaveChangesAsync();
+    }
+
+    var m3Unit = await context.UnitOfMeasures.FirstOrDefaultAsync(x => x.Code == "M3");
+    if (m3Unit == null)
+    {
+        m3Unit = new OhmERP.Domain.Entities.UnitOfMeasure 
+        { 
+            Code = "M3", 
+            Name = "Metreküp", 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.UnitOfMeasures.Add(m3Unit);
+        await context.SaveChangesAsync();
+    }
+
     var telCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "TEL");
     if (telCategory == null)
     {
@@ -166,6 +196,176 @@ using (var scope = app.Services.CreateScope())
             CreatedBy = Guid.Empty 
         };
         context.ItemCategories.Add(sacCategory);
+        await context.SaveChangesAsync();
+    }
+
+    var pimCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "PIM");
+    if (pimCategory == null)
+    {
+        pimCategory = new OhmERP.Domain.Entities.ItemCategory 
+        { 
+            Code = "PIM", 
+            Name = "Pim Tanımları", 
+            DefaultUnitOfMeasureId = adetUnit.Id, 
+            ShowInMenu = false, 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.ItemCategories.Add(pimCategory);
+        await context.SaveChangesAsync();
+    }
+
+    var kumCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "KUM");
+    if (kumCategory == null)
+    {
+        kumCategory = new OhmERP.Domain.Entities.ItemCategory 
+        { 
+            Code = "KUM", 
+            Name = "Kum Tanımları", 
+            DefaultUnitOfMeasureId = kgUnit.Id, 
+            ShowInMenu = false, 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.ItemCategories.Add(kumCategory);
+        await context.SaveChangesAsync();
+    }
+
+    var gazCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "GAZ");
+    if (gazCategory == null)
+    {
+        gazCategory = new OhmERP.Domain.Entities.ItemCategory 
+        { 
+            Code = "GAZ", 
+            Name = "Kaynak Gazı Tanımları", 
+            DefaultUnitOfMeasureId = m3Unit.Id, 
+            ShowInMenu = false, 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.ItemCategories.Add(gazCategory);
+        await context.SaveChangesAsync();
+    }
+
+    var tapaCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "TAPA");
+    if (tapaCategory == null)
+    {
+        tapaCategory = new OhmERP.Domain.Entities.ItemCategory 
+        { 
+            Code = "TAPA", 
+            Name = "Tapa Tanımları", 
+            DefaultUnitOfMeasureId = adetUnit.Id, 
+            ShowInMenu = false, 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.ItemCategories.Add(tapaCategory);
+        await context.SaveChangesAsync();
+    }
+
+    var flansCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "FLANS");
+    if (flansCategory == null)
+    {
+        flansCategory = new OhmERP.Domain.Entities.ItemCategory 
+        { 
+            Code = "FLANS", 
+            Name = "Flanş Tanımları", 
+            DefaultUnitOfMeasureId = adetUnit.Id, 
+            ShowInMenu = false, 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.ItemCategories.Add(flansCategory);
+        await context.SaveChangesAsync();
+    }
+
+    var kelepceCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "KELEPCE");
+    if (kelepceCategory == null)
+    {
+        kelepceCategory = new OhmERP.Domain.Entities.ItemCategory 
+        { 
+            Code = "KELEPCE", 
+            Name = "Kelepçe Tanımları", 
+            DefaultUnitOfMeasureId = adetUnit.Id, 
+            ShowInMenu = false, 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.ItemCategories.Add(kelepceCategory);
+        await context.SaveChangesAsync();
+    }
+
+    var soketCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "SOKET");
+    if (soketCategory == null)
+    {
+        soketCategory = new OhmERP.Domain.Entities.ItemCategory 
+        { 
+            Code = "SOKET", 
+            Name = "Soket Tanımları", 
+            DefaultUnitOfMeasureId = adetUnit.Id, 
+            ShowInMenu = false, 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.ItemCategories.Add(soketCategory);
+        await context.SaveChangesAsync();
+    }
+
+    var omegaCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "OMEGA");
+    if (omegaCategory == null)
+    {
+        omegaCategory = new OhmERP.Domain.Entities.ItemCategory 
+        { 
+            Code = "OMEGA", 
+            Name = "Omega Tanımları", 
+            DefaultUnitOfMeasureId = adetUnit.Id, 
+            ShowInMenu = false, 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.ItemCategories.Add(omegaCategory);
+        await context.SaveChangesAsync();
+    }
+
+    var baglantiSaciCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "BAGLANTISACI");
+    if (baglantiSaciCategory == null)
+    {
+        baglantiSaciCategory = new OhmERP.Domain.Entities.ItemCategory 
+        { 
+            Code = "BAGLANTISACI", 
+            Name = "Bağlantı Sacı Tanımları", 
+            DefaultUnitOfMeasureId = adetUnit.Id, 
+            ShowInMenu = false, 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.ItemCategories.Add(baglantiSaciCategory);
+        await context.SaveChangesAsync();
+    }
+
+    var baglantiTeliCategory = await context.ItemCategories.FirstOrDefaultAsync(x => x.Code == "BAGLANTITELI");
+    if (baglantiTeliCategory == null)
+    {
+        baglantiTeliCategory = new OhmERP.Domain.Entities.ItemCategory 
+        { 
+            Code = "BAGLANTITELI", 
+            Name = "Bağlantı Teli Tanımları", 
+            DefaultUnitOfMeasureId = kgUnit.Id, 
+            ShowInMenu = false, 
+            IsActive = true, 
+            CreatedDate = DateTime.UtcNow, 
+            CreatedBy = Guid.Empty 
+        };
+        context.ItemCategories.Add(baglantiTeliCategory);
         await context.SaveChangesAsync();
     }
 }

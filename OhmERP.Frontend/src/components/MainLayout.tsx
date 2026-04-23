@@ -4,11 +4,10 @@ import {
   MenuFoldOutlined, MenuUnfoldOutlined, SettingOutlined,
   UserOutlined, LogoutOutlined, TeamOutlined, SafetyCertificateOutlined,
   GlobalOutlined, FileSearchOutlined, BankOutlined,
-  AppstoreAddOutlined, DatabaseOutlined, TagsOutlined, SearchOutlined
+  AppstoreAddOutlined, DatabaseOutlined, SearchOutlined
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import api from '../services/api';
 
 const { Header, Sider, Content } = Layout;
 
@@ -30,7 +29,6 @@ const MainLayout: React.FC = () => {
   const [userName, setUserName] = useState<string>('Kullanıcı');
   const [menuSearchText, setMenuSearchText] = useState('');
   const [openKeys, setOpenKeys] = useState<string[]>([]);
-  const [dynamicCategories, setDynamicCategories] = useState<any[]>([]);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,19 +47,6 @@ const MainLayout: React.FC = () => {
         }
       }
     }
-  }, []);
-
-  useEffect(() => {
-    const fetchCats = async () => {
-      try {
-        const response = await api.get('/ItemCategory?pageSize=1000');
-        if (response.data && response.data.items) {
-           setDynamicCategories(response.data.items.filter((x: any) => x.isActive && x.showInMenu));
-        }
-      } catch (e) {
-      }
-    };
-    fetchCats();
   }, []);
 
   const handleLogout = () => {
@@ -100,7 +85,17 @@ const MainLayout: React.FC = () => {
           label: 'Hammadde Tanımları',
           children: [
             { key: '/tanimlar/tel-tanimlari', icon: <AppstoreAddOutlined />, label: 'Tel Tanımları' },
-            { key: '/tanimlar/sac-tanimlari', icon: <AppstoreAddOutlined />, label: 'Sac Tanımları' }
+            { key: '/tanimlar/sac-tanimlari', icon: <AppstoreAddOutlined />, label: 'Sac Tanımları' },
+            { key: '/tanimlar/pim-tanimlari', icon: <AppstoreAddOutlined />, label: 'Pim Tanımları' },
+            { key: '/tanimlar/kum-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kum Tanımları' },
+            { key: '/tanimlar/kaynak-gazi-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kaynak Gazı Tanımları' },
+            { key: '/tanimlar/tapa-tanimlari', icon: <AppstoreAddOutlined />, label: 'Tapa Tanımları' },
+            { key: '/tanimlar/flans-tanimlari', icon: <AppstoreAddOutlined />, label: 'Flanş Tanımları' },
+            { key: '/tanimlar/kelepce-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kelepçe Tanımları' },
+            { key: '/tanimlar/soket-tanimlari', icon: <AppstoreAddOutlined />, label: 'Soket Tanımları' },
+            { key: '/tanimlar/omega-tanimlari', icon: <AppstoreAddOutlined />, label: 'Omega Tanımları' },
+            { key: '/tanimlar/baglanti-saci-tanimlari', icon: <AppstoreAddOutlined />, label: 'Bağlantı Sacı Tanımları' },
+            { key: '/tanimlar/baglanti-teli-tanimlari', icon: <AppstoreAddOutlined />, label: 'Bağlantı Teli Tanımları' }
           ]
         },
         hasPermission('Permissions.Items.View') ? { key: '/malzeme-kartlari', icon: <AppstoreAddOutlined />, label: 'Hammadde ve Malzemeler' } : null,

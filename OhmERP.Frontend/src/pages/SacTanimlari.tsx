@@ -238,7 +238,7 @@ const SacTanimlari: React.FC = () => {
       const props = JSON.parse(record.propertiesJson);
       const val = props[propName] ?? props[propName.toLowerCase()];
       if (val === undefined || val === null) return <small style={{ color: 'red' }}>-</small>;
-      return <Text>{Number(val).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</Text>;
+      return <Text>{Number(val).toLocaleString('tr-TR', { maximumFractionDigits: 4 })}</Text>;
     } catch {
       return <small style={{ color: 'red' }}>Hata</small>;
     }
@@ -259,7 +259,7 @@ const SacTanimlari: React.FC = () => {
       title: 'Yoğunluk', key: 'yogunluk', width: '10%',
       render: (_: any, record: any) => renderEavProperty(record, 'Yogunluk')
     },
-    { title: 'Kritik Stok Seviyesi (KG)', dataIndex: 'criticalStockLevel', key: 'criticalStockLevel', width: 100, ellipsis: true, sorter: true, render: (val: number) => Number(val || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) },
+    { title: 'Kritik Stok Seviyesi (KG)', dataIndex: 'criticalStockLevel', key: 'criticalStockLevel', width: 100, ellipsis: true, sorter: true, render: (val: number) => Number(val || 0).toLocaleString('tr-TR', { maximumFractionDigits: 4 }) },
     { title: 'Barkod', dataIndex: 'barcode', key: 'barcode', width: 100, ellipsis: true, sorter: true },
     {
       title: 'Durum', dataIndex: 'isActive', key: 'isActive', width: '10%',

@@ -23,6 +23,16 @@ const CostSimulation = React.lazy(() => import('./pages/CostSimulation'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const TelTanimlari = React.lazy(() => import('./pages/TelTanimlari'));
 const SacTanimlari = React.lazy(() => import('./pages/SacTanimlari'));
+const PimTanimlari = React.lazy(() => import('./pages/PimTanimlari'));
+const KumTanimlari = React.lazy(() => import('./pages/KumTanimlari'));
+const KaynakGaziTanimlari = React.lazy(() => import('./pages/KaynakGaziTanimlari'));
+const TapaTanimlari = React.lazy(() => import('./pages/TapaTanimlari'));
+const FlansTanimlari = React.lazy(() => import('./pages/FlansTanimlari'));
+const KelepceTanimlari = React.lazy(() => import('./pages/KelepceTanimlari'));
+const SoketTanimlari = React.lazy(() => import('./pages/SoketTanimlari'));
+const OmegaTanimlari = React.lazy(() => import('./pages/OmegaTanimlari'));
+const BaglantiSaciTanimlari = React.lazy(() => import('./pages/BaglantiSaciTanimlari'));
+const BaglantiTeliTanimlari = React.lazy(() => import('./pages/BaglantiTeliTanimlari'));
 const FallbackLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5' }}>
     <Spin size="large" tip="Sistem Modülü Yükleniyor...">
@@ -50,6 +60,16 @@ const App: React.FC = () => {
                 <Route path="/malzeme-kartlari" element={<MalzemeKartlari />} />
                 <Route path="/tanimlar/tel-tanimlari" element={<TelTanimlari />} />
                 <Route path="/tanimlar/sac-tanimlari" element={<SacTanimlari />} />
+                <Route path="/tanimlar/pim-tanimlari" element={<PimTanimlari />} />
+                <Route path="/tanimlar/kum-tanimlari" element={<KumTanimlari />} />
+                <Route path="/tanimlar/kaynak-gazi-tanimlari" element={<KaynakGaziTanimlari />} />
+                <Route path="/tanimlar/tapa-tanimlari" element={<TapaTanimlari />} />
+                <Route path="/tanimlar/flans-tanimlari" element={<FlansTanimlari />} />
+                <Route path="/tanimlar/kelepce-tanimlari" element={<KelepceTanimlari />} />
+                <Route path="/tanimlar/soket-tanimlari" element={<SoketTanimlari />} />
+                <Route path="/tanimlar/omega-tanimlari" element={<OmegaTanimlari />} />
+                <Route path="/tanimlar/baglanti-saci-tanimlari" element={<BaglantiSaciTanimlari />} />
+                <Route path="/tanimlar/baglanti-teli-tanimlari" element={<BaglantiTeliTanimlari />} />
               </Route>
 
               <Route element={<ProtectedRoute requiredPermission="Permissions.Users.View" />}>

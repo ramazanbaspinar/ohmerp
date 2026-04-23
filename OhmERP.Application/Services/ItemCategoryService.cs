@@ -66,7 +66,7 @@ public class ItemCategoryService : BaseService<ItemCategory, ItemCategoryListDto
     public override async Task DeleteAsync(Guid id)
     {
         var entity = await _repository.GetByIdAsync(id);
-        if (entity != null && (entity.Code == "TEL" || entity.Code == "SAC"))
+        if (entity != null && (entity.Code == "TEL" || entity.Code == "SAC" || entity.Code == "PIM" || entity.Code == "KUM" || entity.Code == "GAZ" || entity.Code == "TAPA" || entity.Code == "FLANS" || entity.Code == "KELEPCE" || entity.Code == "SOKET" || entity.Code == "OMEGA" || entity.Code == "BAGLANTISACI" || entity.Code == "BAGLANTITELI"))
             throw new BusinessException("Sistem için kritik olan varsayılan değerler silinemez.");
 
         await base.DeleteAsync(id);
