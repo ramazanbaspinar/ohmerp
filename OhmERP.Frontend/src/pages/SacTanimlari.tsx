@@ -39,14 +39,22 @@ const SacTanimlari: React.FC = () => {
   const fetchMetadata = async () => {
     try {
       const [catRes, unitRes] = await Promise.all([
-        api.get('/ItemCategory'),
-        api.get('/UnitOfMeasure')
+        api.get('/ItemCategory/lookup'),
+        api.get('/UnitOfMeasure/lookup')
       ]);
       const cats = catRes.data?.items || catRes.data || [];
       const units = unitRes.data?.items || unitRes.data || [];
 
-      const sacCat = cats.find((c: any) => c.code === 'SAC');
-      const kg = units.find((u: any) => u.code === 'KG');
+      const sacCat = cats.find((c: any) => {
+        const name = c.name || '';
+        const upperNameTR = name.toLocaleUpperCase('tr-TR');
+        const upperNameEN = name.toUpperCase();
+        return upperNameTR.startsWith('SAC') || upperNameEN.startsWith('SAC') || c.code?.toUpperCase() === 'SAC';
+      });
+      const kg = units.find((u: any) => {
+        const name = u.name || '';
+        return name.toUpperCase().includes('KİLOGRAM') || name.toUpperCase().includes('KILOGRAM') || name.toUpperCase() === 'KG' || u.code?.toUpperCase() === 'KG';
+      });
 
       if (sacCat) setCategoryId(sacCat.id);
       if (kg) setKgUnitId(kg.id);
@@ -142,9 +150,9 @@ const SacTanimlari: React.FC = () => {
         kalinlik: kalinlik,
         en: en,
         yogunluk: yogunluk,
-        criticalStockLevel: itemData.criticalStockLevel,
-        barcode: itemData.barcode,
-        description: itemData.description,
+        criticalStockLevel: itemData.criticalStockLevel || 0,
+        barcode: itemData.barcode || undefined,
+        description: itemData.description || undefined,
         isActive: itemData.isActive
       };
       form.setFieldsValue(initVals);

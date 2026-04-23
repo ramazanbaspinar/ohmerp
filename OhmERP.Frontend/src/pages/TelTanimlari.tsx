@@ -61,8 +61,16 @@ const TelTanimlari: React.FC = () => {
                 api.get('/UnitOfMeasure/lookup')
             ]);
             
-            const telCat = catRes.data.find((c: any) => c.name.toLowerCase().includes("tel"));
-            const kgUnit = unitRes.data.find((u: any) => u.name.toLowerCase().includes("kilogram") || u.name.toLowerCase() === "kg");
+            const telCat = catRes.data.find((c: any) => {
+                const name = c.name || '';
+                const upperNameTR = name.toLocaleUpperCase('tr-TR');
+                const upperNameEN = name.toUpperCase();
+                return upperNameTR.includes('TEL') || upperNameEN.includes('TEL') || c.code?.toUpperCase() === 'TEL';
+            });
+            const kgUnit = unitRes.data.find((u: any) => {
+                const name = u.name || '';
+                return name.toUpperCase().includes('KİLOGRAM') || name.toUpperCase().includes('KILOGRAM') || name.toUpperCase() === 'KG' || u.code?.toUpperCase() === 'KG';
+            });
             
             if (telCat) setCategoryId(telCat.id);
             if (kgUnit) setUnitId(kgUnit.id);
@@ -136,9 +144,9 @@ const TelTanimlari: React.FC = () => {
         cap: cap,
         agirlik: agirlik,
         ohm: ohm,
-        criticalStockLevel: itemData.criticalStockLevel,
-        barcode: itemData.barcode,
-        description: itemData.description,
+        criticalStockLevel: itemData.criticalStockLevel || 0,
+        barcode: itemData.barcode || undefined,
+        description: itemData.description || undefined,
         isActive: itemData.isActive
       };
       form.setFieldsValue(initVals);
