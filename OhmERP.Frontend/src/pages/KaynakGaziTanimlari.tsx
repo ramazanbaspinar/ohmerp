@@ -387,11 +387,11 @@ const KaynakGaziTanimlari: React.FC = () => {
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item name="barcode" label="Barkod" rules={[{ max: 50, message: 'Barkod en fazla 50 karakter olabilir!' }]}>
-            <Input maxLength={50} showCount />
-          </Form.Item>
           <Form.Item name="criticalStockLevel" label="Kritik Stok Seviyesi (m³)">
             <OhmInputNumber precision={0} style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item name="barcode" label="Barkod" rules={[{ max: 50, message: 'Barkod en fazla 50 karakter olabilir!' }]}>
+            <Input maxLength={50} showCount />
           </Form.Item>
           <Form.Item name="isActive" label="Durum" valuePropName="checked" initialValue={true}>
             <Switch checkedChildren="Aktif" unCheckedChildren="Pasif" />

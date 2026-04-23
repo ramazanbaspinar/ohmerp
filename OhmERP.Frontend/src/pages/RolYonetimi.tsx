@@ -110,6 +110,114 @@ const SYSTEM_MODULES: ModulePermissions[] = [
       { code: 'Permissions.Materials.Edit', name: 'Malzeme Kartı Düzenleme', isGranted: false },
       { code: 'Permissions.Materials.Delete', name: 'Malzeme Kartı Silme', isGranted: false },
     ]
+  },
+  {
+    moduleName: 'Bağlantı Sacı Tanımları',
+    permissions: [
+      { code: 'Permissions.BaglantiSaci.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.BaglantiSaci.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.BaglantiSaci.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.BaglantiSaci.Delete', name: 'Silme', isGranted: false },
+    ]
+  },
+  {
+    moduleName: 'Bağlantı Teli Tanımları',
+    permissions: [
+      { code: 'Permissions.BaglantiTeli.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.BaglantiTeli.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.BaglantiTeli.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.BaglantiTeli.Delete', name: 'Silme', isGranted: false },
+    ]
+  },
+  {
+    moduleName: 'Flanş Tanımları',
+    permissions: [
+      { code: 'Permissions.Flans.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.Flans.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.Flans.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.Flans.Delete', name: 'Silme', isGranted: false },
+    ]
+  },
+  {
+    moduleName: 'Kaynak Gazı Tanımları',
+    permissions: [
+      { code: 'Permissions.KaynakGazi.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.KaynakGazi.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.KaynakGazi.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.KaynakGazi.Delete', name: 'Silme', isGranted: false },
+    ]
+  },
+  {
+    moduleName: 'Kelepçe Tanımları',
+    permissions: [
+      { code: 'Permissions.Kelepce.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.Kelepce.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.Kelepce.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.Kelepce.Delete', name: 'Silme', isGranted: false },
+    ]
+  },
+  {
+    moduleName: 'Kum Tanımları',
+    permissions: [
+      { code: 'Permissions.Kum.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.Kum.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.Kum.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.Kum.Delete', name: 'Silme', isGranted: false },
+    ]
+  },
+  {
+    moduleName: 'Omega Tanımları',
+    permissions: [
+      { code: 'Permissions.Omega.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.Omega.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.Omega.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.Omega.Delete', name: 'Silme', isGranted: false },
+    ]
+  },
+  {
+    moduleName: 'Pim Tanımları',
+    permissions: [
+      { code: 'Permissions.Pim.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.Pim.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.Pim.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.Pim.Delete', name: 'Silme', isGranted: false },
+    ]
+  },
+  {
+    moduleName: 'Sac Tanımları',
+    permissions: [
+      { code: 'Permissions.Sac.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.Sac.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.Sac.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.Sac.Delete', name: 'Silme', isGranted: false },
+    ]
+  },
+  {
+    moduleName: 'Soket Tanımları',
+    permissions: [
+      { code: 'Permissions.Soket.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.Soket.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.Soket.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.Soket.Delete', name: 'Silme', isGranted: false },
+    ]
+  },
+  {
+    moduleName: 'Tapa Tanımları',
+    permissions: [
+      { code: 'Permissions.Tapa.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.Tapa.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.Tapa.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.Tapa.Delete', name: 'Silme', isGranted: false },
+    ]
+  },
+  {
+    moduleName: 'Tel Tanımları',
+    permissions: [
+      { code: 'Permissions.Tel.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.Tel.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.Tel.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.Tel.Delete', name: 'Silme', isGranted: false },
+    ]
   }
 ];
 

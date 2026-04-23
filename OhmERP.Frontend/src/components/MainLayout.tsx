@@ -74,7 +74,7 @@ const MainLayout: React.FC = () => {
       label: 'Cari Hesaplar' 
     } : null,
     
-    (hasPermission('Permissions.Items.View') || hasPermission('Permissions.ItemCategories.View') || hasPermission('Permissions.UnitOfMeasures.View')) ? {
+    (hasPermission('Permissions.Items.View') || hasPermission('Permissions.ItemCategories.View') || hasPermission('Permissions.UnitOfMeasures.View') || hasPermission('Permissions.Cities.View') || hasPermission('Permissions.Districts.View')) ? {
       key: 'stok_yonetimi', 
       icon: <AppstoreAddOutlined />, 
       label: 'Tanımlar',
@@ -84,22 +84,31 @@ const MainLayout: React.FC = () => {
           icon: <AppstoreAddOutlined />,
           label: 'Hammadde Tanımları',
           children: [
-            { key: '/tanimlar/tel-tanimlari', icon: <AppstoreAddOutlined />, label: 'Tel Tanımları' },
-            { key: '/tanimlar/sac-tanimlari', icon: <AppstoreAddOutlined />, label: 'Sac Tanımları' },
-            { key: '/tanimlar/pim-tanimlari', icon: <AppstoreAddOutlined />, label: 'Pim Tanımları' },
-            { key: '/tanimlar/kum-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kum Tanımları' },
-            { key: '/tanimlar/kaynak-gazi-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kaynak Gazı Tanımları' },
-            { key: '/tanimlar/tapa-tanimlari', icon: <AppstoreAddOutlined />, label: 'Tapa Tanımları' },
-            { key: '/tanimlar/flans-tanimlari', icon: <AppstoreAddOutlined />, label: 'Flanş Tanımları' },
-            { key: '/tanimlar/kelepce-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kelepçe Tanımları' },
-            { key: '/tanimlar/soket-tanimlari', icon: <AppstoreAddOutlined />, label: 'Soket Tanımları' },
-            { key: '/tanimlar/omega-tanimlari', icon: <AppstoreAddOutlined />, label: 'Omega Tanımları' },
             { key: '/tanimlar/baglanti-saci-tanimlari', icon: <AppstoreAddOutlined />, label: 'Bağlantı Sacı Tanımları' },
-            { key: '/tanimlar/baglanti-teli-tanimlari', icon: <AppstoreAddOutlined />, label: 'Bağlantı Teli Tanımları' }
+            { key: '/tanimlar/baglanti-teli-tanimlari', icon: <AppstoreAddOutlined />, label: 'Bağlantı Teli Tanımları' },
+            { key: '/tanimlar/flans-tanimlari', icon: <AppstoreAddOutlined />, label: 'Flanş Tanımları' },
+            { key: '/tanimlar/kaynak-gazi-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kaynak Gazı Tanımları' },
+            { key: '/tanimlar/kelepce-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kelepçe Tanımları' },
+            { key: '/tanimlar/kum-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kum Tanımları' },
+            { key: '/tanimlar/omega-tanimlari', icon: <AppstoreAddOutlined />, label: 'Omega Tanımları' },
+            { key: '/tanimlar/pim-tanimlari', icon: <AppstoreAddOutlined />, label: 'Pim Tanımları' },
+            { key: '/tanimlar/sac-tanimlari', icon: <AppstoreAddOutlined />, label: 'Sac Tanımları' },
+            { key: '/tanimlar/soket-tanimlari', icon: <AppstoreAddOutlined />, label: 'Soket Tanımları' },
+            { key: '/tanimlar/tapa-tanimlari', icon: <AppstoreAddOutlined />, label: 'Tapa Tanımları' },
+            { key: '/tanimlar/tel-tanimlari', icon: <AppstoreAddOutlined />, label: 'Tel Tanımları' }
           ]
         },
         hasPermission('Permissions.Items.View') ? { key: '/malzeme-kartlari', icon: <AppstoreAddOutlined />, label: 'Hammadde ve Malzemeler' } : null,
-        hasPermission('Permissions.UnitOfMeasures.View') ? { key: '/birim-tanimlari', icon: <DatabaseOutlined />, label: 'Ölçü Birimleri' } : null,
+        (hasPermission('Permissions.Cities.View') || hasPermission('Permissions.Districts.View') || hasPermission('Permissions.UnitOfMeasures.View')) ? {
+          key: 'temel_parametreler',
+          icon: <SettingOutlined />,
+          label: 'Temel Parametreler',
+          children: [
+            hasPermission('Permissions.Cities.View') ? { key: '/iller', icon: <GlobalOutlined />, label: 'İl Tanımları' } : null,
+            hasPermission('Permissions.Districts.View') ? { key: '/ilceler', icon: <GlobalOutlined />, label: 'İlçe Tanımları' } : null,
+            hasPermission('Permissions.UnitOfMeasures.View') ? { key: '/birim-tanimlari', icon: <DatabaseOutlined />, label: 'Ölçü Birimleri' } : null,
+          ].filter(Boolean)
+        } : null,
       ].filter(Boolean)
     } : null,
 
@@ -122,20 +131,13 @@ const MainLayout: React.FC = () => {
       ]
     },
 
-    (hasPermission('Permissions.Users.View') || hasPermission('Permissions.Roles.View') || hasPermission('Permissions.AuditLogs.View') || hasPermission('Permissions.Cities.View') || hasPermission('Permissions.Districts.View')) ? {
+    (hasPermission('Permissions.Users.View') || hasPermission('Permissions.Roles.View') || hasPermission('Permissions.AuditLogs.View')) ? {
       key: 'sistem', icon: <SettingOutlined />, label: 'Sistem Yönetimi',
       children: [
         hasPermission('Permissions.Users.View') ? { key: '/kullanicilar', icon: <TeamOutlined />, label: 'Sistem Kullanıcıları' } : null,
         hasPermission('Permissions.Roles.View') ? { key: '/roller', icon: <SafetyCertificateOutlined />, label: 'Rol ve Yetkiler' } : null,
         hasPermission('Permissions.Roles.View') ? { key: '/numarator-yonetimi', icon: <SettingOutlined />, label: 'Numaratör Yönetimi' } : null,
-        hasPermission('Permissions.AuditLogs.View') ? { key: '/loglar', icon: <FileSearchOutlined />, label: 'Sistem Logları' } : null,
-        (hasPermission('Permissions.Cities.View') || hasPermission('Permissions.Districts.View')) ? {
-          key: 'lokasyon', icon: <GlobalOutlined />, label: 'Lokasyon Tanımları',
-          children: [
-            hasPermission('Permissions.Cities.View') ? { key: '/iller', label: 'İl Tanımları' } : null,
-            hasPermission('Permissions.Districts.View') ? { key: '/ilceler', label: 'İlçe Tanımları' } : null,
-          ].filter(Boolean)
-        } : null
+        hasPermission('Permissions.AuditLogs.View') ? { key: '/loglar', icon: <FileSearchOutlined />, label: 'Sistem Logları' } : null
       ].filter(Boolean)
     } : null
   ].filter(Boolean); 

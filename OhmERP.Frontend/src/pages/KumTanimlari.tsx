@@ -360,11 +360,11 @@ const KumTanimlari: React.FC = () => {
           <Form.Item name="sarfiyatKatsayisi" label="Sarfiyat Katsayısı (KG/m)" rules={[{ required: true, message: 'Zorunlu' }]}>
             <OhmInputNumber precision={4} style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="barcode" label="Barkod" rules={[{ max: 50, message: 'Barkod en fazla 50 karakter olabilir!' }]}>
-            <Input maxLength={50} showCount />
-          </Form.Item>
           <Form.Item name="criticalStockLevel" label="Kritik Stok Seviyesi (KG)">
             <OhmInputNumber precision={0} style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item name="barcode" label="Barkod" rules={[{ max: 50, message: 'Barkod en fazla 50 karakter olabilir!' }]}>
+            <Input maxLength={50} showCount />
           </Form.Item>
           <Form.Item name="isActive" label="Durum" valuePropName="checked" initialValue={true}>
             <Switch checkedChildren="Aktif" unCheckedChildren="Pasif" />
