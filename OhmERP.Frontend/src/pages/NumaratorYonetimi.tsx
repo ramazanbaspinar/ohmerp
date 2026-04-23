@@ -113,6 +113,7 @@ const NumaratorYonetimi: React.FC = () => {
     switch (type) {
       case 1: return 'Cari Kart';
       case 2: return 'Malzeme Kartı';
+      case 3: return 'Makine Tanımları';
       default: return `Bilinmeyen (${type})`;
     }
   };
@@ -292,6 +293,7 @@ const NumaratorYonetimi: React.FC = () => {
                 <Select disabled={!!editingId}>
                   <Select.Option value={1}>Cari Kart</Select.Option>
                   <Select.Option value={2}>Malzeme Kartı</Select.Option>
+                  <Select.Option value={3}>Makine Tanımları</Select.Option>
                 </Select>
               </Form.Item>
             </Col>

@@ -33,6 +33,7 @@ const SoketTanimlari = React.lazy(() => import('./pages/SoketTanimlari'));
 const OmegaTanimlari = React.lazy(() => import('./pages/OmegaTanimlari'));
 const BaglantiSaciTanimlari = React.lazy(() => import('./pages/BaglantiSaciTanimlari'));
 const BaglantiTeliTanimlari = React.lazy(() => import('./pages/BaglantiTeliTanimlari'));
+const MakineTanimlariPage = React.lazy(() => import('./pages/MakineTanimlariPage'));
 const FallbackLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5' }}>
     <Spin size="large" tip="Sistem Modülü Yükleniyor...">
@@ -109,6 +110,17 @@ const App: React.FC = () => {
               <Route path="/is-merkezleri" element={<WorkCenters />} />
               <Route path="/urun-receteleri" element={<BOMs />} />
               <Route path="/maliyet-simulatoru" element={<CostSimulation />} />
+
+              <Route path="/tanimlar/makineler/baglanti-puntasi" element={<MakineTanimlariPage machineType={8} />} />
+              <Route path="/tanimlar/makineler/boru-makinesi" element={<MakineTanimlariPage machineType={2} />} />
+              <Route path="/tanimlar/makineler/bukum-makinesi" element={<MakineTanimlariPage machineType={5} />} />
+              <Route path="/tanimlar/makineler/diger" element={<MakineTanimlariPage machineType={99} />} />
+              <Route path="/tanimlar/makineler/dolum-makinesi" element={<MakineTanimlariPage machineType={3} />} />
+              <Route path="/tanimlar/makineler/hadde-makinesi" element={<MakineTanimlariPage machineType={4} />} />
+              <Route path="/tanimlar/makineler/pres-makinesi" element={<MakineTanimlariPage machineType={6} />} />
+              <Route path="/tanimlar/makineler/punta-makinesi" element={<MakineTanimlariPage machineType={7} />} />
+              <Route path="/tanimlar/makineler/tel-makinesi" element={<MakineTanimlariPage machineType={1} />} />
+              <Route path="/tanimlar/makineler/test-makinesi" element={<MakineTanimlariPage machineType={9} />} />
             </Route>
           </Route>
 

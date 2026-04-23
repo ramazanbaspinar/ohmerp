@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OhmERP.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitalCatalog : Migration
+    public partial class InitialCatalog : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,6 +17,10 @@ namespace OhmERP.Infrastructure.Migrations
 
             migrationBuilder.CreateSequence<int>(
                 name: "ItemCode_Seq",
+                startValue: 0L);
+
+            migrationBuilder.CreateSequence<int>(
+                name: "WorkCenterCode_Seq",
                 startValue: 0L);
 
             migrationBuilder.CreateTable(
@@ -906,6 +910,9 @@ namespace OhmERP.Infrastructure.Migrations
 
             migrationBuilder.DropSequence(
                 name: "ItemCode_Seq");
+
+            migrationBuilder.DropSequence(
+                name: "WorkCenterCode_Seq");
         }
     }
 }

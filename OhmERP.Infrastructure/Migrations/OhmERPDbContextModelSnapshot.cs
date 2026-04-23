@@ -28,6 +28,9 @@ namespace OhmERP.Infrastructure.Migrations
             modelBuilder.HasSequence<int>("ItemCode_Seq")
                 .StartsAt(0L);
 
+            modelBuilder.HasSequence<int>("WorkCenterCode_Seq")
+                .StartsAt(0L);
+
             modelBuilder.Entity("OhmERP.Domain.Entities.AuditLog", b =>
                 {
                     b.Property<Guid>("Id")

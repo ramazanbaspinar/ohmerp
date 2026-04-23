@@ -14,13 +14,15 @@ public class NumeratorService : INumeratorService
     private static readonly Dictionary<DocumentType, string> _sequenceMap = new()
     {
         { DocumentType.Company, "CompanyCode_Seq" },
-        { DocumentType.Item,    "ItemCode_Seq" }
+        { DocumentType.Item,    "ItemCode_Seq" },
+        { DocumentType.WorkCenter, "WorkCenterCode_Seq" }
     };
 
     private static readonly Dictionary<DocumentType, CodeTemplate> _defaultTemplates = new()
     {
         { DocumentType.Company, new CodeTemplate { DocumentType = DocumentType.Company, Prefix = "CAR", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } },
-        { DocumentType.Item,    new CodeTemplate { DocumentType = DocumentType.Item,    Prefix = "MLZ", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } }
+        { DocumentType.Item,    new CodeTemplate { DocumentType = DocumentType.Item,    Prefix = "MLZ", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } },
+        { DocumentType.WorkCenter, new CodeTemplate { DocumentType = DocumentType.WorkCenter, Prefix = "MAK", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } }
     };
 
     public NumeratorService(OhmERPDbContext context)

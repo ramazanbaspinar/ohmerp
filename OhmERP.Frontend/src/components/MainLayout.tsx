@@ -98,6 +98,23 @@ const MainLayout: React.FC = () => {
             { key: '/tanimlar/tel-tanimlari', icon: <AppstoreAddOutlined />, label: 'Tel Tanımları' }
           ]
         },
+        {
+          key: 'makine_tanimlari',
+          icon: <AppstoreAddOutlined />,
+          label: 'Makine Tanımları',
+          children: [
+            { key: '/tanimlar/makineler/baglanti-puntasi', icon: <AppstoreAddOutlined />, label: 'Bağlantı Puntası' },
+            { key: '/tanimlar/makineler/boru-makinesi', icon: <AppstoreAddOutlined />, label: 'Boru Makinesi' },
+            { key: '/tanimlar/makineler/bukum-makinesi', icon: <AppstoreAddOutlined />, label: 'Büküm Makinesi' },
+            { key: '/tanimlar/makineler/dolum-makinesi', icon: <AppstoreAddOutlined />, label: 'Dolum Makinesi' },
+            { key: '/tanimlar/makineler/hadde-makinesi', icon: <AppstoreAddOutlined />, label: 'Hadde Makinesi' },
+            { key: '/tanimlar/makineler/pres-makinesi', icon: <AppstoreAddOutlined />, label: 'Pres Makinesi' },
+            { key: '/tanimlar/makineler/punta-makinesi', icon: <AppstoreAddOutlined />, label: 'Punta Makinesi' },
+            { key: '/tanimlar/makineler/tel-makinesi', icon: <AppstoreAddOutlined />, label: 'Tel Makinesi' },
+            { key: '/tanimlar/makineler/test-makinesi', icon: <AppstoreAddOutlined />, label: 'Test Makinesi' },
+            { key: '/tanimlar/makineler/diger', icon: <AppstoreAddOutlined />, label: 'Diğer' }
+          ]
+        },
         hasPermission('Permissions.Items.View') ? { key: '/malzeme-kartlari', icon: <AppstoreAddOutlined />, label: 'Hammadde ve Malzemeler' } : null,
         (hasPermission('Permissions.Cities.View') || hasPermission('Permissions.Districts.View') || hasPermission('Permissions.UnitOfMeasures.View')) ? {
           key: 'temel_parametreler',

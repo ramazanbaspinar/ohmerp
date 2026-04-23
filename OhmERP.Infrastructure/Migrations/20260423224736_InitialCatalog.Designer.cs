@@ -12,8 +12,8 @@ using OhmERP.Infrastructure.Contexts;
 namespace OhmERP.Infrastructure.Migrations
 {
     [DbContext(typeof(OhmERPDbContext))]
-    [Migration("20260421160142_InitalCatalog")]
-    partial class InitalCatalog
+    [Migration("20260423224736_InitialCatalog")]
+    partial class InitialCatalog
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,6 +29,9 @@ namespace OhmERP.Infrastructure.Migrations
                 .StartsAt(0L);
 
             modelBuilder.HasSequence<int>("ItemCode_Seq")
+                .StartsAt(0L);
+
+            modelBuilder.HasSequence<int>("WorkCenterCode_Seq")
                 .StartsAt(0L);
 
             modelBuilder.Entity("OhmERP.Domain.Entities.AuditLog", b =>

@@ -31,4 +31,10 @@ public class WorkCentersController : BaseCrudController<WorkCenterListDto, Creat
 
     [HttpDelete("{id}")]
     public Task<IActionResult> Delete(Guid id) => DeleteBase(id);
+
+    [HttpGet("export/excel")]
+    public Task<IActionResult> ExportToExcel([FromQuery] PaginationFilter filter) => ExportToExcelBase(filter);
+
+    [HttpGet("export/pdf")]
+    public Task<IActionResult> ExportToPdf([FromQuery] PaginationFilter filter) => ExportToPdfBase(filter);
 }
