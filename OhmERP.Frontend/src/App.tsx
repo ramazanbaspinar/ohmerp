@@ -34,6 +34,7 @@ const OmegaTanimlari = React.lazy(() => import('./pages/OmegaTanimlari'));
 const BaglantiSaciTanimlari = React.lazy(() => import('./pages/BaglantiSaciTanimlari'));
 const BaglantiTeliTanimlari = React.lazy(() => import('./pages/BaglantiTeliTanimlari'));
 const MakineTanimlariPage = React.lazy(() => import('./pages/MakineTanimlariPage'));
+const HammaddeMaliyetiPage = React.lazy(() => import('./pages/HammaddeMaliyetiPage'));
 const FallbackLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5' }}>
     <Spin size="large" tip="Sistem Modülü Yükleniyor...">
@@ -110,6 +111,20 @@ const App: React.FC = () => {
               <Route path="/is-merkezleri" element={<WorkCenters />} />
               <Route path="/urun-receteleri" element={<BOMs />} />
               <Route path="/maliyet-simulatoru" element={<CostSimulation />} />
+
+              <Route path="/maliyet/hammadde/tum" element={<HammaddeMaliyetiPage />} />
+              <Route path="/maliyet/hammadde/baglanti-saci" element={<HammaddeMaliyetiPage categoryCode="BAGLANTISACI" />} />
+              <Route path="/maliyet/hammadde/baglanti-teli" element={<HammaddeMaliyetiPage categoryCode="BAGLANTITELI" />} />
+              <Route path="/maliyet/hammadde/flans" element={<HammaddeMaliyetiPage categoryCode="FLANS" />} />
+              <Route path="/maliyet/hammadde/gaz" element={<HammaddeMaliyetiPage categoryCode="GAZ" />} />
+              <Route path="/maliyet/hammadde/kelepce" element={<HammaddeMaliyetiPage categoryCode="KELEPCE" />} />
+              <Route path="/maliyet/hammadde/kum" element={<HammaddeMaliyetiPage categoryCode="KUM" />} />
+              <Route path="/maliyet/hammadde/omega" element={<HammaddeMaliyetiPage categoryCode="OMEGA" />} />
+              <Route path="/maliyet/hammadde/pim" element={<HammaddeMaliyetiPage categoryCode="PIM" />} />
+              <Route path="/maliyet/hammadde/sac" element={<HammaddeMaliyetiPage categoryCode="SAC" />} />
+              <Route path="/maliyet/hammadde/soket" element={<HammaddeMaliyetiPage categoryCode="SOKET" />} />
+              <Route path="/maliyet/hammadde/tapa" element={<HammaddeMaliyetiPage categoryCode="TAPA" />} />
+              <Route path="/maliyet/hammadde/tel" element={<HammaddeMaliyetiPage categoryCode="TEL" />} />
 
               <Route path="/tanimlar/makineler/baglanti-puntasi" element={<MakineTanimlariPage machineType={8} />} />
               <Route path="/tanimlar/makineler/boru-makinesi" element={<MakineTanimlariPage machineType={2} />} />

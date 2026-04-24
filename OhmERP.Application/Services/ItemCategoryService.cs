@@ -50,6 +50,7 @@ public class ItemCategoryService : BaseService<ItemCategory, ItemCategoryListDto
         {
             Id = c.Id,
             Name = c.Name ?? string.Empty,
+            Code = c.Code ?? string.Empty,
             DefaultUnitOfMeasureId = c.DefaultUnitOfMeasureId
         }).OrderBy(x => x.Name).ToList();
     }
@@ -85,5 +86,14 @@ public class ItemCategoryService : BaseService<ItemCategory, ItemCategoryListDto
 
         if (request.ParentId.HasValue && request.ParentId.Value == id)
             throw new BusinessException("Bir kategori kendisinin üst kategorisi olamaz.");
+
+        if (entity.Code == "TEL" || entity.Code == "SAC" || entity.Code == "PIM" || entity.Code == "KUM" || entity.Code == "GAZ" || entity.Code == "TAPA" || entity.Code == "FLANS" || entity.Code == "KELEPCE" || entity.Code == "SOKET" || entity.Code == "OMEGA" || entity.Code == "BAGLANTISACI" || entity.Code == "BAGLANTITELI")
+        {
+            if (request.Code.Trim() != entity.Code)
+                throw new BusinessException("Sistem için kritik olan varsayılan kategorilerin kodu değiştirilemez.");
+            
+            if (request.IsActive == false)
+                throw new BusinessException("Sistem için kritik olan varsayılan kategoriler pasife alınamaz.");
+        }
     }
 }

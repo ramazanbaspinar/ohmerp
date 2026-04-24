@@ -61,7 +61,7 @@ const TapaTanimlari: React.FC = () => {
                 api.get('/UnitOfMeasure/lookup')
             ]);
             
-            const tapaCategory = catRes.data.find((c: any) => c.name?.toUpperCase().startsWith('TAPA') || c.code?.toUpperCase() === 'TAPA');
+            const tapaCategory = catRes.data.find((c: any) => c.code === 'TAPA');
             const adetUnit = unitRes.data.find((u: any) => u.name?.toUpperCase().startsWith('ADET') || u.code?.toUpperCase() === 'ADET' || u.name?.toUpperCase().includes('ADET') || u.name?.toUpperCase() === 'PIECES');
             if (!adetUnit) console.warn('Gelen Birim Listesi:', unitRes.data);
             

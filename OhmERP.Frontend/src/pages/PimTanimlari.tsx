@@ -61,7 +61,7 @@ const PimTanimlari: React.FC = () => {
                 api.get('/UnitOfMeasure/lookup')
             ]);
             
-            const pimCat = catRes.data.find((c: any) => c.name.toLowerCase().includes("pim") || c.name === "PİM" || c.name === "Pim Tanımları");
+            const pimCat = catRes.data.find((c: any) => c.code === 'PIM');
             const adetUnit = unitRes.data.find((u: any) => u.name.toLowerCase().includes("adet") || u.name.toLowerCase() === "pieces" || u.name === "ADET");
             
             if (pimCat) {

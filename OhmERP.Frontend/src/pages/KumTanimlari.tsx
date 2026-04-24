@@ -61,7 +61,7 @@ const KumTanimlari: React.FC = () => {
                 api.get('/UnitOfMeasure/lookup')
             ]);
             
-            const kumCat = catRes.data.find((c: any) => c.name.toLowerCase().includes("kum") || c.name === "KUM" || c.name === "Kum Tanımları");
+            const kumCat = catRes.data.find((c: any) => c.code === 'KUM');
             const kgUnit = unitRes.data.find((u: any) => u.name.toLowerCase().includes("kilogram") || u.name === "KG");
             
             if (kumCat) {

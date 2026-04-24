@@ -9,4 +9,8 @@ public class PaginationFilter
     public int? Type { get; set; }
     public Guid? CityId { get; set; }
     public Guid? CategoryId { get; set; }
+    public string? CategoryCode { get; set; }
+    public bool? HasCost { get; set; }
+    public string? SortBy { get; set; }
+    public bool SortDesc { get; set; }
 }

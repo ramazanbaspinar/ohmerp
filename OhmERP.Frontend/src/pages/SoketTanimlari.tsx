@@ -61,7 +61,7 @@ const SoketTanimlari: React.FC = () => {
                 api.get('/UnitOfMeasure/lookup')
             ]);
             
-            const soketCategory = catRes.data.find((c: any) => c.name?.toUpperCase().startsWith('SOKET') || c.code?.toUpperCase() === 'SOKET');
+            const soketCategory = catRes.data.find((c: any) => c.code === 'SOKET');
             const adetUnit = unitRes.data.find((u: any) => u.name?.toUpperCase().startsWith('ADET') || u.code?.toUpperCase() === 'ADET' || u.name?.toUpperCase().includes('ADET') || u.name?.toUpperCase() === 'PIECES');
             
             if (soketCategory) {

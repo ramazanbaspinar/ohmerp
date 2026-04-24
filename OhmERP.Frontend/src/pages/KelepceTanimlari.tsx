@@ -61,7 +61,7 @@ const KelepceTanimlari: React.FC = () => {
                 api.get('/UnitOfMeasure/lookup')
             ]);
             
-            const kelepceCategory = catRes.data.find((c: any) => c.name?.toUpperCase().startsWith('KELEPÇE') || c.name?.toUpperCase().startsWith('KELEPCE') || c.code?.toUpperCase() === 'KELEPCE');
+            const kelepceCategory = catRes.data.find((c: any) => c.code === 'KELEPCE');
             const adetUnit = unitRes.data.find((u: any) => u.name?.toUpperCase().startsWith('ADET') || u.code?.toUpperCase() === 'ADET' || u.name?.toUpperCase().includes('ADET') || u.name?.toUpperCase() === 'PIECES');
             
             if (kelepceCategory) {

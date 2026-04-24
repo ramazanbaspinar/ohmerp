@@ -75,12 +75,7 @@ const BaglantiTeliTanimlari: React.FC = () => {
                 api.get('/UnitOfMeasure/lookup')
             ]);
             
-            const baglantiTeliCategory = catRes.data.find((c: any) => {
-                const name = c.name || '';
-                const upperNameTR = name.toLocaleUpperCase('tr-TR');
-                const upperNameEN = name.toUpperCase();
-                return upperNameTR.startsWith('BAĞLANTI TELİ') || upperNameEN.startsWith('BAĞLANTI TELI') || upperNameEN.startsWith('BAGLANTI TELI') || c.code?.toUpperCase() === 'BAGLANTITELI';
-            });
+            const baglantiTeliCategory = catRes.data.find((c: any) => c.code === 'BAGLANTITELI');
             const kgUnit = unitRes.data.find((u: any) => u.name?.toUpperCase().startsWith('KG') || u.code?.toUpperCase() === 'KG' || u.name?.toUpperCase().includes('KİLOGRAM'));
             
             if (baglantiTeliCategory) {

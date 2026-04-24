@@ -10,6 +10,7 @@ public class WorkCenterProfile : Profile
     {
         CreateMap<WorkCenter, WorkCenterListDto>();
         CreateMap<CreateWorkCenterRequest, WorkCenter>();
-        CreateMap<UpdateWorkCenterRequest, WorkCenter>();
+        CreateMap<UpdateWorkCenterRequest, WorkCenter>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore());
     }
 }

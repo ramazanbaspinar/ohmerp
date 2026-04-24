@@ -60,7 +60,14 @@ const WorkCenters: React.FC = () => {
 
   const [form] = Form.useForm();
 
-  const fetchData = useCallback(async (page = currentPage, size = pageSize, search = debouncedSearchText, status = statusFilter) => {
+  const fetchData = useCallback(async (
+    page = currentPage, 
+    size = pageSize, 
+    search = debouncedSearchText, 
+    status = statusFilter,
+    sortBy = '',
+    sortDesc = false
+  ) => {
     setLoading(true);
     try {
       let url = `/WorkCenters?page=${page}&pageSize=${size}`;
@@ -68,6 +75,9 @@ const WorkCenters: React.FC = () => {
       if (search) url += `&search=${encodeURIComponent(search)}`;
       if (status === 'active') url += '&isActive=true';
       if (status === 'passive') url += '&isActive=false';
+      if (sortBy) {
+        url += `&sortBy=${sortBy}&sortDesc=${sortDesc}`;
+      }
 
       const response = await api.get(url);
       setData(response.data.items || []);
@@ -142,6 +152,7 @@ const WorkCenters: React.FC = () => {
       setIsDrawerVisible(false);
       fetchData(1, pageSize, searchText, statusFilter);
     } catch (error: any) {
+      if (error.errorFields) return;
       const errMsg = getErrorMessage(error);
       message.error(errMsg);
     } finally {
@@ -159,14 +170,41 @@ const WorkCenters: React.FC = () => {
     }
   };
 
-  const handleTableChange = (pagination: any) => {
+  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
+    let sortField = '';
+    let sortDesc = false;
+
+    if (sorter && sorter.field) {
+      sortField = sorter.field;
+      sortDesc = sorter.order === 'descend';
+    }
+
     if (pagination.current && pagination.current !== currentPage) {
       setCurrentPage(pagination.current);
     }
     if (pagination.pageSize && pagination.pageSize !== pageSize) {
       setPageSize(pagination.pageSize);
-      setCurrentPage(1); 
+      setCurrentPage(1);
     }
+
+    fetchData(
+      pagination.current || currentPage, 
+      pagination.pageSize || pageSize, 
+      searchText, 
+      statusFilter,
+      sortField,
+      sortDesc
+    );
+  };
+
+  const buildExportUrl = (format: 'excel' | 'pdf') => {
+    const params = new URLSearchParams();
+    if (searchText) params.append('search', searchText);
+    if (statusFilter === 'active') params.append('isActive', 'true');
+    if (statusFilter === 'passive') params.append('isActive', 'false');
+    
+    const queryString = params.toString();
+    return `/WorkCenters/export/${format}${queryString ? `?${queryString}` : ''}`;
   };
 
   const columns = [
@@ -174,7 +212,8 @@ const WorkCenters: React.FC = () => {
       title: 'Kod', 
       dataIndex: 'code', 
       key: 'code', 
-      width: '10%', 
+      width: '10%',
+      sorter: true,
       render: (text: string) => <Text strong>{text}</Text> 
     },
     { 
@@ -182,12 +221,14 @@ const WorkCenters: React.FC = () => {
       dataIndex: 'name', 
       key: 'name', 
       width: '25%',
+      sorter: true
     },
     {
       title: 'Tip',
       dataIndex: 'type',
       key: 'type',
       width: '10%',
+      sorter: true,
       render: (val: number) => <Text>{workCenterTypes.find(x => x.value === val)?.label || val}</Text>
     },
     {
@@ -195,6 +236,7 @@ const WorkCenters: React.FC = () => {
       dataIndex: 'hourlyMachineCost',
       key: 'hourlyMachineCost',
       width: '15%',
+      sorter: true,
       render: (val: number) => <Text>{val?.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</Text>
     },
     {
@@ -202,6 +244,7 @@ const WorkCenters: React.FC = () => {
       dataIndex: 'hourlyLaborCost',
       key: 'hourlyLaborCost',
       width: '15%',
+      sorter: true,
       render: (val: number) => <Text>{val?.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</Text>
     },
     {
@@ -209,6 +252,7 @@ const WorkCenters: React.FC = () => {
       dataIndex: 'currency',
       key: 'currency',
       width: '10%',
+      sorter: true,
       render: (val: number) => <Text>{currencyTypes.find(x => x.value === val)?.label || val}</Text>
     },
     { 
@@ -295,6 +339,8 @@ const WorkCenters: React.FC = () => {
           pageSizeOptions: ['10', '20', '50', '100'],
           showTotal: (total, range) => `${range[0]}-${range[1]} arası gösteriliyor. Toplam: ${total} kayıt`
         }}
+        exportExcelUrl={buildExportUrl('excel')}
+        exportPdfUrl={buildExportUrl('pdf')}
       />
 
       <OhmFormDrawer

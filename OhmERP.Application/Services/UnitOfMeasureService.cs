@@ -28,7 +28,7 @@ public class UnitOfMeasureService : BaseService<UnitOfMeasure, UnitOfMeasureList
     public override async Task DeleteAsync(Guid id)
     {
         var entity = await _repository.GetByIdAsync(id);
-        if (entity != null && entity.Code == "KG")
+        if (entity != null && (entity.Code == "KG" || entity.Code == "ADET" || entity.Code == "M3"))
             throw new BusinessException("Sistem için kritik olan varsayılan değerler silinemez.");
 
         if (await _itemRepository.AnyAsync(x => x.UnitOfMeasureId == id && !x.IsDeleted))
@@ -62,7 +62,8 @@ public class UnitOfMeasureService : BaseService<UnitOfMeasure, UnitOfMeasureList
         return entities.Select(u => new LookupDto
         {
             Id = u.Id,
-            Name = $"{u.Code} - {u.Name}"
+            Name = $"{u.Code} - {u.Name}",
+            Code = u.Code ?? string.Empty
         }).OrderBy(x => x.Name).ToList();
     }
 
@@ -87,5 +88,14 @@ public class UnitOfMeasureService : BaseService<UnitOfMeasure, UnitOfMeasureList
         var requestTargetCode = request.Code?.Trim();
         if (await _repository.AnyAsync(x => x.Code != null && x.Code == requestTargetCode && x.Id != id && !x.IsDeleted))
             throw new BusinessException("Girilen sistem kodu zaten başka bir kayıtta kullanılmaktadır. Lütfen farklı bir kod giriniz."); 
+
+        if (entity.Code == "KG" || entity.Code == "ADET" || entity.Code == "M3")
+        {
+            if (requestTargetCode != entity.Code)
+                throw new BusinessException("Sistem için kritik olan varsayılan ölçü birimlerinin kodu değiştirilemez.");
+            
+            if (request.IsActive == false)
+                throw new BusinessException("Sistem için kritik olan varsayılan ölçü birimleri pasife alınamaz.");
+        }
     }
 }

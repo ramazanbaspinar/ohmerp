@@ -45,12 +45,7 @@ const SacTanimlari: React.FC = () => {
       const cats = catRes.data?.items || catRes.data || [];
       const units = unitRes.data?.items || unitRes.data || [];
 
-      const sacCat = cats.find((c: any) => {
-        const name = c.name || '';
-        const upperNameTR = name.toLocaleUpperCase('tr-TR');
-        const upperNameEN = name.toUpperCase();
-        return upperNameTR.startsWith('SAC') || upperNameEN.startsWith('SAC') || c.code?.toUpperCase() === 'SAC';
-      });
+      const sacCat = cats.find((c: any) => c.code === 'SAC');
       const kg = units.find((u: any) => {
         const name = u.name || '';
         return name.toUpperCase().includes('KİLOGRAM') || name.toUpperCase().includes('KILOGRAM') || name.toUpperCase() === 'KG' || u.code?.toUpperCase() === 'KG';
@@ -374,26 +369,29 @@ const SacTanimlari: React.FC = () => {
         </Form.Item>
 
         <Row gutter={16}>
-          <Col span={8}>
+          <Col span={12}>
             <Form.Item name="kalinlik" label="Sac Kalınlığı (mm)" rules={[{ required: true, message: 'Zorunlu' }]}>
               <OhmInputNumber precision={2} style={{ width: '100%' }} />
             </Form.Item>
           </Col>
-          <Col span={8}>
+          <Col span={12}>
             <Form.Item name="en" label="Sac Eni (Şerit Genişliği - mm)" rules={[{ required: true, message: 'Zorunlu' }]}>
               <OhmInputNumber precision={2} style={{ width: '100%' }} />
             </Form.Item>
           </Col>
-          <Col span={8}>
+        </Row>
+        <Row gutter={16}>
+          <Col span={12}>
             <Form.Item name="yogunluk" label="Yoğunluk (Özkütle)" rules={[{ required: true, message: 'Zorunlu' }]}>
               <OhmInputNumber precision={2} style={{ width: '100%' }} />
             </Form.Item>
           </Col>
+          <Col span={12}>
+            <Form.Item name="criticalStockLevel" label="Kritik Stok Seviyesi (KG)">
+              <OhmInputNumber precision={0} style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
         </Row>
-
-        <Form.Item name="criticalStockLevel" label="Kritik Stok Seviyesi (KG)">
-          <OhmInputNumber precision={0} style={{ width: '100%' }} />
-        </Form.Item>
 
         <Form.Item name="barcode" label="Barkod" rules={[{ max: 50, message: 'Barkod en fazla 50 karakter olabilir!' }]}>
           <Input maxLength={50} showCount />

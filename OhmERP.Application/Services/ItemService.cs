@@ -124,6 +124,11 @@ public class ItemService : BaseService<Item, ItemListDto, CreateItemRequest, Upd
         
         if (item == null) throw new BusinessException("Malzeme bulunamadı.");
         if (item.IsDeleted) throw new BusinessException("Malzeme zaten silinmiş.");
+        
+        if (item.UnitCost > 0)
+        {
+            throw new BusinessException("Bu hammaddenin tanımlı bir maliyeti bulunmaktadır. Lütfen önce Hammadde Maliyetleri modülünden bu malzemenin maliyetini sıfırlayın veya kaydı pasife çekin.");
+        }
 
         if (item.AttributeValues != null)
         {
@@ -136,6 +141,48 @@ public class ItemService : BaseService<Item, ItemListDto, CreateItemRequest, Upd
         _repository.Remove(item);
         await _unitOfWork.SaveChangesAsync();
         await _cacheService.RemoveByPrefixAsync(CacheKey);
+    }
+
+    public override async Task<PagedResult<ItemListDto>> GetPagedAsync(PaginationFilter filter)
+    {
+        var filterFunc = BuildFilter(filter);
+        Func<IQueryable<Item>, IQueryable<Item>> queryModifier = q => filterFunc(q.Where(x => !x.IsDeleted));
+
+        Func<IQueryable<Item>, IOrderedQueryable<Item>>? orderBy = null;
+
+        if (!string.IsNullOrEmpty(filter.SortBy))
+        {
+            orderBy = q => filter.SortBy.ToLower() switch
+            {
+                "code" => filter.SortDesc ? q.OrderByDescending(x => x.Code) : q.OrderBy(x => x.Code),
+                "name" => filter.SortDesc ? q.OrderByDescending(x => x.Name) : q.OrderBy(x => x.Name),
+                "unitcost" => filter.SortDesc ? q.OrderByDescending(x => x.UnitCost) : q.OrderBy(x => x.UnitCost),
+                "costcurrency" => filter.SortDesc ? q.OrderByDescending(x => x.CostCurrency) : q.OrderBy(x => x.CostCurrency),
+                "category" => filter.SortDesc ? q.OrderByDescending(x => x.Category != null ? x.Category.Name : "") : q.OrderBy(x => x.Category != null ? x.Category.Name : ""),
+                _ => q.OrderByDescending(x => x.CreatedDate)
+            };
+        }
+        else
+        {
+            orderBy = q => q.OrderByDescending(x => x.CreatedDate);
+        }
+
+        var pagedData = await _repository.GetPagedWithQueryAsync(
+            filter.Page,
+            filter.PageSize,
+            queryModifier: queryModifier,
+            orderBy: orderBy);
+
+        var dtos = _mapper.Map<List<ItemListDto>>(pagedData.Items);
+
+        return new PagedResult<ItemListDto>
+        {
+            Items = dtos,
+            TotalCount = pagedData.TotalCount,
+            PageNumber = pagedData.PageNumber,
+            PageSize = pagedData.PageSize,
+            TotalPages = pagedData.TotalPages
+        };
     }
 
     protected override Func<IQueryable<Item>, IQueryable<Item>> BuildFilter(PaginationFilter filter)
@@ -163,6 +210,19 @@ public class ItemService : BaseService<Item, ItemListDto, CreateItemRequest, Upd
             if (filter.CategoryId.HasValue)
             {
                 query = query.Where(x => x.CategoryId == filter.CategoryId.Value);
+            }
+
+            if (!string.IsNullOrEmpty(filter.CategoryCode))
+            {
+                query = query.Where(x => x.Category.Code == filter.CategoryCode);
+            }
+
+            if (filter.HasCost.HasValue)
+            {
+                if (filter.HasCost.Value)
+                    query = query.Where(x => x.UnitCost > 0);
+                else
+                    query = query.Where(x => x.UnitCost == 0);
             }
 
             return query;
@@ -203,6 +263,157 @@ public class ItemService : BaseService<Item, ItemListDto, CreateItemRequest, Upd
     {
         if (await _repository.AnyAsync(x => x.Code == request.Code.Trim() && x.Id != id && !x.IsDeleted))
             throw new BusinessException("Girilen sistem kodu zaten başka bir kayıtta kullanılmaktadır. Lütfen farklı bir kod giriniz.");
+    }
+
+    public async Task<List<LookupDto>> GetLookupWithoutCostAsync(string? categoryCode)
+    {
+        var entities = await _repository.FindWithQueryAsync(q => 
+        {
+            var query = q.Include(x => x.Category).Where(x => !x.IsDeleted && x.IsActive && x.UnitCost == 0);
+            if (!string.IsNullOrEmpty(categoryCode))
+            {
+                var upperCode = categoryCode.ToUpper();
+                query = query.Where(x => x.Category.Code.ToUpper() == upperCode);
+            }
+            return query;
+        });
+
+        return entities.Select(u => new LookupDto
+        {
+            Id = u.Id,
+            Name = $"{u.Code} - {u.Name}"
+        }).OrderBy(x => x.Name).ToList();
+    }
+
+    public async Task UpdateItemCostAsync(Guid id, decimal unitCost, CurrencyType currency)
+    {
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null || entity.IsDeleted)
+            throw new BusinessException("Malzeme bulunamadı.");
+
+        entity.UnitCost = unitCost;
+        entity.CostCurrency = currency;
+
+        _repository.Update(entity);
+        await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheKey);
+    }
+
+    public async Task ResetItemCostAsync(Guid id)
+    {
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null || entity.IsDeleted)
+            throw new BusinessException("Malzeme bulunamadı.");
+
+        entity.UnitCost = 0;
+        entity.CostCurrency = CurrencyType.TL;
+
+        _repository.Update(entity);
+        await _unitOfWork.SaveChangesAsync();
+        await _cacheService.RemoveByPrefixAsync(CacheKey);
+    }
+
+    public async Task<byte[]> ExportCostsToExcelAsync(string reportName = "Hammadde Maliyetleri", PaginationFilter? filter = null)
+    {
+        if (filter == null) filter = new PaginationFilter();
+        filter.HasCost = true;
+        var filterFunc = BuildFilter(filter);
+        var entities = await _repository.FindWithQueryAsync(q => filterFunc(q.Where(x => !x.IsDeleted)).OrderByDescending(x => x.CreatedDate));
+
+        using var workbook = new ClosedXML.Excel.XLWorkbook();
+        var worksheet = workbook.Worksheets.Add("Maliyetler");
+
+        var headers = new[] { "Kodu", "Adı", "Kategori", "Maliyet", "Para Birimi" };
+        for (int i = 0; i < headers.Length; i++)
+        {
+            worksheet.Cell(1, i + 1).Value = headers[i];
+        }
+
+        var headerRow = worksheet.Range(1, 1, 1, headers.Length);
+        headerRow.Style.Font.Bold = true;
+        headerRow.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
+        headerRow.Style.Border.BottomBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+
+        int row = 2;
+        foreach (var item in entities)
+        {
+            worksheet.Cell(row, 1).Value = item.Code;
+            worksheet.Cell(row, 2).Value = item.Name;
+            worksheet.Cell(row, 3).Value = item.Category?.Name;
+            worksheet.Cell(row, 4).Value = item.UnitCost;
+            worksheet.Cell(row, 5).Value = item.CostCurrency.ToString();
+            row++;
+        }
+
+        worksheet.Columns().AdjustToContents();
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        return stream.ToArray();
+    }
+
+    public async Task<byte[]> ExportCostsToPdfAsync(string reportName = "Hammadde Maliyetleri", PaginationFilter? filter = null)
+    {
+        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+        if (filter == null) filter = new PaginationFilter();
+        filter.HasCost = true;
+        var filterFunc = BuildFilter(filter);
+        var entities = await _repository.FindWithQueryAsync(q => filterFunc(q.Where(x => !x.IsDeleted)).OrderByDescending(x => x.CreatedDate));
+
+        var document = QuestPDF.Fluent.Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(QuestPDF.Helpers.PageSizes.A4.Landscape());
+                page.Margin(1, QuestPDF.Infrastructure.Unit.Centimetre);
+                page.PageColor(QuestPDF.Helpers.Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Arial"));
+
+                page.Header().Row(row =>
+                {
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text(reportName).SemiBold().FontSize(20).FontColor(QuestPDF.Helpers.Colors.Blue.Darken2);
+                        col.Item().Text($"Oluşturulma Tarihi: {DateTime.Now:dd.MM.yyyy HH:mm}");
+                    });
+                });
+
+                page.Content().PaddingVertical(1, QuestPDF.Infrastructure.Unit.Centimetre).Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        for (int i = 0; i < 5; i++) columns.RelativeColumn();
+                    });
+
+                    var headers = new[] { "Kodu", "Adı", "Kategori", "Maliyet", "Para Birimi" };
+                    table.Header(header =>
+                    {
+                        foreach (var headerName in headers)
+                        {
+                            header.Cell().BorderBottom(2).BorderColor(QuestPDF.Helpers.Colors.Black).PaddingBottom(5).Text(headerName).SemiBold();
+                        }
+                    });
+
+                    foreach (var item in entities)
+                    {
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.Code);
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.Name);
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.Category?.Name ?? "");
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.UnitCost.ToString("0.####", new System.Globalization.CultureInfo("tr-TR")));
+                        table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2).PaddingVertical(5).Text(item.CostCurrency.ToString());
+                    }
+                });
+
+                page.Footer().AlignCenter().Text(x =>
+                {
+                    x.Span("Sayfa ");
+                    x.CurrentPageNumber();
+                    x.Span(" / ");
+                    x.TotalPages();
+                });
+            });
+        });
+
+        return document.GeneratePdf();
     }
 
     public override async Task<byte[]> ExportToExcelAsync(string reportName = "Dışa Aktarım", PaginationFilter? filter = null)

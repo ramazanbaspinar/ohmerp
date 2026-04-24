@@ -61,7 +61,7 @@ const OmegaTanimlari: React.FC = () => {
                 api.get('/UnitOfMeasure/lookup')
             ]);
             
-            const omegaCategory = catRes.data.find((c: any) => c.name?.toUpperCase().startsWith('OMEGA') || c.code?.toUpperCase() === 'OMEGA');
+            const omegaCategory = catRes.data.find((c: any) => c.code === 'OMEGA');
             const adetUnit = unitRes.data.find((u: any) => u.name?.toUpperCase().startsWith('ADET') || u.code?.toUpperCase() === 'ADET' || u.name?.toUpperCase().includes('ADET') || u.name?.toUpperCase() === 'PIECES');
             
             if (omegaCategory) {

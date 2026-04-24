@@ -51,4 +51,41 @@ public class ItemController : BaseCrudController<ItemListDto, CreateItemRequest,
 
     [HttpGet("export/pdf")]
     public Task<IActionResult> ExportToPdf([FromQuery] PaginationFilter filter) => ExportToPdfBase(filter);
+
+    [HttpGet("lookup-without-cost")]
+    public async Task<IActionResult> GetLookupWithoutCost([FromQuery] string? categoryCode)
+    {
+        var result = await _itemService.GetLookupWithoutCostAsync(categoryCode);
+        return Ok(result);
+    }
+
+    [HttpPut("{id}/cost")]
+    [HasPermission(Permissions.Items.Edit)]
+    public async Task<IActionResult> UpdateCost(Guid id, [FromBody] UpdateItemCostDto request)
+    {
+        await _itemService.UpdateItemCostAsync(id, request.UnitCost, request.Currency);
+        return Ok(new { message = "Maliyet başarıyla güncellendi." });
+    }
+
+    [HttpDelete("{id}/cost")]
+    [HasPermission(Permissions.Items.Edit)]
+    public async Task<IActionResult> ResetCost(Guid id)
+    {
+        await _itemService.ResetItemCostAsync(id);
+        return Ok(new { message = "Maliyet başarıyla silindi." });
+    }
+
+    [HttpGet("export-costs/excel")]
+    public async Task<IActionResult> ExportCostsToExcel([FromQuery] PaginationFilter filter)
+    {
+        var fileBytes = await _itemService.ExportCostsToExcelAsync("Hammadde Maliyetleri", filter);
+        return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"HammaddeMaliyetleri_{DateTime.Now:yyyyMMdd}.xlsx");
+    }
+
+    [HttpGet("export-costs/pdf")]
+    public async Task<IActionResult> ExportCostsToPdf([FromQuery] PaginationFilter filter)
+    {
+        var fileBytes = await _itemService.ExportCostsToPdfAsync("Hammadde Maliyetleri", filter);
+        return File(fileBytes, "application/pdf", $"HammaddeMaliyetleri_{DateTime.Now:yyyyMMdd}.pdf");
+    }
 }

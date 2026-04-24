@@ -150,6 +150,7 @@ const MakineTanimlariPage: React.FC<MakineTanimlariPageProps> = ({ machineType }
       setIsDrawerVisible(false);
       fetchData(1, pageSize, searchText, statusFilter);
     } catch (error: any) {
+      if (error.errorFields) return;
       const errMsg = getErrorMessage(error);
       message.error(errMsg);
     } finally {

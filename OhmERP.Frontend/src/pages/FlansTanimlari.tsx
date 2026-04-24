@@ -61,7 +61,7 @@ const FlansTanimlari: React.FC = () => {
                 api.get('/UnitOfMeasure/lookup')
             ]);
             
-            const flansCategory = catRes.data.find((c: any) => c.name?.toUpperCase().startsWith('FLANŞ') || c.name?.toUpperCase().startsWith('FLANS') || c.code?.toUpperCase() === 'FLANS');
+            const flansCategory = catRes.data.find((c: any) => c.code === 'FLANS');
             const adetUnit = unitRes.data.find((u: any) => u.name?.toUpperCase().startsWith('ADET') || u.code?.toUpperCase() === 'ADET' || u.name?.toUpperCase().includes('ADET') || u.name?.toUpperCase() === 'PIECES');
             
             if (flansCategory) {

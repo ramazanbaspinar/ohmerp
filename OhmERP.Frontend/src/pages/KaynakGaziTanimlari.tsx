@@ -61,7 +61,7 @@ const KaynakGaziTanimlari: React.FC = () => {
                 api.get('/UnitOfMeasure/lookup')
             ]);
             
-            const gazCategory = catRes.data.find((c: any) => c.name?.toUpperCase().startsWith('KAYNAK GAZ') || c.code?.toUpperCase() === 'GAZ');
+            const gazCategory = catRes.data.find((c: any) => c.code === 'GAZ');
             const m3Unit = unitRes.data.find((u: any) => u.name?.toUpperCase().startsWith('M3') || u.code?.toUpperCase() === 'M3');
             if (!m3Unit) console.warn('Gelen Birim Listesi:', unitRes.data);
             

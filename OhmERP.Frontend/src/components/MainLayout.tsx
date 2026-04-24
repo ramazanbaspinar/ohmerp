@@ -103,6 +103,7 @@ const MainLayout: React.FC = () => {
           icon: <AppstoreAddOutlined />,
           label: 'Makine Tanımları',
           children: [
+            { key: '/is-merkezleri', icon: <AppstoreAddOutlined />, label: 'Tüm Makineler (İş Merkezleri)' },
             { key: '/tanimlar/makineler/baglanti-puntasi', icon: <AppstoreAddOutlined />, label: 'Bağlantı Puntası' },
             { key: '/tanimlar/makineler/boru-makinesi', icon: <AppstoreAddOutlined />, label: 'Boru Makinesi' },
             { key: '/tanimlar/makineler/bukum-makinesi', icon: <AppstoreAddOutlined />, label: 'Büküm Makinesi' },
@@ -130,12 +131,39 @@ const MainLayout: React.FC = () => {
     } : null,
 
     {
+      key: 'maliyet',
+      icon: <AppstoreAddOutlined />,
+      label: 'Maliyet',
+      children: [
+        {
+          key: 'hammadde_maliyetleri',
+          icon: <AppstoreAddOutlined />,
+          label: 'Hammadde Maliyetleri',
+          children: [
+            { key: '/maliyet/hammadde/tum', icon: <AppstoreAddOutlined />, label: 'Tüm Hammadde Maliyetleri' },
+            { key: '/maliyet/hammadde/baglanti-saci', icon: <AppstoreAddOutlined />, label: 'Bağlantı Sacı Maliyetleri' },
+            { key: '/maliyet/hammadde/baglanti-teli', icon: <AppstoreAddOutlined />, label: 'Bağlantı Teli Maliyetleri' },
+            { key: '/maliyet/hammadde/flans', icon: <AppstoreAddOutlined />, label: 'Flanş Maliyetleri' },
+            { key: '/maliyet/hammadde/gaz', icon: <AppstoreAddOutlined />, label: 'Kaynak Gazı Maliyetleri' },
+            { key: '/maliyet/hammadde/kelepce', icon: <AppstoreAddOutlined />, label: 'Kelepçe Maliyetleri' },
+            { key: '/maliyet/hammadde/kum', icon: <AppstoreAddOutlined />, label: 'Kum Maliyetleri' },
+            { key: '/maliyet/hammadde/omega', icon: <AppstoreAddOutlined />, label: 'Omega Maliyetleri' },
+            { key: '/maliyet/hammadde/pim', icon: <AppstoreAddOutlined />, label: 'Pim Maliyetleri' },
+            { key: '/maliyet/hammadde/sac', icon: <AppstoreAddOutlined />, label: 'Sac Maliyetleri' },
+            { key: '/maliyet/hammadde/soket', icon: <AppstoreAddOutlined />, label: 'Soket Maliyetleri' },
+            { key: '/maliyet/hammadde/tapa', icon: <AppstoreAddOutlined />, label: 'Tapa Maliyetleri' },
+            { key: '/maliyet/hammadde/tel', icon: <AppstoreAddOutlined />, label: 'Tel Maliyetleri' }
+          ]
+        }
+      ]
+    },
+
+    {
       key: 'uretim_yonetimi',
       icon: <SettingOutlined />,
       label: 'Üretim Yönetimi',
       children: [
-        { key: '/urun-receteleri', icon: <AppstoreAddOutlined />, label: 'Ürün Reçeteleri (BOM)' },
-        { key: '/is-merkezleri', icon: <AppstoreAddOutlined />, label: 'İş Merkezleri (Makineler)' }
+        { key: '/urun-receteleri', icon: <AppstoreAddOutlined />, label: 'Ürün Reçeteleri (BOM)' }
       ]
     },
 

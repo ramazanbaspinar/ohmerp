@@ -144,7 +144,8 @@ public abstract class BaseService<TEntity, TDto, TCreateRequest, TUpdateRequest>
         }
 
         var properties = typeof(TDto).GetProperties()
-            .Where(p => p.Name != "Id" && !p.Name.EndsWith("Id"))
+            .Where(p => p.Name != "Id" && !p.Name.EndsWith("Id") &&
+                        (p.GetCustomAttribute<DisplayAttribute>()?.GetAutoGenerateField() != false))
             .ToList();
 
         for (int i = 0; i < properties.Count; i++)
@@ -195,7 +196,8 @@ public abstract class BaseService<TEntity, TDto, TCreateRequest, TUpdateRequest>
         var data = filter != null ? await GetFilteredDataAsync(filter) : await GetAllAsync();
 
         var properties = typeof(TDto).GetProperties()
-            .Where(p => p.Name != "Id" && !p.Name.EndsWith("Id"))
+            .Where(p => p.Name != "Id" && !p.Name.EndsWith("Id") &&
+                        (p.GetCustomAttribute<DisplayAttribute>()?.GetAutoGenerateField() != false))
             .ToList();
 
         var document = Document.Create(container =>

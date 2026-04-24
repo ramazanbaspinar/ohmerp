@@ -61,7 +61,7 @@ const BaglantiSaciTanimlari: React.FC = () => {
                 api.get('/UnitOfMeasure/lookup')
             ]);
             
-            const baglantiSaciCategory = catRes.data.find((c: any) => c.name?.toUpperCase().startsWith('BAĞLANTI SACI') || c.name?.toUpperCase().startsWith('BAGLANTI SACI') || c.code?.toUpperCase() === 'BAGLANTISACI');
+            const baglantiSaciCategory = catRes.data.find((c: any) => c.code === 'BAGLANTISACI');
             const adetUnit = unitRes.data.find((u: any) => u.name?.toUpperCase().startsWith('ADET') || u.code?.toUpperCase() === 'ADET' || u.name?.toUpperCase().includes('ADET') || u.name?.toUpperCase() === 'PIECES');
             
             if (baglantiSaciCategory) {

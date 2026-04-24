@@ -45,6 +45,48 @@ public class WorkCenterService : BaseService<WorkCenter, WorkCenterListDto, Crea
         return await base.CreateAsync(request);
     }
 
+    public override async Task<PagedResult<WorkCenterListDto>> GetPagedAsync(PaginationFilter filter)
+    {
+        var filterFunc = BuildFilter(filter);
+        Func<IQueryable<WorkCenter>, IQueryable<WorkCenter>> queryModifier = q => filterFunc(q.Where(x => !x.IsDeleted));
+
+        Func<IQueryable<WorkCenter>, IOrderedQueryable<WorkCenter>>? orderBy = null;
+
+        if (!string.IsNullOrEmpty(filter.SortBy))
+        {
+            orderBy = q => filter.SortBy.ToLower() switch
+            {
+                "code" => filter.SortDesc ? q.OrderByDescending(x => x.Code) : q.OrderBy(x => x.Code),
+                "name" => filter.SortDesc ? q.OrderByDescending(x => x.Name) : q.OrderBy(x => x.Name),
+                "hourlymachinecost" => filter.SortDesc ? q.OrderByDescending(x => x.HourlyMachineCost) : q.OrderBy(x => x.HourlyMachineCost),
+                "hourlylaborcost" => filter.SortDesc ? q.OrderByDescending(x => x.HourlyLaborCost) : q.OrderBy(x => x.HourlyLaborCost),
+                "currency" => filter.SortDesc ? q.OrderByDescending(x => x.Currency) : q.OrderBy(x => x.Currency),
+                _ => q.OrderByDescending(x => x.CreatedDate)
+            };
+        }
+        else
+        {
+            orderBy = q => q.OrderByDescending(x => x.CreatedDate);
+        }
+
+        var pagedData = await _repository.GetPagedWithQueryAsync(
+            filter.Page,
+            filter.PageSize,
+            queryModifier: queryModifier,
+            orderBy: orderBy);
+
+        var dtos = _mapper.Map<List<WorkCenterListDto>>(pagedData.Items);
+
+        return new PagedResult<WorkCenterListDto>
+        {
+            Items = dtos,
+            TotalCount = pagedData.TotalCount,
+            PageNumber = pagedData.PageNumber,
+            PageSize = pagedData.PageSize,
+            TotalPages = pagedData.TotalPages
+        };
+    }
+
     protected override Func<IQueryable<WorkCenter>, IQueryable<WorkCenter>> BuildFilter(PaginationFilter filter)
     {
         return query =>
@@ -76,7 +118,8 @@ public class WorkCenterService : BaseService<WorkCenter, WorkCenterListDto, Crea
         var data = filter != null ? await GetFilteredDataAsync(filter) : await GetAllAsync();
 
         var properties = typeof(WorkCenterListDto).GetProperties()
-            .Where(p => p.Name != "Id" && !p.Name.EndsWith("Id"))
+            .Where(p => p.Name != "Id" && !p.Name.EndsWith("Id") &&
+                        (p.GetCustomAttribute<DisplayAttribute>()?.GetAutoGenerateField() != false))
             .ToList();
 
         var document = Document.Create(container =>
