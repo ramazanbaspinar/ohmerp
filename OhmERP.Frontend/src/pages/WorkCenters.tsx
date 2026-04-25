@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
-import { Button, Typography, Space, Input, Form, Popconfirm, message, Switch, Row, Col, Radio, Select } from 'antd';
+import { Button, Typography, Space, Input, Form, Popconfirm, message, Switch, Row, Col, Radio, Select, Tabs } from 'antd';
 import { AppstoreAddOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
 import api from '../services/api';
 import { OhmTable } from '../components/OhmTable';
@@ -56,6 +56,7 @@ const WorkCenters: React.FC = () => {
   const debouncedSearchText = useDebounce(searchText, 500);
   const isManualSearch = useRef(false);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'passive'>('active');
+  const [activeTab, setActiveTab] = useState('all');
 
   const [form] = Form.useForm();
 
@@ -64,6 +65,7 @@ const WorkCenters: React.FC = () => {
     size = pageSize, 
     search = debouncedSearchText, 
     status = statusFilter,
+    tab = activeTab,
     sortBy = '',
     sortDesc = false
   ) => {
@@ -74,6 +76,7 @@ const WorkCenters: React.FC = () => {
       if (search) url += `&search=${encodeURIComponent(search)}`;
       if (status === 'active') url += '&isActive=true';
       if (status === 'passive') url += '&isActive=false';
+      if (tab !== 'all') url += `&type=${tab}`;
       if (sortBy) {
         url += `&sortBy=${sortBy}&sortDesc=${sortDesc}`;
       }
@@ -86,11 +89,11 @@ const WorkCenters: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize, debouncedSearchText, statusFilter]);
+  }, [currentPage, pageSize, debouncedSearchText, statusFilter, activeTab]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchText]);
+  }, [debouncedSearchText, activeTab]);
 
   useEffect(() => {
     if (isManualSearch.current) {
@@ -98,9 +101,9 @@ const WorkCenters: React.FC = () => {
       return;
     }
     if (debouncedSearchText.length === 0 || debouncedSearchText.length >= 3) {
-      fetchData(currentPage, pageSize, debouncedSearchText, statusFilter);
+      fetchData(currentPage, pageSize, debouncedSearchText, statusFilter, activeTab);
     }
-  }, [currentPage, pageSize, statusFilter, debouncedSearchText, fetchData]);
+  }, [currentPage, pageSize, statusFilter, debouncedSearchText, activeTab, fetchData]);
 
   const openDrawerForCreate = async () => {
     setEditingId(null);
@@ -109,11 +112,13 @@ const WorkCenters: React.FC = () => {
     setFormLoading(true);
     try {
       const numRes = await api.get('/Numerator/PreviewNextCode/3');
-      const initVals = { code: numRes.data.nextCode, isActive: true, currency: 1, type: 1 };
+      const defaultType = activeTab === 'all' ? 1 : Number(activeTab);
+      const initVals = { code: numRes.data.nextCode, isActive: true, currency: 1, type: defaultType };
       form.setFieldsValue(initVals);
       setOriginalData(initVals);
     } catch {
-      const initVals = { code: '', isActive: true, currency: 1, type: 1 };
+      const defaultType = activeTab === 'all' ? 1 : Number(activeTab);
+      const initVals = { code: '', isActive: true, currency: 1, type: defaultType };
       form.setFieldsValue(initVals);
       setOriginalData(initVals);
     } finally {
@@ -149,7 +154,7 @@ const WorkCenters: React.FC = () => {
         message.success('İş Merkezi başarıyla oluşturuldu.');
       }
       setIsDrawerVisible(false);
-      fetchData(1, pageSize, searchText, statusFilter);
+      fetchData(1, pageSize, searchText, statusFilter, activeTab);
     } catch (error: any) {
       if (error.errorFields) return;
       const errMsg = getErrorMessage(error);
@@ -163,7 +168,7 @@ const WorkCenters: React.FC = () => {
     try {
       await api.delete(`/WorkCenters/${id}`);
       message.success('İş Merkezi başarıyla silindi.');
-      fetchData(currentPage, pageSize, searchText, statusFilter);
+      fetchData(currentPage, pageSize, searchText, statusFilter, activeTab);
     } catch {
       message.error('Silme işlemi başarısız.');
     }
@@ -191,6 +196,7 @@ const WorkCenters: React.FC = () => {
       pagination.pageSize || pageSize, 
       searchText, 
       statusFilter,
+      activeTab,
       sortField,
       sortDesc
     );
@@ -201,6 +207,7 @@ const WorkCenters: React.FC = () => {
     if (searchText) params.append('search', searchText);
     if (statusFilter === 'active') params.append('isActive', 'true');
     if (statusFilter === 'passive') params.append('isActive', 'false');
+    if (activeTab !== 'all') params.append('type', activeTab);
     
     const queryString = params.toString();
     return `/WorkCenters/export/${format}${queryString ? `?${queryString}` : ''}`;
@@ -299,15 +306,32 @@ const WorkCenters: React.FC = () => {
           </Col>
           <Col span={8} style={{ textAlign: 'right' }}>
              <Space>
-                <Button icon={<ReloadOutlined />} onClick={() => fetchData(currentPage, pageSize, searchText, statusFilter)}>Yenile</Button>
+                <Button icon={<ReloadOutlined />} onClick={() => fetchData(currentPage, pageSize, searchText, statusFilter, activeTab)}>Yenile</Button>
                 <Button type="primary" icon={<PlusOutlined />} onClick={openDrawerForCreate}>Yeni Makine Ekle</Button>
               </Space>
           </Col>
         </Row>
       </div>
 
+      <div style={{ background: '#fff', padding: '0 16px', marginBottom: 16, borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+        <Tabs 
+          activeKey={activeTab} 
+          onChange={(key) => {
+            setActiveTab(key);
+            setCurrentPage(1);
+          }} 
+          items={[
+            { key: 'all', label: 'Tümü' },
+            ...workCenterTypes.map(type => ({
+              key: type.value.toString(),
+              label: type.label
+            }))
+          ]} 
+        />
+      </div>
+
       <OhmTable
-        tableName="Is_Merkezleri"
+        tableName={`Is_Merkezleri_${activeTab || 'ALL'}`}
         tableTitle="İş Merkezleri (Makineler)"
         titleIcon={<AppstoreAddOutlined />}
         dataSource={data} 
@@ -351,7 +375,7 @@ const WorkCenters: React.FC = () => {
             <Input maxLength={150} />
           </Form.Item>
           <Form.Item name="type" label="Tipi" rules={[{ required: true }]}>
-            <Select options={workCenterTypes} />
+            <Select options={workCenterTypes} disabled={activeTab !== 'all'} />
           </Form.Item>
 
           <Form.Item name="currency" label="Para Birimi" rules={[{ required: true }]}>

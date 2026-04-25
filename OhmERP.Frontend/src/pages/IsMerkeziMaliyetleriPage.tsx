@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
-import { Button, Typography, Space, Input, Form, message, Row, Col, Tabs } from 'antd';
+import { Button, Typography, Space, Input, Form, message, Row, Col, Tabs, Select } from 'antd';
 import { AppstoreAddOutlined, EditOutlined, ReloadOutlined } from '@ant-design/icons';
 import api from '../services/api';
 import { OhmTable } from '../components/OhmTable';
@@ -111,7 +111,8 @@ const IsMerkeziMaliyetleriPage: React.FC = () => {
       const response = await api.get(`/WorkCenters/${id}`);
       form.setFieldsValue({
         hourlyMachineCost: response.data.hourlyMachineCost,
-        hourlyLaborCost: response.data.hourlyLaborCost
+        hourlyLaborCost: response.data.hourlyLaborCost,
+        currency: response.data.currency
       });
       setOriginalData(response.data);
     } catch {
@@ -130,7 +131,8 @@ const IsMerkeziMaliyetleriPage: React.FC = () => {
         const updatePayload = {
           ...originalData,
           hourlyMachineCost: values.hourlyMachineCost,
-          hourlyLaborCost: values.hourlyLaborCost
+          hourlyLaborCost: values.hourlyLaborCost,
+          currency: values.currency
         };
         await api.put(`/WorkCenters/${editingId}`, updatePayload);
         message.success('Maliyet başarıyla güncellendi.');
@@ -319,6 +321,9 @@ const IsMerkeziMaliyetleriPage: React.FC = () => {
           </Form.Item>
           <Form.Item name="hourlyLaborCost" label="Saatlik İşçilik Maliyeti" rules={[{ required: true, message: 'Bu alan zorunludur' }]}>
             <OhmInputNumber style={{ width: '100%' }} precision={4} />
+          </Form.Item>
+          <Form.Item name="currency" label="Para Birimi" rules={[{ required: true, message: 'Bu alan zorunludur' }]}>
+            <Select options={currencyTypes} />
           </Form.Item>
       </OhmFormDrawer>
     </>

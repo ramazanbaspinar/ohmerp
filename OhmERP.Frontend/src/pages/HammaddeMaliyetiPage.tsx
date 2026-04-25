@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
-import { Button, Typography, Space, Input, Form, message, Row, Col, Select, Popconfirm } from 'antd';
+import { Button, Typography, Space, Input, Form, message, Row, Col, Select, Popconfirm, Tabs } from 'antd';
 import { AppstoreAddOutlined, PlusOutlined, EditOutlined, ReloadOutlined, DeleteOutlined } from '@ant-design/icons';
 import api from '../services/api';
 import { OhmTable } from '../components/OhmTable';
@@ -43,11 +43,7 @@ const categoryNames: Record<string, string> = {
   "BAGLANTITELI": "Bağlantı Teli"
 };
 
-interface HammaddeMaliyetiPageProps {
-  categoryCode?: string;
-}
-
-const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCode }) => {
+const HammaddeMaliyetiPage: React.FC = () => {
   const [data, setData] = useState<ItemCostDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
@@ -61,13 +57,14 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
   const [searchText, setSearchText] = useState('');
   const debouncedSearchText = useDebounce(searchText, 500);
   const isManualSearch = useRef(false);
+  const [activeTab, setActiveTab] = useState('all');
 
   const [lookupItems, setLookupItems] = useState<{ id: string; name: string }[]>([]);
   const [form] = Form.useForm();
 
   const getPageTitle = () => {
-    if (categoryCode && categoryNames[categoryCode]) {
-      return `${categoryNames[categoryCode]} Maliyetleri`;
+    if (activeTab && activeTab !== 'all' && categoryNames[activeTab]) {
+      return `${categoryNames[activeTab]} Maliyetleri`;
     }
     return 'Tüm Hammadde Maliyetleri';
   };
@@ -76,6 +73,7 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
     page = currentPage, 
     size = pageSize, 
     search = debouncedSearchText,
+    tab = activeTab,
     sortBy = '',
     sortDesc = false
   ) => {
@@ -84,7 +82,7 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
       let url = `/Item?page=${page}&pageSize=${size}&hasCost=true`;
       
       if (search) url += `&search=${encodeURIComponent(search)}`;
-      if (categoryCode) url += `&categoryCode=${categoryCode}`;
+      if (tab !== 'all') url += `&categoryCode=${tab}`;
       if (sortBy) {
         url += `&sortBy=${sortBy}&sortDesc=${sortDesc}`;
       }
@@ -97,11 +95,11 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize, debouncedSearchText, categoryCode]);
+  }, [currentPage, pageSize, debouncedSearchText, activeTab]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchText, categoryCode]);
+  }, [debouncedSearchText, activeTab]);
 
   useEffect(() => {
     if (isManualSearch.current) {
@@ -109,14 +107,14 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
       return;
     }
     if (debouncedSearchText.length === 0 || debouncedSearchText.length >= 3) {
-      fetchData(currentPage, pageSize, debouncedSearchText);
+      fetchData(currentPage, pageSize, debouncedSearchText, activeTab);
     }
-  }, [currentPage, pageSize, debouncedSearchText, fetchData, categoryCode]);
+  }, [currentPage, pageSize, debouncedSearchText, activeTab, fetchData]);
 
   const loadLookupItems = async () => {
     try {
       const res = await api.get('/Item/lookup-without-cost', {
-        params: categoryCode ? { categoryCode } : undefined
+        params: activeTab !== 'all' ? { categoryCode: activeTab } : undefined
       });
       setLookupItems(res.data);
     } catch {
@@ -214,6 +212,7 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
       pagination.current || currentPage, 
       pagination.pageSize || pageSize, 
       searchText, 
+      activeTab,
       sortField, 
       sortDesc
     );
@@ -274,11 +273,19 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
     }
   ];
 
+  const tabItems = [
+    { key: 'all', label: 'Tümü' },
+    ...Object.keys(categoryNames).map(key => ({
+      key: key,
+      label: categoryNames[key]
+    }))
+  ];
+
   return (
     <>
       <div style={{ marginBottom: 16, padding: '16px', background: '#fff', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
         <Row gutter={16} align="middle">
-          <Col span={8}>
+          <Col span={12}>
             <Input.Search 
               placeholder={`Ara (En az 3 karakter)...`} 
               value={searchText}
@@ -289,24 +296,34 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
               onSearch={(value) => {
                 isManualSearch.current = true;
                 setCurrentPage(1);
-                fetchData(1, pageSize, value);
+                fetchData(1, pageSize, value, activeTab);
               }}
               allowClear
               enterButton
             />
           </Col>
-          <Col span={8}></Col>
-          <Col span={8} style={{ textAlign: 'right' }}>
+          <Col span={12} style={{ textAlign: 'right' }}>
              <Space>
-                <Button icon={<ReloadOutlined />} onClick={() => fetchData(currentPage, pageSize, searchText)}>Yenile</Button>
+                <Button icon={<ReloadOutlined />} onClick={() => fetchData(currentPage, pageSize, searchText, activeTab)}>Yenile</Button>
                 <Button type="primary" icon={<PlusOutlined />} onClick={openDrawerForCreate}>Yeni Kayıt</Button>
               </Space>
           </Col>
         </Row>
       </div>
 
+      <div style={{ background: '#fff', padding: '0 16px', marginBottom: 16, borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+        <Tabs 
+          activeKey={activeTab} 
+          onChange={(key) => {
+            setActiveTab(key);
+            setCurrentPage(1);
+          }} 
+          items={tabItems} 
+        />
+      </div>
+
       <OhmTable
-        tableName={`HammaddeMaliyeti_${categoryCode || 'ALL'}`}
+        tableName={`HammaddeMaliyeti_${activeTab || 'ALL'}`}
         tableTitle={getPageTitle()}
         titleIcon={<AppstoreAddOutlined />}
         dataSource={data} 
@@ -322,8 +339,8 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
           pageSizeOptions: ['10', '20', '50', '100'],
           showTotal: (total, range) => `${range[0]}-${range[1]} arası gösteriliyor. Toplam: ${total} kayıt`
         }}
-        exportExcelUrl={`/Item/export-costs/excel?hasCost=true${categoryCode ? `&categoryCode=${categoryCode}` : ''}${searchText ? `&search=${encodeURIComponent(searchText)}` : ''}`}
-        exportPdfUrl={`/Item/export-costs/pdf?hasCost=true${categoryCode ? `&categoryCode=${categoryCode}` : ''}${searchText ? `&search=${encodeURIComponent(searchText)}` : ''}`}
+        exportExcelUrl={`/Item/export-costs/excel?hasCost=true${activeTab !== 'all' ? `&categoryCode=${activeTab}` : ''}${searchText ? `&search=${encodeURIComponent(searchText)}` : ''}`}
+        exportPdfUrl={`/Item/export-costs/pdf?hasCost=true${activeTab !== 'all' ? `&categoryCode=${activeTab}` : ''}${searchText ? `&search=${encodeURIComponent(searchText)}` : ''}`}
       />
 
       <OhmFormDrawer

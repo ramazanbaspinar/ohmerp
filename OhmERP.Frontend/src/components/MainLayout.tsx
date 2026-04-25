@@ -82,40 +82,23 @@ const MainLayout: React.FC = () => {
         {
           key: 'hammadde_tanimlari_yeni',
           icon: <AppstoreAddOutlined />,
-          label: 'Hammadde Tanımları',
+          label: 'Hammadde',
           children: [
-            { key: '/tanimlar/baglanti-saci-tanimlari', icon: <AppstoreAddOutlined />, label: 'Bağlantı Sacı Tanımları' },
-            { key: '/tanimlar/baglanti-teli-tanimlari', icon: <AppstoreAddOutlined />, label: 'Bağlantı Teli Tanımları' },
-            { key: '/tanimlar/flans-tanimlari', icon: <AppstoreAddOutlined />, label: 'Flanş Tanımları' },
-            { key: '/tanimlar/kaynak-gazi-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kaynak Gazı Tanımları' },
-            { key: '/tanimlar/kelepce-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kelepçe Tanımları' },
-            { key: '/tanimlar/kum-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kum Tanımları' },
-            { key: '/tanimlar/omega-tanimlari', icon: <AppstoreAddOutlined />, label: 'Omega Tanımları' },
-            { key: '/tanimlar/pim-tanimlari', icon: <AppstoreAddOutlined />, label: 'Pim Tanımları' },
-            { key: '/tanimlar/sac-tanimlari', icon: <AppstoreAddOutlined />, label: 'Sac Tanımları' },
-            { key: '/tanimlar/soket-tanimlari', icon: <AppstoreAddOutlined />, label: 'Soket Tanımları' },
-            { key: '/tanimlar/tapa-tanimlari', icon: <AppstoreAddOutlined />, label: 'Tapa Tanımları' },
-            { key: '/tanimlar/tel-tanimlari', icon: <AppstoreAddOutlined />, label: 'Tel Tanımları' }
+            { key: '/tanimlar/baglanti-saci-tanimlari', icon: <AppstoreAddOutlined />, label: 'Bağlantı Sacı' },
+            { key: '/tanimlar/baglanti-teli-tanimlari', icon: <AppstoreAddOutlined />, label: 'Bağlantı Teli' },
+            { key: '/tanimlar/flans-tanimlari', icon: <AppstoreAddOutlined />, label: 'Flanş' },
+            { key: '/tanimlar/kaynak-gazi-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kaynak Gazı' },
+            { key: '/tanimlar/kelepce-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kelepçe' },
+            { key: '/tanimlar/kum-tanimlari', icon: <AppstoreAddOutlined />, label: 'Kum' },
+            { key: '/tanimlar/omega-tanimlari', icon: <AppstoreAddOutlined />, label: 'Omega' },
+            { key: '/tanimlar/pim-tanimlari', icon: <AppstoreAddOutlined />, label: 'Pim' },
+            { key: '/tanimlar/sac-tanimlari', icon: <AppstoreAddOutlined />, label: 'Sac' },
+            { key: '/tanimlar/soket-tanimlari', icon: <AppstoreAddOutlined />, label: 'Soket' },
+            { key: '/tanimlar/tapa-tanimlari', icon: <AppstoreAddOutlined />, label: 'Tapa' },
+            { key: '/tanimlar/tel-tanimlari', icon: <AppstoreAddOutlined />, label: 'Tel' }
           ]
         },
-        {
-          key: 'makine_tanimlari',
-          icon: <AppstoreAddOutlined />,
-          label: 'Makine Tanımları',
-          children: [
-            { key: '/is-merkezleri', icon: <AppstoreAddOutlined />, label: 'Tüm Makineler (İş Merkezleri)' },
-            { key: '/tanimlar/makineler/baglanti-puntasi', icon: <AppstoreAddOutlined />, label: 'Bağlantı Puntası' },
-            { key: '/tanimlar/makineler/boru-makinesi', icon: <AppstoreAddOutlined />, label: 'Boru Makinesi' },
-            { key: '/tanimlar/makineler/bukum-makinesi', icon: <AppstoreAddOutlined />, label: 'Büküm Makinesi' },
-            { key: '/tanimlar/makineler/dolum-makinesi', icon: <AppstoreAddOutlined />, label: 'Dolum Makinesi' },
-            { key: '/tanimlar/makineler/hadde-makinesi', icon: <AppstoreAddOutlined />, label: 'Hadde Makinesi' },
-            { key: '/tanimlar/makineler/pres-makinesi', icon: <AppstoreAddOutlined />, label: 'Pres Makinesi' },
-            { key: '/tanimlar/makineler/punta-makinesi', icon: <AppstoreAddOutlined />, label: 'Punta Makinesi' },
-            { key: '/tanimlar/makineler/tel-makinesi', icon: <AppstoreAddOutlined />, label: 'Tel Makinesi' },
-            { key: '/tanimlar/makineler/test-makinesi', icon: <AppstoreAddOutlined />, label: 'Test Makinesi' },
-            { key: '/tanimlar/makineler/diger', icon: <AppstoreAddOutlined />, label: 'Diğer' }
-          ]
-        },
+        { key: '/is-merkezleri', icon: <AppstoreAddOutlined />, label: 'İş Merkezleri (Makineler)' },
         hasPermission('Permissions.Items.View') ? { key: '/malzeme-kartlari', icon: <AppstoreAddOutlined />, label: 'Hammadde ve Malzemeler' } : null,
         (hasPermission('Permissions.Cities.View') || hasPermission('Permissions.Districts.View') || hasPermission('Permissions.UnitOfMeasures.View')) ? {
           key: 'temel_parametreler',
@@ -137,26 +120,7 @@ const MainLayout: React.FC = () => {
       children: [
         { key: '/maliyet/is-merkezi-maliyetleri', icon: <AppstoreAddOutlined />, label: 'İş Merkezi Maliyetleri' },
         { key: '/maliyet/genel-uretim-giderleri', icon: <AppstoreAddOutlined />, label: 'Genel Üretim Giderleri' },
-        {
-          key: 'hammadde_maliyetleri',
-          icon: <AppstoreAddOutlined />,
-          label: 'Hammadde Maliyetleri',
-          children: [
-            { key: '/maliyet/hammadde/tum', icon: <AppstoreAddOutlined />, label: 'Tüm Hammadde Maliyetleri' },
-            { key: '/maliyet/hammadde/baglanti-saci', icon: <AppstoreAddOutlined />, label: 'Bağlantı Sacı Maliyetleri' },
-            { key: '/maliyet/hammadde/baglanti-teli', icon: <AppstoreAddOutlined />, label: 'Bağlantı Teli Maliyetleri' },
-            { key: '/maliyet/hammadde/flans', icon: <AppstoreAddOutlined />, label: 'Flanş Maliyetleri' },
-            { key: '/maliyet/hammadde/gaz', icon: <AppstoreAddOutlined />, label: 'Kaynak Gazı Maliyetleri' },
-            { key: '/maliyet/hammadde/kelepce', icon: <AppstoreAddOutlined />, label: 'Kelepçe Maliyetleri' },
-            { key: '/maliyet/hammadde/kum', icon: <AppstoreAddOutlined />, label: 'Kum Maliyetleri' },
-            { key: '/maliyet/hammadde/omega', icon: <AppstoreAddOutlined />, label: 'Omega Maliyetleri' },
-            { key: '/maliyet/hammadde/pim', icon: <AppstoreAddOutlined />, label: 'Pim Maliyetleri' },
-            { key: '/maliyet/hammadde/sac', icon: <AppstoreAddOutlined />, label: 'Sac Maliyetleri' },
-            { key: '/maliyet/hammadde/soket', icon: <AppstoreAddOutlined />, label: 'Soket Maliyetleri' },
-            { key: '/maliyet/hammadde/tapa', icon: <AppstoreAddOutlined />, label: 'Tapa Maliyetleri' },
-            { key: '/maliyet/hammadde/tel', icon: <AppstoreAddOutlined />, label: 'Tel Maliyetleri' }
-          ]
-        },
+        { key: '/maliyet/hammadde-maliyetleri', icon: <AppstoreAddOutlined />, label: 'Hammadde Maliyetleri' },
         { key: '/maliyet/parametreler', icon: <AppstoreAddOutlined />, label: 'Maliyet Parametreleri' }
       ]
     },
