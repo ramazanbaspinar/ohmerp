@@ -1,4 +1,6 @@
 using FluentValidation;
+using Microsoft.AspNetCore.RateLimiting;
+using Serilog;
 using FluentValidation.AspNetCore;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,6 +21,11 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.Seq("http://localhost:5341"));
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
@@ -85,6 +92,8 @@ builder.Services.AddScoped<IWorkCenterService, WorkCenterService>();
 builder.Services.AddScoped<IBOMService, BOMService>();
 builder.Services.AddScoped<ICostEngineService, CostEngineService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
+builder.Services.AddScoped<IOverheadCostService, OverheadCostService>();
+builder.Services.AddScoped<ICostParameterService, CostParameterService>();
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
@@ -103,11 +112,23 @@ builder.Services.AddAutoMapper(cfg =>
 
 builder.Services.AddOpenApi();
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("GlobalLimiter", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 100;
+        opt.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0;
+    });
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp", policy =>
+    options.AddPolicy("StrictCorsPolicy", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:5173", "https://erp.firman.com")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -377,15 +398,23 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+else
+{
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowReactApp");
+app.UseRouting();
+
+app.UseRateLimiter();
+
+app.UseCors("StrictCorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapControllers().RequireRateLimiting("GlobalLimiter");
 
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {

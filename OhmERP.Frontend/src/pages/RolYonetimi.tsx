@@ -218,6 +218,24 @@ const SYSTEM_MODULES: ModulePermissions[] = [
       { code: 'Permissions.Tel.Edit', name: 'Düzenleme', isGranted: false },
       { code: 'Permissions.Tel.Delete', name: 'Silme', isGranted: false },
     ]
+  },
+  {
+    moduleName: 'Genel Üretim Giderleri',
+    permissions: [
+      { code: 'Permissions.OverheadCosts.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.OverheadCosts.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.OverheadCosts.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.OverheadCosts.Delete', name: 'Silme', isGranted: false },
+    ]
+  },
+  {
+    moduleName: 'Maliyet Parametreleri',
+    permissions: [
+      { code: 'Permissions.CostParameters.View', name: 'Görüntüleme', isGranted: false },
+      { code: 'Permissions.CostParameters.Create', name: 'Oluşturma', isGranted: false },
+      { code: 'Permissions.CostParameters.Edit', name: 'Düzenleme', isGranted: false },
+      { code: 'Permissions.CostParameters.Delete', name: 'Silme', isGranted: false },
+    ]
   }
 ];
 

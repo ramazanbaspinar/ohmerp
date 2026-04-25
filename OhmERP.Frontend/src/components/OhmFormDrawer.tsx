@@ -53,6 +53,7 @@ export const OhmFormDrawer: React.FC<OhmFormDrawerProps> = ({
         content: 'Çıkmak istediğinize emin misiniz? Yaptığınız değişiklikler kaybolacak.',
         okText: 'Evet',
         cancelText: 'Hayır',
+        centered: true,
         onOk: () => {
           setIsDirty(false);
           onClose();

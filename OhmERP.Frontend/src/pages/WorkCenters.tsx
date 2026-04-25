@@ -170,7 +170,7 @@ const WorkCenters: React.FC = () => {
     }
   };
 
-  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
+  const handleTableChange = (pagination: any, _filters: any, sorter: any) => {
     let sortField = '';
     let sortDesc = false;
 

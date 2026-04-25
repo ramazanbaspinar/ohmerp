@@ -36,6 +36,8 @@ public class OhmERPDbContext : DbContext
     public DbSet<BOMLine> BOMLines => Set<BOMLine>();
     public DbSet<BOMOperation> BOMOperations => Set<BOMOperation>();
     public DbSet<CurrencyRate> CurrencyRates => Set<CurrencyRate>();
+    public DbSet<OverheadCost> OverheadCosts => Set<OverheadCost>();
+    public DbSet<CostParameter> CostParameters => Set<CostParameter>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,6 +46,7 @@ public class OhmERPDbContext : DbContext
         modelBuilder.HasSequence<int>("CompanyCode_Seq").StartsAt(0).IncrementsBy(1);
         modelBuilder.HasSequence<int>("ItemCode_Seq").StartsAt(0).IncrementsBy(1);
         modelBuilder.HasSequence<int>("WorkCenterCode_Seq").StartsAt(0).IncrementsBy(1);
+        modelBuilder.HasSequence<int>("OverheadCostCode_Seq").StartsAt(0).IncrementsBy(1);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OhmERPDbContext).Assembly);
 

@@ -35,6 +35,8 @@ const BaglantiSaciTanimlari = React.lazy(() => import('./pages/BaglantiSaciTanim
 const BaglantiTeliTanimlari = React.lazy(() => import('./pages/BaglantiTeliTanimlari'));
 const MakineTanimlariPage = React.lazy(() => import('./pages/MakineTanimlariPage'));
 const HammaddeMaliyetiPage = React.lazy(() => import('./pages/HammaddeMaliyetiPage'));
+const GenelUretimGiderleriPage = React.lazy(() => import('./pages/GenelUretimGiderleriPage'));
+const MaliyetParametreleriPage = React.lazy(() => import('./pages/MaliyetParametreleriPage'));
 const FallbackLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5' }}>
     <Spin size="large" tip="Sistem Modülü Yükleniyor...">
@@ -111,6 +113,9 @@ const App: React.FC = () => {
               <Route path="/is-merkezleri" element={<WorkCenters />} />
               <Route path="/urun-receteleri" element={<BOMs />} />
               <Route path="/maliyet-simulatoru" element={<CostSimulation />} />
+
+              <Route path="/maliyet/genel-uretim-giderleri" element={<GenelUretimGiderleriPage />} />
+              <Route path="/maliyet/parametreler" element={<MaliyetParametreleriPage />} />
 
               <Route path="/maliyet/hammadde/tum" element={<HammaddeMaliyetiPage />} />
               <Route path="/maliyet/hammadde/baglanti-saci" element={<HammaddeMaliyetiPage categoryCode="BAGLANTISACI" />} />

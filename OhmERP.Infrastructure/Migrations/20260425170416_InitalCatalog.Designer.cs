@@ -12,8 +12,8 @@ using OhmERP.Infrastructure.Contexts;
 namespace OhmERP.Infrastructure.Migrations
 {
     [DbContext(typeof(OhmERPDbContext))]
-    [Migration("20260423224736_InitialCatalog")]
-    partial class InitialCatalog
+    [Migration("20260425170416_InitalCatalog")]
+    partial class InitalCatalog
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,6 +29,9 @@ namespace OhmERP.Infrastructure.Migrations
                 .StartsAt(0L);
 
             modelBuilder.HasSequence<int>("ItemCode_Seq")
+                .StartsAt(0L);
+
+            modelBuilder.HasSequence<int>("OverheadCostCode_Seq")
                 .StartsAt(0L);
 
             modelBuilder.HasSequence<int>("WorkCenterCode_Seq")
@@ -620,6 +623,106 @@ namespace OhmERP.Infrastructure.Migrations
                     b.ToTable("CompanyContacts");
                 });
 
+            modelBuilder.Entity("OhmERP.Domain.Entities.CostParameter", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSystemDefined")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal>("PercentageValue")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("CostParameters", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Code = "FIRE_ORANI",
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Üretim esnasında oluşacak varsayılan fire yüzdesi",
+                            IsDeleted = false,
+                            IsSystemDefined = true,
+                            Name = "Varsayılan Fire Oranı",
+                            PercentageValue = 5.0m,
+                            RowVersion = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 }
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            Code = "VADE_FARKI",
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Satışlarda uygulanacak varsayılan vade farkı yüzdesi",
+                            IsDeleted = false,
+                            IsSystemDefined = true,
+                            Name = "Vade Farkı",
+                            PercentageValue = 3.5m,
+                            RowVersion = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 }
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            Code = "KDV_ORANI",
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Sistem geneli varsayılan KDV Oranı",
+                            IsDeleted = false,
+                            IsSystemDefined = true,
+                            Name = "KDV Oranı",
+                            PercentageValue = 20.0m,
+                            RowVersion = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 }
+                        });
+                });
+
             modelBuilder.Entity("OhmERP.Domain.Entities.CurrencyRate", b =>
                 {
                     b.Property<Guid>("Id")
@@ -933,6 +1036,68 @@ namespace OhmERP.Infrastructure.Migrations
                     b.HasIndex("ParentId");
 
                     b.ToTable("ItemCategories");
+                });
+
+            modelBuilder.Entity("OhmERP.Domain.Entities.OverheadCost", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Currency")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("MonthlyAmount")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("OverheadCosts", (string)null);
                 });
 
             modelBuilder.Entity("OhmERP.Domain.Entities.Role", b =>

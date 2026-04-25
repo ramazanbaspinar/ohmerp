@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace OhmERP.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCatalog : Migration
+    public partial class InitalCatalog : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,6 +19,10 @@ namespace OhmERP.Infrastructure.Migrations
 
             migrationBuilder.CreateSequence<int>(
                 name: "ItemCode_Seq",
+                startValue: 0L);
+
+            migrationBuilder.CreateSequence<int>(
+                name: "OverheadCostCode_Seq",
                 startValue: 0L);
 
             migrationBuilder.CreateSequence<int>(
@@ -83,6 +89,30 @@ namespace OhmERP.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CostParameters",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    PercentageValue = table.Column<decimal>(type: "decimal(18,4)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsSystemDefined = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CostParameters", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CurrencyRates",
                 columns: table => new
                 {
@@ -103,6 +133,31 @@ namespace OhmERP.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CurrencyRates", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OverheadCosts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    MonthlyAmount = table.Column<decimal>(type: "decimal(18,4)", nullable: false),
+                    Currency = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OverheadCosts", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -635,6 +690,16 @@ namespace OhmERP.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "CostParameters",
+                columns: new[] { "Id", "Code", "CreatedBy", "CreatedDate", "DeletedBy", "DeletedDate", "Description", "IsDeleted", "IsSystemDefined", "Name", "PercentageValue", "RowVersion", "UpdatedBy", "UpdatedDate" },
+                values: new object[,]
+                {
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "FIRE_ORANI", new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "Üretim esnasında oluşacak varsayılan fire yüzdesi", false, true, "Varsayılan Fire Oranı", 5.0m, new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 }, null, null },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "VADE_FARKI", new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "Satışlarda uygulanacak varsayılan vade farkı yüzdesi", false, true, "Vade Farkı", 3.5m, new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 }, null, null },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), "KDV_ORANI", new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "Sistem geneli varsayılan KDV Oranı", false, true, "KDV Oranı", 20.0m, new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 }, null, null }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "Id", "Code", "CreatedBy", "CreatedDate", "DeletedBy", "DeletedDate", "Description", "IsActive", "IsDeleted", "Name", "RowVersion", "UpdatedBy", "UpdatedDate" },
                 values: new object[] { new Guid("d865c2e3-aa4c-4f46-9187-012112b96475"), "ADMIN", new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, null, "Sistem Yönetici Rolü", true, false, "Admin", new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 }, null, null });
@@ -745,6 +810,12 @@ namespace OhmERP.Infrastructure.Migrations
                 column: "CompanyId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CostParameters_Code",
+                table: "CostParameters",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CurrencyRates_Date_CurrencyCode",
                 table: "CurrencyRates",
                 columns: new[] { "Date", "CurrencyCode" },
@@ -806,6 +877,12 @@ namespace OhmERP.Infrastructure.Migrations
                 column: "UnitOfMeasureId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_OverheadCosts_Code",
+                table: "OverheadCosts",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RolePermissions_RoleId_PermissionCode",
                 table: "RolePermissions",
                 columns: new[] { "RoleId", "PermissionCode" },
@@ -861,10 +938,16 @@ namespace OhmERP.Infrastructure.Migrations
                 name: "CompanyContacts");
 
             migrationBuilder.DropTable(
+                name: "CostParameters");
+
+            migrationBuilder.DropTable(
                 name: "CurrencyRates");
 
             migrationBuilder.DropTable(
                 name: "ItemAttributeValues");
+
+            migrationBuilder.DropTable(
+                name: "OverheadCosts");
 
             migrationBuilder.DropTable(
                 name: "RolePermissions");
@@ -910,6 +993,9 @@ namespace OhmERP.Infrastructure.Migrations
 
             migrationBuilder.DropSequence(
                 name: "ItemCode_Seq");
+
+            migrationBuilder.DropSequence(
+                name: "OverheadCostCode_Seq");
 
             migrationBuilder.DropSequence(
                 name: "WorkCenterCode_Seq");

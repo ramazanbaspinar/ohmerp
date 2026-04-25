@@ -173,4 +173,20 @@ public static class Permissions
         public const string Edit = "Permissions.Tel.Edit";
         public const string Delete = "Permissions.Tel.Delete";
     }
+
+    public static class OverheadCosts
+    {
+        public const string View = "Permissions.OverheadCosts.View";
+        public const string Create = "Permissions.OverheadCosts.Create";
+        public const string Edit = "Permissions.OverheadCosts.Edit";
+        public const string Delete = "Permissions.OverheadCosts.Delete";
+    }
+
+    public static class CostParameters
+    {
+        public const string View = "Permissions.CostParameters.View";
+        public const string Create = "Permissions.CostParameters.Create";
+        public const string Edit = "Permissions.CostParameters.Edit";
+        public const string Delete = "Permissions.CostParameters.Delete";
+    }
 }

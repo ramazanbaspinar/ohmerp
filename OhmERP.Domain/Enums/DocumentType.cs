@@ -7,5 +7,6 @@ public enum DocumentType
 {
     Company = 1,
     Item = 2,
-    WorkCenter = 3
+    WorkCenter = 3,
+    OverheadCost = 4
 }

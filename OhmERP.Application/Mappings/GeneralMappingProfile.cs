@@ -11,6 +11,8 @@ using OhmERP.Application.DTOs.User;
 using OhmERP.Application.DTOs.CodeTemplate;
 using OhmERP.Application.DTOs.CategoryAttribute;
 using OhmERP.Application.DTOs.ItemAttributeValue;
+using OhmERP.Application.DTOs.CostParameter;
+using OhmERP.Application.DTOs.OverheadCost;
 using OhmERP.Domain.Entities;
 
 namespace OhmERP.Application.Mappings;
@@ -52,7 +54,7 @@ public class GeneralMappingProfile : Profile
 
         CreateMap<UnitOfMeasure, UnitOfMeasureListDto>();
         CreateMap<CreateUnitOfMeasureRequest, UnitOfMeasure>();
-        CreateMap<UpdateUnitOfMeasureRequest, UnitOfMeasure>().ReverseMap(); // Eklendi
+        CreateMap<UpdateUnitOfMeasureRequest, UnitOfMeasure>().ReverseMap();
 
         CreateMap<Item, ItemListDto>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty))
@@ -91,5 +93,31 @@ public class GeneralMappingProfile : Profile
             .ReverseMap();
 
         CreateMap<ItemAttributeValue, ItemAttributeValueDto>().ReverseMap();
+
+        CreateMap<CostParameter, CostParameterListDto>().ReverseMap();
+        CreateMap<CreateCostParameterRequest, CostParameter>();
+        CreateMap<UpdateCostParameterRequest, CostParameter>()
+            .ForMember(dest => dest.RowVersion, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+            .ReverseMap();
+
+        CreateMap<OverheadCost, OverheadCostListDto>().ReverseMap();
+        CreateMap<CreateOverheadCostRequest, OverheadCost>();
+        CreateMap<UpdateOverheadCostRequest, OverheadCost>()
+            .ForMember(dest => dest.RowVersion, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+            .ReverseMap();
     }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
-import { Button, Typography, Space, Input, Form, message, Row, Col, Select, Popconfirm } from 'antd';
+import { Button, Typography, Space, Input, Form, message, Row, Col, Select, Popconfirm, Switch, Table } from 'antd';
 import { AppstoreAddOutlined, PlusOutlined, EditOutlined, ReloadOutlined, DeleteOutlined } from '@ant-design/icons';
 import api from '../services/api';
 import { OhmTable } from '../components/OhmTable';
@@ -10,16 +10,14 @@ import { OhmInputNumber } from '../components/OhmInputNumber';
 
 const { Text } = Typography;
 
-interface ItemCostDto {
+interface OverheadCostDto {
   id: string;
   code: string;
   name: string;
-  category: {
-    code: string;
-    name: string;
-  };
-  unitCost: number;
-  costCurrency: number;
+  monthlyAmount: number;
+  currency: number;
+  description: string;
+  isActive: boolean;
 }
 
 const currencyTypes = [
@@ -28,31 +26,13 @@ const currencyTypes = [
   { value: 3, label: 'EUR' }
 ];
 
-const categoryNames: Record<string, string> = {
-  "TEL": "Tel",
-  "SAC": "Sac",
-  "PIM": "Pim",
-  "KUM": "Kum",
-  "GAZ": "Kaynak Gazı",
-  "TAPA": "Tapa",
-  "FLANS": "Flanş",
-  "KELEPCE": "Kelepçe",
-  "SOKET": "Soket",
-  "OMEGA": "Omega",
-  "BAGLANTISACI": "Bağlantı Sacı",
-  "BAGLANTITELI": "Bağlantı Teli"
-};
-
-interface HammaddeMaliyetiPageProps {
-  categoryCode?: string;
-}
-
-const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCode }) => {
-  const [data, setData] = useState<ItemCostDto[]>([]);
+const GenelUretimGiderleriPage: React.FC = () => {
+  const [data, setData] = useState<OverheadCostDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [originalData, setOriginalData] = useState<any>(null);
   
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -62,15 +42,21 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
   const debouncedSearchText = useDebounce(searchText, 500);
   const isManualSearch = useRef(false);
 
-  const [lookupItems, setLookupItems] = useState<{ id: string; name: string }[]>([]);
+  const [currencyRates, setCurrencyRates] = useState<any[]>([]);
+
   const [form] = Form.useForm();
 
-  const getPageTitle = () => {
-    if (categoryCode && categoryNames[categoryCode]) {
-      return `${categoryNames[categoryCode]} Maliyetleri`;
-    }
-    return 'Tüm Hammadde Maliyetleri';
-  };
+  useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        const res = await api.get('/CurrencyRates/today');
+        setCurrencyRates(res.data || []);
+      } catch {
+        console.error("Kurlar çekilemedi.");
+      }
+    };
+    fetchRates();
+  }, []);
 
   const fetchData = useCallback(async (
     page = currentPage, 
@@ -81,13 +67,9 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
   ) => {
     setLoading(true);
     try {
-      let url = `/Item?page=${page}&pageSize=${size}&hasCost=true`;
-      
+      let url = `/OverheadCosts?page=${page}&pageSize=${size}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
-      if (categoryCode) url += `&categoryCode=${categoryCode}`;
-      if (sortBy) {
-        url += `&sortBy=${sortBy}&sortDesc=${sortDesc}`;
-      }
+      if (sortBy) url += `&sortBy=${sortBy}&sortDesc=${sortDesc}`;
 
       const response = await api.get(url);
       setData(response.data.items || []);
@@ -97,11 +79,11 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize, debouncedSearchText, categoryCode]);
+  }, [currentPage, pageSize, debouncedSearchText]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchText, categoryCode]);
+  }, [debouncedSearchText]);
 
   useEffect(() => {
     if (isManualSearch.current) {
@@ -111,69 +93,54 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
     if (debouncedSearchText.length === 0 || debouncedSearchText.length >= 3) {
       fetchData(currentPage, pageSize, debouncedSearchText);
     }
-  }, [currentPage, pageSize, debouncedSearchText, fetchData, categoryCode]);
-
-  const loadLookupItems = async () => {
-    try {
-      const res = await api.get('/Item/lookup-without-cost', {
-        params: categoryCode ? { categoryCode } : undefined
-      });
-      setLookupItems(res.data);
-    } catch {
-      message.error('Hammadde listesi alınamadı.');
-    }
-  };
+  }, [currentPage, pageSize, debouncedSearchText, fetchData]);
 
   const openDrawerForCreate = async () => {
     setEditingId(null);
     form.resetFields();
-    setLookupItems([]);
-    setIsDrawerVisible(true);
-    setFormLoading(true);
+    
     try {
-      await loadLookupItems();
-      const initVals = { currency: 1 };
-      form.setFieldsValue(initVals);
+      setFormLoading(true);
+      const res = await api.get('/Numerator/PreviewNextCode/4');
+      if (res.data && res.data.nextCode) {
+        const initial = { code: res.data.nextCode, currency: 1, isActive: true };
+        form.setFieldsValue(initial);
+        setOriginalData(initial);
+      } else {
+        const initial = { currency: 1, isActive: true };
+        form.setFieldsValue(initial);
+        setOriginalData(initial);
+      }
     } catch {
+      const initial = { currency: 1, isActive: true };
+      form.setFieldsValue(initial);
+      setOriginalData(initial);
     } finally {
       setFormLoading(false);
+      setIsDrawerVisible(true);
     }
   };
 
-  const openDrawerForEdit = async (record: ItemCostDto) => {
+  const openDrawerForEdit = (record: OverheadCostDto) => {
     setEditingId(record.id);
     setIsDrawerVisible(true);
-    setFormLoading(true);
-    try {
-      // Edit modunda hammadde seçimi kapalı olacağı için dropdown'a sadece o kaydı koyuyoruz
-      setLookupItems([{ id: record.id, name: `${record.code} - ${record.name}` }]);
-      form.setFieldsValue({
-        itemId: record.id,
-        unitCost: record.unitCost,
-        currency: record.costCurrency
-      });
-    } catch {
-      message.error('Kayıt bilgileri alınamadı.');
-      setIsDrawerVisible(false);
-    } finally {
-      setFormLoading(false);
-    }
+    form.setFieldsValue(record);
+    setOriginalData(record);
   };
 
   const handleSave = async () => {
     setFormLoading(true);
     try {
       const values = await form.validateFields();
-      const idToUpdate = editingId || values.itemId;
-      
-      await api.put(`/Item/${idToUpdate}/cost`, {
-        unitCost: values.unitCost,
-        currency: values.currency
-      });
-      
-      message.success('Maliyet başarıyla kaydedildi.');
+      if (editingId) {
+        await api.put(`/OverheadCosts/${editingId}`, values);
+        message.success('Kayıt başarıyla güncellendi.');
+      } else {
+        await api.post('/OverheadCosts', values);
+        message.success('Kayıt başarıyla eklendi.');
+      }
       setIsDrawerVisible(false);
-      fetchData(1, pageSize, searchText);
+      fetchData(currentPage, pageSize, searchText);
     } catch (error: any) {
       if (error.errorFields) return;
       const errMsg = getErrorMessage(error);
@@ -183,13 +150,13 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
     }
   };
 
-  const handleDeleteCost = async (id: string) => {
+  const handleDelete = async (id: string) => {
     try {
-      await api.delete(`/Item/${id}/cost`);
-      message.success('Maliyet başarıyla silindi.');
+      await api.delete(`/OverheadCosts/${id}`);
+      message.success('Kayıt başarıyla silindi.');
       fetchData(currentPage, pageSize, searchText);
     } catch {
-      message.error('Maliyet silme işlemi başarısız.');
+      message.error('Silme işlemi başarısız.');
     }
   };
 
@@ -210,18 +177,12 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
       setCurrentPage(1); 
     }
 
-    fetchData(
-      pagination.current || currentPage, 
-      pagination.pageSize || pageSize, 
-      searchText, 
-      sortField, 
-      sortDesc
-    );
+    fetchData(pagination.current || currentPage, pagination.pageSize || pageSize, searchText, sortField, sortDesc);
   };
 
   const columns = [
     { 
-      title: 'Hammadde Kodu', 
+      title: 'Gider Kodu', 
       dataIndex: 'code', 
       key: 'code', 
       width: '15%', 
@@ -229,44 +190,52 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
       render: (text: string) => <Text strong>{text}</Text> 
     },
     { 
-      title: 'Hammadde Adı', 
+      title: 'Gider Adı', 
       dataIndex: 'name', 
       key: 'name', 
-      width: '35%',
+      width: '25%',
       sorter: true
     },
     {
-      title: 'Kategori',
-      key: 'category',
-      width: '15%',
-      sorter: true,
-      render: (_: any, record: any) => <Text>{record.categoryName}</Text>
-    },
-    {
-      title: 'Birim Maliyet',
-      dataIndex: 'unitCost',
-      key: 'unitCost',
+      title: 'Aylık Tutar',
+      dataIndex: 'monthlyAmount',
+      key: 'monthlyAmount',
       width: '15%',
       sorter: true,
       render: (val: number) => <Text>{val?.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</Text>
     },
     {
       title: 'Para Birimi',
-      dataIndex: 'costCurrency',
-      key: 'costCurrency',
+      dataIndex: 'currency',
+      key: 'currency',
       width: '10%',
       sorter: true,
       render: (val: number) => <Text>{currencyTypes.find(x => x.value === val)?.label || val}</Text>
     },
     {
+      title: 'Açıklama',
+      dataIndex: 'description',
+      key: 'description',
+      width: '20%',
+      sorter: false
+    },
+    {
+      title: 'Durum',
+      dataIndex: 'isActive',
+      key: 'isActive',
+      width: '10%',
+      sorter: true,
+      render: (val: boolean) => <Text>{val ? 'Aktif' : 'Pasif'}</Text>
+    },
+    {
       title: 'İşlemler', 
       key: 'actions', 
       align: 'right' as const, 
-      width: '10%',
-      render: (_: any, record: ItemCostDto) => (
+      width: '5%',
+      render: (_: any, record: OverheadCostDto) => (
         <Space>
           <Button type="primary" size="small" icon={<EditOutlined />} onClick={() => openDrawerForEdit(record)} />
-          <Popconfirm title="Maliyeti silmek istediğinize emin misiniz?" onConfirm={() => handleDeleteCost(record.id)} okText="Evet" cancelText="Hayır">
+          <Popconfirm title="Kaydı silmek istediğinize emin misiniz?" onConfirm={() => handleDelete(record.id)} okText="Evet" cancelText="Hayır">
             <Button danger size="small" icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
@@ -306,8 +275,8 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
       </div>
 
       <OhmTable
-        tableName={`HammaddeMaliyeti_${categoryCode || 'ALL'}`}
-        tableTitle={getPageTitle()}
+        tableName="GenelUretimGiderleri"
+        tableTitle="Genel Üretim Giderleri"
         titleIcon={<AppstoreAddOutlined />}
         dataSource={data} 
         columns={columns}
@@ -322,41 +291,64 @@ const HammaddeMaliyetiPage: React.FC<HammaddeMaliyetiPageProps> = ({ categoryCod
           pageSizeOptions: ['10', '20', '50', '100'],
           showTotal: (total, range) => `${range[0]}-${range[1]} arası gösteriliyor. Toplam: ${total} kayıt`
         }}
-        exportExcelUrl={`/Item/export-costs/excel?hasCost=true${categoryCode ? `&categoryCode=${categoryCode}` : ''}${searchText ? `&search=${encodeURIComponent(searchText)}` : ''}`}
-        exportPdfUrl={`/Item/export-costs/pdf?hasCost=true${categoryCode ? `&categoryCode=${categoryCode}` : ''}${searchText ? `&search=${encodeURIComponent(searchText)}` : ''}`}
+        exportExcelUrl={`/OverheadCosts/export/excel${searchText ? `?search=${encodeURIComponent(searchText)}` : ''}`}
+        exportPdfUrl={`/OverheadCosts/export/pdf${searchText ? `?search=${encodeURIComponent(searchText)}` : ''}`}
+        summary={(pageData) => {
+          let totalAmountInTl = 0;
+          let usdRate = currencyRates.find(x => x.currencyCode === 'USD')?.sellingRate || 1;
+          let eurRate = currencyRates.find(x => x.currencyCode === 'EUR')?.sellingRate || 1;
+
+          pageData.forEach(({ monthlyAmount, currency }) => {
+            if (currency === 2) totalAmountInTl += monthlyAmount * usdRate;
+            else if (currency === 3) totalAmountInTl += monthlyAmount * eurRate;
+            else totalAmountInTl += monthlyAmount;
+          });
+
+          return (
+            <Table.Summary.Row style={{ background: '#fafafa' }}>
+              <Table.Summary.Cell index={0} colSpan={2} align="right">
+                <Text strong>Genel Toplam (TL):</Text>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={1}>
+                <Text strong>{totalAmountInTl.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</Text>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={2} colSpan={4}></Table.Summary.Cell>
+            </Table.Summary.Row>
+          );
+        }}
       />
 
       <OhmFormDrawer
-        title={editingId ? `Maliyet Düzenle` : `Yeni Maliyet Kaydı`}
+        title={editingId ? `Gider Düzenle` : `Yeni Gider Kaydı`}
         width={400}
         onClose={() => setIsDrawerVisible(false)}
         open={isDrawerVisible}
         onSave={handleSave}
         loading={formLoading}
         form={form}
+        initialValues={originalData}
       >
-          <Form.Item 
-            name="itemId" 
-            label="Hammadde Seçimi" 
-            rules={[{ required: true, message: 'Lütfen hammadde seçiniz' }]}
-          >
-            <Select 
-              options={lookupItems.map(x => ({ value: x.id, label: x.name }))} 
-              disabled={!!editingId}
-              showSearch
-              optionFilterProp="label"
-              placeholder="Maliyeti girilecek hammaddeyi seçin"
-            />
+          <Form.Item name="code" label="Gider Kodu" rules={[{ required: true, message: 'Lütfen gider kodu giriniz' }]}>
+            <Input placeholder="Gider Kodu" />
           </Form.Item>
-          <Form.Item name="unitCost" label="Birim Fiyat" rules={[{ required: true, message: 'Lütfen birim fiyat giriniz' }]}>
+          <Form.Item name="name" label="Gider Adı" rules={[{ required: true, message: 'Lütfen gider adı giriniz' }]}>
+            <Input placeholder="Gider Adı" />
+          </Form.Item>
+          <Form.Item name="monthlyAmount" label="Aylık Tutar" rules={[{ required: true, message: 'Lütfen aylık tutar giriniz' }]}>
             <OhmInputNumber style={{ width: '100%' }} precision={4} />
           </Form.Item>
           <Form.Item name="currency" label="Para Birimi" rules={[{ required: true }]}>
             <Select options={currencyTypes} />
+          </Form.Item>
+          <Form.Item name="isActive" label="Durum" valuePropName="checked">
+            <Switch checkedChildren="Aktif" unCheckedChildren="Pasif" />
+          </Form.Item>
+          <Form.Item name="description" label="Açıklama">
+            <Input.TextArea rows={3} placeholder="Açıklama..." />
           </Form.Item>
       </OhmFormDrawer>
     </>
   );
 };
 
-export default HammaddeMaliyetiPage;
+export default GenelUretimGiderleriPage;
