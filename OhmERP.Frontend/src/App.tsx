@@ -37,6 +37,8 @@ const MakineTanimlariPage = React.lazy(() => import('./pages/MakineTanimlariPage
 const HammaddeMaliyetiPage = React.lazy(() => import('./pages/HammaddeMaliyetiPage'));
 const GenelUretimGiderleriPage = React.lazy(() => import('./pages/GenelUretimGiderleriPage'));
 const MaliyetParametreleriPage = React.lazy(() => import('./pages/MaliyetParametreleriPage'));
+const IsMerkeziMaliyetleriPage = React.lazy(() => import('./pages/IsMerkeziMaliyetleriPage'));
+
 const FallbackLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5' }}>
     <Spin size="large" tip="Sistem Modülü Yükleniyor...">
@@ -114,6 +116,7 @@ const App: React.FC = () => {
               <Route path="/urun-receteleri" element={<BOMs />} />
               <Route path="/maliyet-simulatoru" element={<CostSimulation />} />
 
+              <Route path="/maliyet/is-merkezi-maliyetleri" element={<IsMerkeziMaliyetleriPage />} />
               <Route path="/maliyet/genel-uretim-giderleri" element={<GenelUretimGiderleriPage />} />
               <Route path="/maliyet/parametreler" element={<MaliyetParametreleriPage />} />
 

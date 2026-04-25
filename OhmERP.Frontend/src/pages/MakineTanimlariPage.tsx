@@ -7,7 +7,6 @@ import { OhmTable } from '../components/OhmTable';
 import { OhmFormDrawer } from '../components/OhmFormDrawer';
 import { getErrorMessage } from '../utils/turkishSearch';
 import { formatSystemCode } from '../utils/helpers';
-import { OhmInputNumber } from '../components/OhmInputNumber';
 
 const { Text } = Typography;
 
@@ -192,20 +191,7 @@ const MakineTanimlariPage: React.FC<MakineTanimlariPageProps> = ({ machineType }
       key: 'name', 
       width: '35%',
     },
-    {
-      title: 'Makine Mal. (Saat)',
-      dataIndex: 'hourlyMachineCost',
-      key: 'hourlyMachineCost',
-      width: '15%',
-      render: (val: number) => <Text>{val?.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</Text>
-    },
-    {
-      title: 'İşçilik Mal. (Saat)',
-      dataIndex: 'hourlyLaborCost',
-      key: 'hourlyLaborCost',
-      width: '15%',
-      render: (val: number) => <Text>{val?.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</Text>
-    },
+
     {
       title: 'Para Birimi',
       dataIndex: 'currency',
@@ -327,12 +313,7 @@ const MakineTanimlariPage: React.FC<MakineTanimlariPageProps> = ({ machineType }
           <Form.Item name="type" label="Tipi" rules={[{ required: true }]}>
             <Select options={workCenterTypes} disabled />
           </Form.Item>
-          <Form.Item name="hourlyMachineCost" label="Saatlik Makine Maliyeti" rules={[{ required: true }]}>
-            <OhmInputNumber style={{ width: '100%' }} precision={4} />
-          </Form.Item>
-          <Form.Item name="hourlyLaborCost" label="Saatlik İşçilik Maliyeti" rules={[{ required: true }]}>
-            <OhmInputNumber style={{ width: '100%' }} precision={4} />
-          </Form.Item>
+
           <Form.Item name="currency" label="Para Birimi" rules={[{ required: true }]}>
             <Select options={currencyTypes} />
           </Form.Item>

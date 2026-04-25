@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
-import { Button, Typography, Space, Input, Form, Popconfirm, message, Switch, Row, Col, Radio, Select } from 'antd';
-import { AppstoreAddOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Button, Typography, Space, Input, Form, message, Row, Col, Tabs } from 'antd';
+import { AppstoreAddOutlined, EditOutlined, ReloadOutlined } from '@ant-design/icons';
 import api from '../services/api';
 import { OhmTable } from '../components/OhmTable';
 import { OhmFormDrawer } from '../components/OhmFormDrawer';
 import { getErrorMessage } from '../utils/turkishSearch';
-import { formatSystemCode } from '../utils/helpers';
+import { OhmInputNumber } from '../components/OhmInputNumber';
 
 const { Text } = Typography;
 
@@ -40,7 +40,7 @@ const currencyTypes = [
   { value: 3, label: 'EUR' }
 ];
 
-const WorkCenters: React.FC = () => {
+const IsMerkeziMaliyetleriPage: React.FC = () => {
   const [data, setData] = useState<WorkCenterDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
@@ -55,7 +55,7 @@ const WorkCenters: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const debouncedSearchText = useDebounce(searchText, 500);
   const isManualSearch = useRef(false);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'passive'>('active');
+  const [activeTab, setActiveTab] = useState('all');
 
   const [form] = Form.useForm();
 
@@ -63,17 +63,18 @@ const WorkCenters: React.FC = () => {
     page = currentPage, 
     size = pageSize, 
     search = debouncedSearchText, 
-    status = statusFilter,
+    tab = activeTab,
     sortBy = '',
     sortDesc = false
   ) => {
     setLoading(true);
     try {
-      let url = `/WorkCenters?page=${page}&pageSize=${size}`;
+      let url = `/WorkCenters?page=${page}&pageSize=${size}&isActive=true`;
       
       if (search) url += `&search=${encodeURIComponent(search)}`;
-      if (status === 'active') url += '&isActive=true';
-      if (status === 'passive') url += '&isActive=false';
+      if (tab !== 'all') {
+        url += `&type=${tab}`;
+      }
       if (sortBy) {
         url += `&sortBy=${sortBy}&sortDesc=${sortDesc}`;
       }
@@ -82,15 +83,15 @@ const WorkCenters: React.FC = () => {
       setData(response.data.items || []);
       setTotalCount(response.data.totalCount || 0);
     } catch {
-      message.error('İş merkezleri yüklenirken hata oluştu.');
+      message.error('Maliyet bilgileri yüklenirken hata oluştu.');
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize, debouncedSearchText, statusFilter]);
+  }, [currentPage, pageSize, debouncedSearchText, activeTab]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchText]);
+  }, [debouncedSearchText, activeTab]);
 
   useEffect(() => {
     if (isManualSearch.current) {
@@ -98,28 +99,9 @@ const WorkCenters: React.FC = () => {
       return;
     }
     if (debouncedSearchText.length === 0 || debouncedSearchText.length >= 3) {
-      fetchData(currentPage, pageSize, debouncedSearchText, statusFilter);
+      fetchData(currentPage, pageSize, debouncedSearchText, activeTab);
     }
-  }, [currentPage, pageSize, statusFilter, debouncedSearchText, fetchData]);
-
-  const openDrawerForCreate = async () => {
-    setEditingId(null);
-    form.resetFields();
-    setIsDrawerVisible(true);
-    setFormLoading(true);
-    try {
-      const numRes = await api.get('/Numerator/PreviewNextCode/3');
-      const initVals = { code: numRes.data.nextCode, isActive: true, currency: 1, type: 1 };
-      form.setFieldsValue(initVals);
-      setOriginalData(initVals);
-    } catch {
-      const initVals = { code: '', isActive: true, currency: 1, type: 1 };
-      form.setFieldsValue(initVals);
-      setOriginalData(initVals);
-    } finally {
-      setFormLoading(false);
-    }
-  };
+  }, [currentPage, pageSize, activeTab, debouncedSearchText, fetchData]);
 
   const openDrawerForEdit = async (id: string) => {
     setEditingId(id);
@@ -127,7 +109,10 @@ const WorkCenters: React.FC = () => {
     setFormLoading(true);
     try {
       const response = await api.get(`/WorkCenters/${id}`);
-      form.setFieldsValue(response.data);
+      form.setFieldsValue({
+        hourlyMachineCost: response.data.hourlyMachineCost,
+        hourlyLaborCost: response.data.hourlyLaborCost
+      });
       setOriginalData(response.data);
     } catch {
       message.error('Makine bilgileri alınamadı.');
@@ -141,31 +126,23 @@ const WorkCenters: React.FC = () => {
     setFormLoading(true);
     try {
       const values = await form.validateFields();
-      if (editingId) {
-        await api.put(`/WorkCenters/${editingId}`, values);
-        message.success('İş Merkezi başarıyla güncellendi.');
-      } else {
-        await api.post('/WorkCenters', values);
-        message.success('İş Merkezi başarıyla oluşturuldu.');
+      if (editingId && originalData) {
+        const updatePayload = {
+          ...originalData,
+          hourlyMachineCost: values.hourlyMachineCost,
+          hourlyLaborCost: values.hourlyLaborCost
+        };
+        await api.put(`/WorkCenters/${editingId}`, updatePayload);
+        message.success('Maliyet başarıyla güncellendi.');
+        setIsDrawerVisible(false);
+        fetchData(currentPage, pageSize, searchText, activeTab);
       }
-      setIsDrawerVisible(false);
-      fetchData(1, pageSize, searchText, statusFilter);
     } catch (error: any) {
       if (error.errorFields) return;
       const errMsg = getErrorMessage(error);
       message.error(errMsg);
     } finally {
       setFormLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await api.delete(`/WorkCenters/${id}`);
-      message.success('İş Merkezi başarıyla silindi.');
-      fetchData(currentPage, pageSize, searchText, statusFilter);
-    } catch {
-      message.error('Silme işlemi başarısız.');
     }
   };
 
@@ -190,7 +167,7 @@ const WorkCenters: React.FC = () => {
       pagination.current || currentPage, 
       pagination.pageSize || pageSize, 
       searchText, 
-      statusFilter,
+      activeTab,
       sortField,
       sortDesc
     );
@@ -199,8 +176,8 @@ const WorkCenters: React.FC = () => {
   const buildExportUrl = (format: 'excel' | 'pdf') => {
     const params = new URLSearchParams();
     if (searchText) params.append('search', searchText);
-    if (statusFilter === 'active') params.append('isActive', 'true');
-    if (statusFilter === 'passive') params.append('isActive', 'false');
+    if (activeTab !== 'all') params.append('type', activeTab);
+    params.append('isActive', 'true');
     
     const queryString = params.toString();
     return `/WorkCenters/export/${format}${queryString ? `?${queryString}` : ''}`;
@@ -211,7 +188,7 @@ const WorkCenters: React.FC = () => {
       title: 'Kod', 
       dataIndex: 'code', 
       key: 'code', 
-      width: '10%',
+      width: '15%',
       sorter: true,
       render: (text: string) => <Text strong>{text}</Text> 
     },
@@ -219,18 +196,25 @@ const WorkCenters: React.FC = () => {
       title: 'Makine Adı', 
       dataIndex: 'name', 
       key: 'name', 
-      width: '25%',
+      width: '35%',
       sorter: true
     },
     {
-      title: 'Tip',
-      dataIndex: 'type',
-      key: 'type',
-      width: '10%',
+      title: 'Makine Maliyeti (Saat)',
+      dataIndex: 'hourlyMachineCost',
+      key: 'hourlyMachineCost',
+      width: '15%',
       sorter: true,
-      render: (val: number) => <Text>{workCenterTypes.find(x => x.value === val)?.label || val}</Text>
+      render: (val: number) => <Text>{val?.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</Text>
     },
-
+    {
+      title: 'İşçilik Maliyeti (Saat)',
+      dataIndex: 'hourlyLaborCost',
+      key: 'hourlyLaborCost',
+      width: '15%',
+      sorter: true,
+      render: (val: number) => <Text>{val?.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</Text>
+    },
     {
       title: 'Para Birimi',
       dataIndex: 'currency',
@@ -239,34 +223,32 @@ const WorkCenters: React.FC = () => {
       sorter: true,
       render: (val: number) => <Text>{currencyTypes.find(x => x.value === val)?.label || val}</Text>
     },
-    { 
-      title: 'Durum', 
-      dataIndex: 'isActive', 
-      key: 'isActive', 
-      width: '5%', 
-      render: (isActive: boolean) => isActive ? <Text type="success">Aktif</Text> : <Text type="danger">Pasif</Text> 
-    },
     {
       title: 'İşlemler', 
       key: 'actions', 
       align: 'right' as const, 
       width: '10%',
       render: (_: any, record: WorkCenterDto) => (
-        <Space>
-          <Button type="primary" size="small" icon={<EditOutlined />} onClick={() => openDrawerForEdit(record.id)} />
-          <Popconfirm title="Silmek istediğinize emin misiniz?" onConfirm={() => handleDelete(record.id)} okText="Evet" cancelText="Hayır">
-            <Button danger size="small" icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
+        <Button type="primary" size="small" icon={<EditOutlined />} onClick={() => openDrawerForEdit(record.id)}>
+          Maliyet Güncelle
+        </Button>
       )
     }
+  ];
+
+  const tabItems = [
+    { key: 'all', label: 'Tümü' },
+    ...workCenterTypes.map(type => ({
+      key: type.value.toString(),
+      label: type.label
+    }))
   ];
 
   return (
     <>
       <div style={{ marginBottom: 16, padding: '16px', background: '#fff', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
         <Row gutter={16} align="middle">
-          <Col span={8}>
+          <Col span={12}>
             <Input.Search 
               placeholder="Makine Ara (En az 3 karakter)..." 
               value={searchText}
@@ -277,38 +259,34 @@ const WorkCenters: React.FC = () => {
               onSearch={(value) => {
                 isManualSearch.current = true;
                 setCurrentPage(1);
-                fetchData(1, pageSize, value, statusFilter);
+                fetchData(1, pageSize, value, activeTab);
               }}
               allowClear
               enterButton
             />
           </Col>
-          <Col span={8}>
-            <Radio.Group 
-              value={statusFilter} 
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
-              }} 
-              buttonStyle="solid"
-            >
-              <Radio.Button value="all">Tümü</Radio.Button>
-              <Radio.Button value="active">Aktifler</Radio.Button>
-              <Radio.Button value="passive">Pasifler</Radio.Button>
-            </Radio.Group>
-          </Col>
-          <Col span={8} style={{ textAlign: 'right' }}>
+          <Col span={12} style={{ textAlign: 'right' }}>
              <Space>
-                <Button icon={<ReloadOutlined />} onClick={() => fetchData(currentPage, pageSize, searchText, statusFilter)}>Yenile</Button>
-                <Button type="primary" icon={<PlusOutlined />} onClick={openDrawerForCreate}>Yeni Makine Ekle</Button>
-              </Space>
+                <Button icon={<ReloadOutlined />} onClick={() => fetchData(currentPage, pageSize, searchText, activeTab)}>Yenile</Button>
+             </Space>
           </Col>
         </Row>
       </div>
 
+      <div style={{ background: '#fff', padding: '0 16px', marginBottom: 16, borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+        <Tabs 
+          activeKey={activeTab} 
+          onChange={(key) => {
+            setActiveTab(key);
+            setCurrentPage(1);
+          }} 
+          items={tabItems} 
+        />
+      </div>
+
       <OhmTable
-        tableName="Is_Merkezleri"
-        tableTitle="İş Merkezleri (Makineler)"
+        tableName="Is_Merkezi_Maliyetleri"
+        tableTitle="İş Merkezi Maliyetleri"
         titleIcon={<AppstoreAddOutlined />}
         dataSource={data} 
         columns={columns}
@@ -328,41 +306,23 @@ const WorkCenters: React.FC = () => {
       />
 
       <OhmFormDrawer
-        title={editingId ? 'Makine Düzenle' : 'Yeni Makine'}
+        title="Maliyet Güncelle"
         width={400}
         onClose={() => setIsDrawerVisible(false)}
         open={isDrawerVisible}
         onSave={handleSave}
         loading={formLoading}
         form={form}
-        initialValues={originalData}
       >
-          <Form.Item 
-            name="code" 
-            label="Makine Kodu" 
-            rules={[{ required: true }]}
-          >
-            <Input 
-              maxLength={50} 
-              onChange={(e) => form.setFieldsValue({ code: formatSystemCode(e.target.value) })}
-            />
+          <Form.Item name="hourlyMachineCost" label="Saatlik Makine Maliyeti" rules={[{ required: true, message: 'Bu alan zorunludur' }]}>
+            <OhmInputNumber style={{ width: '100%' }} precision={4} />
           </Form.Item>
-          <Form.Item name="name" label="Makine Adı" rules={[{ required: true }]}>
-            <Input maxLength={150} />
-          </Form.Item>
-          <Form.Item name="type" label="Tipi" rules={[{ required: true }]}>
-            <Select options={workCenterTypes} />
-          </Form.Item>
-
-          <Form.Item name="currency" label="Para Birimi" rules={[{ required: true }]}>
-            <Select options={currencyTypes} />
-          </Form.Item>
-          <Form.Item name="isActive" label="Durum" valuePropName="checked">
-            <Switch checkedChildren="Aktif" unCheckedChildren="Pasif" />
+          <Form.Item name="hourlyLaborCost" label="Saatlik İşçilik Maliyeti" rules={[{ required: true, message: 'Bu alan zorunludur' }]}>
+            <OhmInputNumber style={{ width: '100%' }} precision={4} />
           </Form.Item>
       </OhmFormDrawer>
     </>
   );
 };
 
-export default WorkCenters;
+export default IsMerkeziMaliyetleriPage;

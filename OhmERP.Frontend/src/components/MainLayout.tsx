@@ -135,6 +135,7 @@ const MainLayout: React.FC = () => {
       icon: <AppstoreAddOutlined />,
       label: 'Maliyet',
       children: [
+        { key: '/maliyet/is-merkezi-maliyetleri', icon: <AppstoreAddOutlined />, label: 'İş Merkezi Maliyetleri' },
         { key: '/maliyet/genel-uretim-giderleri', icon: <AppstoreAddOutlined />, label: 'Genel Üretim Giderleri' },
         {
           key: 'hammadde_maliyetleri',
