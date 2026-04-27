@@ -119,5 +119,18 @@ public class GeneralMappingProfile : Profile
             .ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
             .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
             .ReverseMap();
+
+        CreateMap<TechnicalParameter, OhmERP.Application.DTOs.TechnicalParameterDto>().ReverseMap();
+        CreateMap<OhmERP.Application.DTOs.CreateTechnicalParameterDto, TechnicalParameter>();
+        CreateMap<OhmERP.Application.DTOs.UpdateTechnicalParameterDto, TechnicalParameter>()
+            .ForMember(dest => dest.RowVersion, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
+            .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+            .ReverseMap();
     }
 }

@@ -37,7 +37,8 @@ const HammaddeMaliyetiPage = React.lazy(() => import('./pages/HammaddeMaliyetiPa
 const GenelUretimGiderleriPage = React.lazy(() => import('./pages/GenelUretimGiderleriPage'));
 const MaliyetParametreleriPage = React.lazy(() => import('./pages/MaliyetParametreleriPage'));
 const IsMerkeziMaliyetleriPage = React.lazy(() => import('./pages/IsMerkeziMaliyetleriPage'));
-
+const VoltTanimlariPage = React.lazy(() => import('./pages/VoltTanimlariPage'));
+const WattTanimlariPage = React.lazy(() => import('./pages/WattTanimlariPage'));
 const FallbackLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5' }}>
     <Spin size="large" tip="Sistem Modülü Yükleniyor...">
@@ -110,6 +111,9 @@ const App: React.FC = () => {
               <Route element={<ProtectedRoute requiredPermission="Permissions.Roles.View" />}>
                 <Route path="/numarator-yonetimi" element={<NumaratorYonetimi />} />
               </Route>
+
+              <Route path="/tanimlar/volt" element={<VoltTanimlariPage />} />
+              <Route path="/tanimlar/watt" element={<WattTanimlariPage />} />
 
               <Route path="/is-merkezleri" element={<WorkCenters />} />
               <Route path="/urun-receteleri" element={<BOMs />} />

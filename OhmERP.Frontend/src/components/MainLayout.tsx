@@ -108,7 +108,9 @@ const MainLayout: React.FC = () => {
             hasPermission('Permissions.Cities.View') ? { key: '/iller', icon: <GlobalOutlined />, label: 'İl Tanımları' } : null,
             hasPermission('Permissions.Districts.View') ? { key: '/ilceler', icon: <GlobalOutlined />, label: 'İlçe Tanımları' } : null,
             hasPermission('Permissions.UnitOfMeasures.View') ? { key: '/birim-tanimlari', icon: <DatabaseOutlined />, label: 'Ölçü Birimleri' } : null,
-          ].filter(Boolean)
+            { key: '/tanimlar/volt', icon: <DatabaseOutlined />, label: 'Volt' },
+            { key: '/tanimlar/watt', icon: <DatabaseOutlined />, label: 'Watt' },
+          ].filter(Boolean).sort((a: any, b: any) => String(a.label).localeCompare(String(b.label), 'tr-TR'))
         } : null,
       ].filter(Boolean)
     } : null,

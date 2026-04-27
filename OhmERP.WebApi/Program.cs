@@ -94,6 +94,7 @@ builder.Services.AddScoped<ICostEngineService, CostEngineService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IOverheadCostService, OverheadCostService>();
 builder.Services.AddScoped<ICostParameterService, CostParameterService>();
+builder.Services.AddScoped<ITechnicalParameterService, TechnicalParameterService>();
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
