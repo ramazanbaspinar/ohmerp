@@ -12,8 +12,8 @@ using OhmERP.Infrastructure.Contexts;
 namespace OhmERP.Infrastructure.Migrations
 {
     [DbContext(typeof(OhmERPDbContext))]
-    [Migration("20260426194655_AddTechnicalParameter")]
-    partial class AddTechnicalParameter
+    [Migration("20260427185713_InitalCatalog")]
+    partial class InitalCatalog
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

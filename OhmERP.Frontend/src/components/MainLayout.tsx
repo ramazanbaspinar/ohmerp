@@ -120,7 +120,7 @@ const MainLayout: React.FC = () => {
       icon: <AppstoreAddOutlined />,
       label: 'Maliyet',
       children: [
-        { key: '/maliyet/is-merkezi-maliyetleri', icon: <AppstoreAddOutlined />, label: 'İş Merkezi Maliyetleri' },
+        { key: '/maliyet/is-merkezi-maliyetleri', icon: <AppstoreAddOutlined />, label: 'İş Merkezi (Makine) Maliyetleri' },
         { key: '/maliyet/genel-uretim-giderleri', icon: <AppstoreAddOutlined />, label: 'Genel Üretim Giderleri' },
         { key: '/maliyet/hammadde-maliyetleri', icon: <AppstoreAddOutlined />, label: 'Hammadde Maliyetleri' },
         { key: '/maliyet/parametreler', icon: <AppstoreAddOutlined />, label: 'Maliyet Parametreleri' }

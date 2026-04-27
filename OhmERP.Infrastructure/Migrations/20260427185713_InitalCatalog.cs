@@ -26,6 +26,10 @@ namespace OhmERP.Infrastructure.Migrations
                 startValue: 0L);
 
             migrationBuilder.CreateSequence<int>(
+                name: "TechnicalParameterCode_Seq",
+                startValue: 0L);
+
+            migrationBuilder.CreateSequence<int>(
                 name: "WorkCenterCode_Seq",
                 startValue: 0L);
 
@@ -181,6 +185,29 @@ namespace OhmERP.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TechnicalParameters",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ParameterType = table.Column<int>(type: "int", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    NumericValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TechnicalParameters", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -953,6 +980,9 @@ namespace OhmERP.Infrastructure.Migrations
                 name: "RolePermissions");
 
             migrationBuilder.DropTable(
+                name: "TechnicalParameters");
+
+            migrationBuilder.DropTable(
                 name: "UserRoles");
 
             migrationBuilder.DropTable(
@@ -996,6 +1026,9 @@ namespace OhmERP.Infrastructure.Migrations
 
             migrationBuilder.DropSequence(
                 name: "OverheadCostCode_Seq");
+
+            migrationBuilder.DropSequence(
+                name: "TechnicalParameterCode_Seq");
 
             migrationBuilder.DropSequence(
                 name: "WorkCenterCode_Seq");

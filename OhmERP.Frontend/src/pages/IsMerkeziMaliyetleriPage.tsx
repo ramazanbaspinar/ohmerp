@@ -288,7 +288,7 @@ const IsMerkeziMaliyetleriPage: React.FC = () => {
 
       <OhmTable
         tableName="Is_Merkezi_Maliyetleri"
-        tableTitle="İş Merkezi Maliyetleri"
+        tableTitle="İş Merkezi (Makine) Maliyetleri"
         titleIcon={<AppstoreAddOutlined />}
         dataSource={data} 
         columns={columns}
