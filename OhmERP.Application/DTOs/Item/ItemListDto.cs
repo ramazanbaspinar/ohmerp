@@ -18,6 +18,8 @@ public class ItemListDto
     [Display(Name = "Kategori")]
     public string CategoryName { get; set; } = string.Empty;
 
+    public string CategoryCode { get; set; } = string.Empty;
+
     public Guid UnitOfMeasureId { get; set; }
 
     [Display(Name = "Birim")]

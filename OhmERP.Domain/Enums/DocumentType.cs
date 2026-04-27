@@ -6,5 +6,6 @@ public enum DocumentType
     Item = 2,
     WorkCenter = 3,
     OverheadCost = 4,
-    TechnicalParameter = 5
+    TechnicalParameter = 5,
+    Product = 6
 }

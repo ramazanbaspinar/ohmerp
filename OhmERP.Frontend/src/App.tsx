@@ -18,7 +18,6 @@ const KategoriTanimlari = React.lazy(() => import('./pages/KategoriTanimlari'));
 const CategorySettings = React.lazy(() => import('./pages/CategorySettings'));
 const NumaratorYonetimi = React.lazy(() => import('./pages/NumaratorYonetimi'));
 const WorkCenters = React.lazy(() => import('./pages/WorkCenters'));
-const BOMs = React.lazy(() => import('./pages/BOMs'));
 const CostSimulation = React.lazy(() => import('./pages/CostSimulation'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const TelTanimlari = React.lazy(() => import('./pages/TelTanimlari'));
@@ -39,6 +38,7 @@ const MaliyetParametreleriPage = React.lazy(() => import('./pages/MaliyetParamet
 const IsMerkeziMaliyetleriPage = React.lazy(() => import('./pages/IsMerkeziMaliyetleriPage'));
 const VoltTanimlariPage = React.lazy(() => import('./pages/VoltTanimlariPage'));
 const WattTanimlariPage = React.lazy(() => import('./pages/WattTanimlariPage'));
+const UrunAgaclariPage = React.lazy(() => import('./pages/UrunAgaclariPage'));
 const FallbackLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5' }}>
     <Spin size="large" tip="Sistem Modülü Yükleniyor...">
@@ -116,7 +116,7 @@ const App: React.FC = () => {
               <Route path="/tanimlar/watt" element={<WattTanimlariPage />} />
 
               <Route path="/is-merkezleri" element={<WorkCenters />} />
-              <Route path="/urun-receteleri" element={<BOMs />} />
+              <Route path="/urun-agaclari" element={<UrunAgaclariPage />} />
               <Route path="/maliyet-simulatoru" element={<CostSimulation />} />
 
               <Route path="/maliyet/is-merkezi-maliyetleri" element={<IsMerkeziMaliyetleriPage />} />

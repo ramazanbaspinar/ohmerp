@@ -132,7 +132,7 @@ const MainLayout: React.FC = () => {
       icon: <SettingOutlined />,
       label: 'Üretim Yönetimi',
       children: [
-        { key: '/urun-receteleri', icon: <AppstoreAddOutlined />, label: 'Ürün Reçeteleri (BOM)' }
+        { key: '/urun-agaclari', icon: <AppstoreAddOutlined />, label: 'Ürün Ağaçları' }
       ]
     },
 

@@ -17,7 +17,8 @@ public class NumeratorService : INumeratorService
         { DocumentType.Item,    "ItemCode_Seq" },
         { DocumentType.WorkCenter, "WorkCenterCode_Seq" },
         { DocumentType.OverheadCost, "OverheadCostCode_Seq" },
-        { DocumentType.TechnicalParameter, "TechnicalParameterCode_Seq" }
+        { DocumentType.TechnicalParameter, "TechnicalParameterCode_Seq" },
+        { DocumentType.Product, "ProductCode_Seq" }
     };
 
     private static readonly Dictionary<DocumentType, CodeTemplate> _defaultTemplates = new()
@@ -26,7 +27,8 @@ public class NumeratorService : INumeratorService
         { DocumentType.Item,    new CodeTemplate { DocumentType = DocumentType.Item,    Prefix = "MLZ", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } },
         { DocumentType.WorkCenter, new CodeTemplate { DocumentType = DocumentType.WorkCenter, Prefix = "MAK", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } },
         { DocumentType.OverheadCost, new CodeTemplate { DocumentType = DocumentType.OverheadCost, Prefix = "GDR", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } },
-        { DocumentType.TechnicalParameter, new CodeTemplate { DocumentType = DocumentType.TechnicalParameter, Prefix = "PRM", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } }
+        { DocumentType.TechnicalParameter, new CodeTemplate { DocumentType = DocumentType.TechnicalParameter, Prefix = "PRM", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } },
+        { DocumentType.Product, new CodeTemplate { DocumentType = DocumentType.Product, Prefix = "URN", Suffix = "", Padding = 5, UseDate = false, DateFormat = "", IsActive = true, IsManualEntryAllowed = false } }
     };
 
     public NumeratorService(OhmERPDbContext context)

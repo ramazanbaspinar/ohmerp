@@ -58,6 +58,7 @@ public class GeneralMappingProfile : Profile
 
         CreateMap<Item, ItemListDto>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty))
+            .ForMember(dest => dest.CategoryCode, opt => opt.MapFrom(src => src.Category != null ? src.Category.Code : string.Empty))
             .ForMember(dest => dest.UnitOfMeasureName, opt => opt.MapFrom(src => src.UnitOfMeasure != null ? src.UnitOfMeasure.Name : string.Empty))
             .ForMember(dest => dest.DynamicAttributes, opt => opt.MapFrom(src => src.AttributeValues));
         CreateMap<CreateItemRequest, Item>()

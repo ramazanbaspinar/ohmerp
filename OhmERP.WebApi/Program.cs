@@ -95,6 +95,7 @@ builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IOverheadCostService, OverheadCostService>();
 builder.Services.AddScoped<ICostParameterService, CostParameterService>();
 builder.Services.AddScoped<ITechnicalParameterService, TechnicalParameterService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
@@ -109,6 +110,7 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<GeneralMappingProfile>();
     cfg.AddProfile<WorkCenterProfile>();
     cfg.AddProfile<OhmERP.Application.Profiles.BOMProfile>();
+    cfg.AddProfile<OhmERP.Application.Mappings.ProductProfile>();
 });
 
 builder.Services.AddOpenApi();

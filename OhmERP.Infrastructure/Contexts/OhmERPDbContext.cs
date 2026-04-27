@@ -39,7 +39,10 @@ public class OhmERPDbContext : DbContext
     public DbSet<OverheadCost> OverheadCosts => Set<OverheadCost>();
     public DbSet<CostParameter> CostParameters => Set<CostParameter>();
     public DbSet<TechnicalParameter> TechnicalParameters => Set<TechnicalParameter>();
-
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<ProductInnerDetail> ProductInnerDetails => Set<ProductInnerDetail>();
+    public DbSet<ProductOperation> ProductOperations => Set<ProductOperation>();
+    public DbSet<ProductImage> ProductImages => Set<ProductImage>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -49,6 +52,7 @@ public class OhmERPDbContext : DbContext
         modelBuilder.HasSequence<int>("WorkCenterCode_Seq").StartsAt(0).IncrementsBy(1);
         modelBuilder.HasSequence<int>("OverheadCostCode_Seq").StartsAt(0).IncrementsBy(1);
         modelBuilder.HasSequence<int>("TechnicalParameterCode_Seq").StartsAt(0).IncrementsBy(1);
+        modelBuilder.HasSequence<int>("ProductCode_Seq").StartsAt(0).IncrementsBy(1);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OhmERPDbContext).Assembly);
 
