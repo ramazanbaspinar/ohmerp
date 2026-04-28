@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using OhmERP.Application.DTOs.Product;
 using OhmERP.Application.Interfaces.Repositories;
 using OhmERP.Application.Interfaces.Services;
@@ -20,19 +23,72 @@ public class ProductService : IProductService
     private readonly IMapper _mapper;
     private readonly INumeratorService _numeratorService;
     private readonly IGenericRepository<TechnicalParameter> _technicalParameterRepository;
+    private readonly IWebHostEnvironment _env;
 
     public ProductService(
         IGenericRepository<Product> productRepository,
         IUnitOfWork unitOfWork,
         IMapper mapper,
         INumeratorService numeratorService,
-        IGenericRepository<TechnicalParameter> technicalParameterRepository)
+        IGenericRepository<TechnicalParameter> technicalParameterRepository,
+        IWebHostEnvironment env)
     {
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _numeratorService = numeratorService;
         _technicalParameterRepository = technicalParameterRepository;
+        _env = env;
+    }
+
+    private async Task<string> SaveBase64ImageAsync(string base64Data)
+    {
+        if (string.IsNullOrEmpty(base64Data)) return string.Empty;
+
+        if (!base64Data.StartsWith("data:image/png;base64,") && 
+            !base64Data.StartsWith("data:image/jpeg;base64,") && 
+            !base64Data.StartsWith("data:image/webp;base64,"))
+        {
+            throw new BusinessException("Desteklenmeyen resim formatı tespit edildi. Sistem güvenliği gereği işlem reddedildi.");
+        }
+
+        var parts = base64Data.Split(',');
+        var base64String = parts.Length > 1 ? parts[1] : parts[0];
+
+        if (base64String.Length > 14000000) 
+        {
+            throw new BusinessException("Resim boyutu çok büyük. Maksimum 10MB yüklenebilir.");
+        }
+
+        var bytes = Convert.FromBase64String(base64String);
+        if (bytes.Length < 4) throw new BusinessException("Bozuk dosya formatı tespit edildi.");
+
+        string extension = ".png";
+        if (base64Data.StartsWith("data:image/jpeg")) extension = ".jpg";
+        else if (base64Data.StartsWith("data:image/webp")) extension = ".webp";
+
+        var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        var uploadsFolder = Path.Combine(webRoot, "uploads", "products");
+        if (!Directory.Exists(uploadsFolder))
+            Directory.CreateDirectory(uploadsFolder);
+
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        var filePath = Path.Combine(uploadsFolder, fileName);
+
+        await File.WriteAllBytesAsync(filePath, bytes);
+
+        return $"/uploads/products/{fileName}";
+    }
+
+    private void DeleteImageFile(string imagePath)
+    {
+        if (string.IsNullOrEmpty(imagePath)) return;
+        var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        var filePath = Path.Combine(webRoot, imagePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        if (File.Exists(filePath))
+        {
+            try { File.Delete(filePath); } catch { }
+        }
     }
 
     public async Task<List<ProductDto>> GetAllAsync()
@@ -43,7 +99,11 @@ public class ProductService : IProductService
 
     public async Task<ProductDto> GetByIdAsync(Guid id)
     {
-        var products = await _productRepository.FindWithQueryAsync(query => query.Where(p => p.Id == id));
+        var products = await _productRepository.FindWithQueryAsync(query => 
+            query.Include(p => p.InnerDetail)
+                 .Include(p => p.Operations)
+                 .Include(p => p.Images)
+                 .Where(p => p.Id == id));
         var product = products.FirstOrDefault();
         if (product == null) throw new BusinessException("Kayıt bulunamadı.");
         return _mapper.Map<ProductDto>(product);
@@ -57,15 +117,10 @@ public class ProductService : IProductService
         
         var product = _mapper.Map<Product>(request);
         product.Code = productCode;
-        
-        // Calculate Ohm for Outer Product
-        product.OhmValue = await CalculateOhmAsync(request.VoltParameterId, request.WattParameterId);
 
         if (request.HasInnerProduct && request.InnerDetail != null)
         {
             product.InnerDetail = _mapper.Map<ProductInnerDetail>(request.InnerDetail);
-            // Calculate Ohm for Inner Product
-            product.InnerDetail.InnerOhmValue = await CalculateOhmAsync(request.InnerDetail.InnerVoltParameterId, request.InnerDetail.InnerWattParameterId);
         }
 
         if (request.Operations.Any())
@@ -73,9 +128,28 @@ public class ProductService : IProductService
             product.Operations = _mapper.Map<List<ProductOperation>>(request.Operations);
         }
         
+        if (request.Images.Count > 20)
+        {
+            throw new BusinessException("Sistem standartları gereği bir ürüne maksimum 20 resim eklenebilir.");
+        }
+
         if (request.Images.Any())
         {
-            product.Images = _mapper.Map<List<ProductImage>>(request.Images);
+            var images = new List<ProductImage>();
+            foreach(var imgReq in request.Images)
+            {
+                var img = _mapper.Map<ProductImage>(imgReq);
+                if (!string.IsNullOrEmpty(imgReq.ImageData) && imgReq.ImageData.StartsWith("data:image"))
+                {
+                    img.ImagePath = await SaveBase64ImageAsync(imgReq.ImageData);
+                }
+                else if (!string.IsNullOrEmpty(imgReq.ImagePath))
+                {
+                    img.ImagePath = imgReq.ImagePath;
+                }
+                images.Add(img);
+            }
+            product.Images = images;
         }
 
         await _productRepository.AddAsync(product);
@@ -90,39 +164,69 @@ public class ProductService : IProductService
     {
         using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-        var existingProducts = await _productRepository.FindWithQueryAsync(query => query.Where(p => p.Id == request.Id));
+        var existingProducts = await _productRepository.FindWithQueryAsync(query => 
+            query.Include(p => p.InnerDetail)
+                 .Include(p => p.Operations)
+                 .Include(p => p.Images)
+                 .Where(p => p.Id == request.Id));
         var existingProduct = existingProducts.FirstOrDefault();
         
         if (existingProduct == null) throw new BusinessException("Kayıt bulunamadı.");
 
         _mapper.Map(request, existingProduct);
-        
-        // Recalculate Ohm Value
-        existingProduct.OhmValue = await CalculateOhmAsync(request.VoltParameterId, request.WattParameterId);
-
-        // Update Inner Detail
         if (request.HasInnerProduct && request.InnerDetail != null)
         {
             if (existingProduct.InnerDetail == null)
             {
-                existingProduct.InnerDetail = _mapper.Map<ProductInnerDetail>(request.InnerDetail);
+                var newInner = _mapper.Map<ProductInnerDetail>(request.InnerDetail);
+                newInner.Id = Guid.Empty;
+                existingProduct.InnerDetail = newInner;
             }
             else
             {
                 _mapper.Map(request.InnerDetail, existingProduct.InnerDetail);
             }
-            existingProduct.InnerDetail.InnerOhmValue = await CalculateOhmAsync(request.InnerDetail.InnerVoltParameterId, request.InnerDetail.InnerWattParameterId);
         }
         else
         {
             existingProduct.InnerDetail = null;
         }
 
-        // Simplistic operation and image update for this example (in a real scenario, merge strategy needed)
-        existingProduct.Operations = _mapper.Map<List<ProductOperation>>(request.Operations);
-        existingProduct.Images = _mapper.Map<List<ProductImage>>(request.Images);
+        existingProduct.Operations.Clear();
+        foreach (var op in _mapper.Map<List<ProductOperation>>(request.Operations))
+        {
+            op.Id = Guid.Empty;
+            existingProduct.Operations.Add(op);
+        }
 
-        _productRepository.Update(existingProduct);
+        if (request.Images.Count > 20)
+        {
+            throw new BusinessException("Sistem standartları gereği bir ürüne maksimum 20 resim eklenebilir.");
+        }
+
+        var newPaths = request.Images.Select(x => x.ImagePath).Where(x => !string.IsNullOrEmpty(x)).ToList();
+        var deletedImages = existingProduct.Images.Where(x => !newPaths.Contains(x.ImagePath)).ToList();
+        foreach(var deletedImage in deletedImages)
+        {
+            DeleteImageFile(deletedImage.ImagePath);
+        }
+
+        existingProduct.Images.Clear();
+        foreach (var imgReq in request.Images)
+        {
+            var img = _mapper.Map<ProductImage>(imgReq);
+            img.Id = Guid.Empty;
+            if (!string.IsNullOrEmpty(imgReq.ImageData) && imgReq.ImageData.StartsWith("data:image"))
+            {
+                img.ImagePath = await SaveBase64ImageAsync(imgReq.ImageData);
+            }
+            else
+            {
+                img.ImagePath = imgReq.ImagePath ?? string.Empty;
+            }
+            existingProduct.Images.Add(img);
+        }
+
         await _unitOfWork.SaveChangesAsync();
 
         scope.Complete();
@@ -134,28 +238,22 @@ public class ProductService : IProductService
     {
         using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-        var existingProducts = await _productRepository.FindWithQueryAsync(query => query.Where(p => p.Id == id));
+        var existingProducts = await _productRepository.FindWithQueryAsync(query => 
+            query.Include(p => p.InnerDetail)
+                 .Include(p => p.Operations)
+                 .Include(p => p.Images)
+                 .Where(p => p.Id == id));
         var existingProduct = existingProducts.FirstOrDefault();
         if (existingProduct == null) throw new BusinessException("Kayıt bulunamadı.");
+
+        foreach(var img in existingProduct.Images)
+        {
+            DeleteImageFile(img.ImagePath);
+        }
 
         _productRepository.Remove(existingProduct);
         await _unitOfWork.SaveChangesAsync();
 
         scope.Complete();
-    }
-    
-    private async Task<decimal> CalculateOhmAsync(Guid voltId, Guid wattId)
-    {
-        var voltParam = await _technicalParameterRepository.GetByIdAsync(voltId);
-        var wattParam = await _technicalParameterRepository.GetByIdAsync(wattId);
-        
-        if (voltParam == null || wattParam == null || wattParam.NumericValue == 0)
-        {
-            return 0; // Or throw depending on requirements
-        }
-        
-        // Math.Round(((Volt * Volt) / Watt) * 1.1, 1)
-        var result = ((voltParam.NumericValue * voltParam.NumericValue) / wattParam.NumericValue) * 1.1m;
-        return Math.Round(result, 1);
     }
 }

@@ -23,6 +23,8 @@ public class ProductInnerDetailConfiguration : IEntityTypeConfiguration<ProductI
         builder.Property(pid => pid.InnerRolledLength).HasColumnType("decimal(18,2)");
         builder.Property(pid => pid.InnerMixedSand1Ratio).HasColumnType("decimal(18,2)");
         builder.Property(pid => pid.InnerMixedSand2Ratio).HasColumnType("decimal(18,2)");
+        
+        builder.Property(pid => pid.InnerPlug1Qty).HasDefaultValue(2);
 
         builder.HasOne(pid => pid.InnerWire).WithMany().HasForeignKey(pid => pid.InnerWireId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(pid => pid.InnerSheet).WithMany().HasForeignKey(pid => pid.InnerSheetId).OnDelete(DeleteBehavior.Restrict);

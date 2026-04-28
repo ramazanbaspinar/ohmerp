@@ -4,8 +4,7 @@ import type { InputNumberProps } from 'antd';
 
 export const OhmInputNumber: React.FC<InputNumberProps> = ({ precision, ...props }) => {
   const getPlaceholder = () => {
-    if (!precision || precision <= 0) return '0';
-    return `0,${'0'.repeat(precision)}`;
+    return '';
   };
 
   return (

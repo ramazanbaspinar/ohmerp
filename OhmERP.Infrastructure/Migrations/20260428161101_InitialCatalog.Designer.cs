@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OhmERP.Infrastructure.Contexts;
 
@@ -11,9 +12,11 @@ using OhmERP.Infrastructure.Contexts;
 namespace OhmERP.Infrastructure.Migrations
 {
     [DbContext(typeof(OhmERPDbContext))]
-    partial class OhmERPDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260428161101_InitialCatalog")]
+    partial class InitialCatalog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1232,7 +1235,7 @@ namespace OhmERP.Infrastructure.Migrations
                     b.Property<int?>("Plug2Qty")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("RolledLength")
+                    b.Property<decimal>("RolledLength")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<byte[]>("RowVersion")
@@ -1333,10 +1336,9 @@ namespace OhmERP.Infrastructure.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ImagePath")
+                    b.Property<string>("ImageBase64")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -1437,7 +1439,7 @@ namespace OhmERP.Infrastructure.Migrations
                     b.Property<int?>("InnerPlug2Qty")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("InnerRolledLength")
+                    b.Property<decimal>("InnerRolledLength")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid?>("InnerSandId")

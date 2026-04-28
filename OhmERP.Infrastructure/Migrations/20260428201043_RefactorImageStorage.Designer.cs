@@ -12,8 +12,8 @@ using OhmERP.Infrastructure.Contexts;
 namespace OhmERP.Infrastructure.Migrations
 {
     [DbContext(typeof(OhmERPDbContext))]
-    [Migration("20260427210333_AddProductModule")]
-    partial class AddProductModule
+    [Migration("20260428201043_RefactorImageStorage")]
+    partial class RefactorImageStorage
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1224,8 +1224,16 @@ namespace OhmERP.Infrastructure.Migrations
                     b.Property<Guid>("Plug1Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Plug1Qty")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(2);
+
                     b.Property<Guid?>("Plug2Id")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("Plug2Qty")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("RolledLength")
                         .HasColumnType("decimal(18,2)");
@@ -1328,9 +1336,10 @@ namespace OhmERP.Infrastructure.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ImageBase64")
+                    b.Property<string>("ImagePath")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -1411,10 +1420,6 @@ namespace OhmERP.Infrastructure.Migrations
                     b.Property<decimal>("InnerOhmValue")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("InnerPackageType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("InnerPinId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1424,8 +1429,16 @@ namespace OhmERP.Infrastructure.Migrations
                     b.Property<Guid>("InnerPlug1Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("InnerPlug1Qty")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(2);
+
                     b.Property<Guid?>("InnerPlug2Id")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("InnerPlug2Qty")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("InnerRolledLength")
                         .HasColumnType("decimal(18,2)");

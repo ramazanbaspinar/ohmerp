@@ -36,6 +36,8 @@ public class CreateProductRequestValidator : AbstractValidator<CreateProductRequ
             RuleFor(x => x.InnerDetail!.InnerWattParameterId).NotEmpty().When(x => x.InnerDetail != null).WithMessage("İç ürün: Watt seçilmelidir.");
             RuleFor(x => x.InnerDetail!.InnerWireId).NotEmpty().When(x => x.InnerDetail != null).WithMessage("İç ürün: Tel seçilmelidir.");
             RuleFor(x => x.InnerDetail!.InnerSheetId).NotEmpty().When(x => x.InnerDetail != null).WithMessage("İç ürün: Sac seçilmelidir.");
+            RuleFor(x => x.InnerDetail!.InnerGasId).NotEmpty().When(x => x.InnerDetail != null).WithMessage("İç ürün: Kaynak Gazı seçilmelidir.");
+            RuleFor(x => x.InnerDetail!.InnerPlug1Id).NotEmpty().When(x => x.InnerDetail != null).WithMessage("İç ürün: 1. Tapa seçilmelidir.");
             
             When(x => x.InnerDetail != null && x.InnerDetail.InnerIsMixedSand, () =>
             {

@@ -22,6 +22,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.ConnectionWireLength).HasColumnType("decimal(18,2)");
         builder.Property(p => p.MixedSand1Ratio).HasColumnType("decimal(18,2)");
         builder.Property(p => p.MixedSand2Ratio).HasColumnType("decimal(18,2)");
+        
+        builder.Property(p => p.Plug1Qty).HasDefaultValue(2);
 
         builder.HasOne(p => p.Wire).WithMany().HasForeignKey(p => p.WireId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(p => p.Sheet).WithMany().HasForeignKey(p => p.SheetId).OnDelete(DeleteBehavior.Restrict);

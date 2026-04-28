@@ -20,7 +20,7 @@ public class Product : AuditableEntity
     public decimal OhmValue { get; set; }
 
     public decimal PipeLength { get; set; }
-    public decimal RolledLength { get; set; }
+    public decimal? RolledLength { get; set; }
     
     public Guid WireId { get; set; }
     public Item Wire { get; set; } = null!;
@@ -38,9 +38,11 @@ public class Product : AuditableEntity
 
     public Guid Plug1Id { get; set; }
     public Item Plug1 { get; set; } = null!;
+    public int Plug1Qty { get; set; }
 
     public Guid? Plug2Id { get; set; }
     public Item? Plug2 { get; set; }
+    public int? Plug2Qty { get; set; }
 
     public Guid Socket1Id { get; set; }
     public Item Socket1 { get; set; } = null!;

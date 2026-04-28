@@ -16,7 +16,7 @@ public class ProductInnerDetail : AuditableEntity
     public decimal InnerOhmValue { get; set; }
 
     public decimal InnerPipeLength { get; set; }
-    public decimal InnerRolledLength { get; set; }
+    public decimal? InnerRolledLength { get; set; }
     
     public Guid InnerWireId { get; set; }
     public Item InnerWire { get; set; } = null!;
@@ -34,9 +34,11 @@ public class ProductInnerDetail : AuditableEntity
 
     public Guid InnerPlug1Id { get; set; }
     public Item InnerPlug1 { get; set; } = null!;
+    public int InnerPlug1Qty { get; set; }
 
     public Guid? InnerPlug2Id { get; set; }
     public Item? InnerPlug2 { get; set; }
+    public int? InnerPlug2Qty { get; set; }
 
     public Guid InnerSocket1Id { get; set; }
     public Item InnerSocket1 { get; set; } = null!;
@@ -48,7 +50,6 @@ public class ProductInnerDetail : AuditableEntity
 
     public string InnerIsOvened { get; set; } = string.Empty;
     public string InnerMarking { get; set; } = string.Empty;
-    public string InnerPackageType { get; set; } = string.Empty;
 
     public Guid? InnerSandId { get; set; }
     public Item? InnerSand { get; set; }

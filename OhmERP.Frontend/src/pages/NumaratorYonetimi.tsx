@@ -116,6 +116,7 @@ const NumaratorYonetimi: React.FC = () => {
       case 3: return 'Makine Tanımları';
       case 4: return 'Genel Üretim Gideri';
       case 5: return 'Teknik Parametreler';
+      case 6: return 'Ürün';
       default: return `Bilinmeyen (${type})`;
     }
   };
@@ -298,6 +299,7 @@ const NumaratorYonetimi: React.FC = () => {
                   <Select.Option value={3}>Makine Tanımları</Select.Option>
                   <Select.Option value={4}>Genel Üretim Gideri</Select.Option>
                   <Select.Option value={5}>Teknik Parametreler</Select.Option>
+                  <Select.Option value={6}>Ürün</Select.Option>
                 </Select>
               </Form.Item>
             </Col>

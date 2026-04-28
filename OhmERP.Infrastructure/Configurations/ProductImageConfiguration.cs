@@ -10,6 +10,8 @@ public class ProductImageConfiguration : IEntityTypeConfiguration<ProductImage>
     {
         builder.HasKey(pi => pi.Id);
         
+        builder.Property(pi => pi.ImagePath).HasMaxLength(500);
+
         builder.HasOne(pi => pi.Product)
             .WithMany(p => p.Images)
             .HasForeignKey(pi => pi.ProductId)

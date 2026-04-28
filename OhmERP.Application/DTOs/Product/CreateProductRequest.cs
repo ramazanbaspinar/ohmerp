@@ -11,15 +11,18 @@ public class CreateProductRequest
     public Guid FirmId { get; set; }
     public Guid VoltParameterId { get; set; }
     public Guid WattParameterId { get; set; }
+    public decimal OhmValue { get; set; }
     public decimal PipeLength { get; set; }
-    public decimal RolledLength { get; set; }
+    public decimal? RolledLength { get; set; }
     public Guid WireId { get; set; }
     public bool IsDoubleWound { get; set; }
     public Guid SheetId { get; set; }
     public Guid GasId { get; set; }
     public Guid PinId { get; set; }
     public Guid Plug1Id { get; set; }
+    public int Plug1Qty { get; set; }
     public Guid? Plug2Id { get; set; }
+    public int? Plug2Qty { get; set; }
     public Guid Socket1Id { get; set; }
     public int Socket1Qty { get; set; }
     public Guid? Socket2Id { get; set; }
@@ -57,15 +60,18 @@ public class CreateProductInnerDetailRequest
 {
     public Guid InnerVoltParameterId { get; set; }
     public Guid InnerWattParameterId { get; set; }
+    public decimal InnerOhmValue { get; set; }
     public decimal InnerPipeLength { get; set; }
-    public decimal InnerRolledLength { get; set; }
+    public decimal? InnerRolledLength { get; set; }
     public Guid InnerWireId { get; set; }
     public bool InnerIsDoubleWound { get; set; }
     public Guid InnerSheetId { get; set; }
     public Guid InnerGasId { get; set; }
     public Guid InnerPinId { get; set; }
     public Guid InnerPlug1Id { get; set; }
+    public int InnerPlug1Qty { get; set; }
     public Guid? InnerPlug2Id { get; set; }
+    public int? InnerPlug2Qty { get; set; }
     public Guid InnerSocket1Id { get; set; }
     public int InnerSocket1Qty { get; set; }
     public Guid? InnerSocket2Id { get; set; }
@@ -92,6 +98,7 @@ public class CreateProductOperationRequest
 
 public class CreateProductImageRequest
 {
-    public string ImageBase64 { get; set; } = string.Empty;
+    public string ImageData { get; set; } = string.Empty;
+    public string? ImagePath { get; set; }
     public int SequenceOrder { get; set; }
 }

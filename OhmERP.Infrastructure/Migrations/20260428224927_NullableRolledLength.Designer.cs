@@ -12,8 +12,8 @@ using OhmERP.Infrastructure.Contexts;
 namespace OhmERP.Infrastructure.Migrations
 {
     [DbContext(typeof(OhmERPDbContext))]
-    [Migration("20260427185713_InitalCatalog")]
-    partial class InitalCatalog
+    [Migration("20260428224927_NullableRolledLength")]
+    partial class NullableRolledLength
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,9 @@ namespace OhmERP.Infrastructure.Migrations
                 .StartsAt(0L);
 
             modelBuilder.HasSequence<int>("OverheadCostCode_Seq")
+                .StartsAt(0L);
+
+            modelBuilder.HasSequence<int>("ProductCode_Seq")
                 .StartsAt(0L);
 
             modelBuilder.HasSequence<int>("TechnicalParameterCode_Seq")
@@ -1103,6 +1106,475 @@ namespace OhmERP.Infrastructure.Migrations
                     b.ToTable("OverheadCosts", (string)null);
                 });
 
+            modelBuilder.Entity("OhmERP.Domain.Entities.Product", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ClampId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("ClampQty")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("ConnectionSheetId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("ConnectionSheetQty")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ConnectionWireId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("ConnectionWireLength")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("ConnectionWireQty")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("FirmId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("FlangeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("FlangeQty")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("GasId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDoubleWound")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMixedSand")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("IsOvened")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Marking")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("MixedSand1Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("MixedSand1Ratio")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("MixedSand2Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("MixedSand2Ratio")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal>("OhmValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("OmegaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("OmegaQty")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PackageType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("PipeLength")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("Plug1Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Plug1Qty")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(2);
+
+                    b.Property<Guid?>("Plug2Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("Plug2Qty")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("RolledLength")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<Guid?>("SandId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SheetId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("Socket1Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Socket1Qty")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("Socket2Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("Socket2Qty")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("VoltParameterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("WattParameterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("WireId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClampId");
+
+                    b.HasIndex("ConnectionSheetId");
+
+                    b.HasIndex("ConnectionWireId");
+
+                    b.HasIndex("FirmId");
+
+                    b.HasIndex("FlangeId");
+
+                    b.HasIndex("GasId");
+
+                    b.HasIndex("MixedSand1Id");
+
+                    b.HasIndex("MixedSand2Id");
+
+                    b.HasIndex("OmegaId");
+
+                    b.HasIndex("PinId");
+
+                    b.HasIndex("Plug1Id");
+
+                    b.HasIndex("Plug2Id");
+
+                    b.HasIndex("SandId");
+
+                    b.HasIndex("SheetId");
+
+                    b.HasIndex("Socket1Id");
+
+                    b.HasIndex("Socket2Id");
+
+                    b.HasIndex("VoltParameterId");
+
+                    b.HasIndex("WattParameterId");
+
+                    b.HasIndex("WireId");
+
+                    b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("OhmERP.Domain.Entities.ProductImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<int>("SequenceOrder")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductImages");
+                });
+
+            modelBuilder.Entity("OhmERP.Domain.Entities.ProductInnerDetail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InnerDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("InnerGasId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("InnerIsDoubleWound")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("InnerIsMixedSand")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("InnerIsOvened")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InnerMarking")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("InnerMixedSand1Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("InnerMixedSand1Ratio")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("InnerMixedSand2Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("InnerMixedSand2Ratio")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("InnerOhmValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("InnerPinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("InnerPipeLength")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("InnerPlug1Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("InnerPlug1Qty")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(2);
+
+                    b.Property<Guid?>("InnerPlug2Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("InnerPlug2Qty")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("InnerRolledLength")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("InnerSandId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("InnerSheetId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("InnerSocket1Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("InnerSocket1Qty")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("InnerSocket2Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("InnerSocket2Qty")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("InnerVoltParameterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("InnerWattParameterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("InnerWireId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InnerGasId");
+
+                    b.HasIndex("InnerMixedSand1Id");
+
+                    b.HasIndex("InnerMixedSand2Id");
+
+                    b.HasIndex("InnerPinId");
+
+                    b.HasIndex("InnerPlug1Id");
+
+                    b.HasIndex("InnerPlug2Id");
+
+                    b.HasIndex("InnerSandId");
+
+                    b.HasIndex("InnerSheetId");
+
+                    b.HasIndex("InnerSocket1Id");
+
+                    b.HasIndex("InnerSocket2Id");
+
+                    b.HasIndex("InnerVoltParameterId");
+
+                    b.HasIndex("InnerWattParameterId");
+
+                    b.HasIndex("InnerWireId");
+
+                    b.HasIndex("ProductId")
+                        .IsUnique();
+
+                    b.ToTable("ProductInnerDetails");
+                });
+
+            modelBuilder.Entity("OhmERP.Domain.Entities.ProductOperation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsInnerProductRoute")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("OperationTimeMinutes")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<int>("SequenceOrder")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("WorkCenterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("WorkCenterId");
+
+                    b.ToTable("ProductOperations");
+                });
+
             modelBuilder.Entity("OhmERP.Domain.Entities.Role", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1668,6 +2140,291 @@ namespace OhmERP.Infrastructure.Migrations
                     b.Navigation("Parent");
                 });
 
+            modelBuilder.Entity("OhmERP.Domain.Entities.Product", b =>
+                {
+                    b.HasOne("OhmERP.Domain.Entities.Item", "Clamp")
+                        .WithMany()
+                        .HasForeignKey("ClampId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "ConnectionSheet")
+                        .WithMany()
+                        .HasForeignKey("ConnectionSheetId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "ConnectionWire")
+                        .WithMany()
+                        .HasForeignKey("ConnectionWireId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Company", "Firm")
+                        .WithMany()
+                        .HasForeignKey("FirmId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "Flange")
+                        .WithMany()
+                        .HasForeignKey("FlangeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "Gas")
+                        .WithMany()
+                        .HasForeignKey("GasId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "MixedSand1")
+                        .WithMany()
+                        .HasForeignKey("MixedSand1Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "MixedSand2")
+                        .WithMany()
+                        .HasForeignKey("MixedSand2Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "Omega")
+                        .WithMany()
+                        .HasForeignKey("OmegaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "Pin")
+                        .WithMany()
+                        .HasForeignKey("PinId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "Plug1")
+                        .WithMany()
+                        .HasForeignKey("Plug1Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "Plug2")
+                        .WithMany()
+                        .HasForeignKey("Plug2Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "Sand")
+                        .WithMany()
+                        .HasForeignKey("SandId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "Sheet")
+                        .WithMany()
+                        .HasForeignKey("SheetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "Socket1")
+                        .WithMany()
+                        .HasForeignKey("Socket1Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "Socket2")
+                        .WithMany()
+                        .HasForeignKey("Socket2Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.TechnicalParameter", "VoltParameter")
+                        .WithMany()
+                        .HasForeignKey("VoltParameterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.TechnicalParameter", "WattParameter")
+                        .WithMany()
+                        .HasForeignKey("WattParameterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "Wire")
+                        .WithMany()
+                        .HasForeignKey("WireId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Clamp");
+
+                    b.Navigation("ConnectionSheet");
+
+                    b.Navigation("ConnectionWire");
+
+                    b.Navigation("Firm");
+
+                    b.Navigation("Flange");
+
+                    b.Navigation("Gas");
+
+                    b.Navigation("MixedSand1");
+
+                    b.Navigation("MixedSand2");
+
+                    b.Navigation("Omega");
+
+                    b.Navigation("Pin");
+
+                    b.Navigation("Plug1");
+
+                    b.Navigation("Plug2");
+
+                    b.Navigation("Sand");
+
+                    b.Navigation("Sheet");
+
+                    b.Navigation("Socket1");
+
+                    b.Navigation("Socket2");
+
+                    b.Navigation("VoltParameter");
+
+                    b.Navigation("WattParameter");
+
+                    b.Navigation("Wire");
+                });
+
+            modelBuilder.Entity("OhmERP.Domain.Entities.ProductImage", b =>
+                {
+                    b.HasOne("OhmERP.Domain.Entities.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("OhmERP.Domain.Entities.ProductInnerDetail", b =>
+                {
+                    b.HasOne("OhmERP.Domain.Entities.Item", "InnerGas")
+                        .WithMany()
+                        .HasForeignKey("InnerGasId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "InnerMixedSand1")
+                        .WithMany()
+                        .HasForeignKey("InnerMixedSand1Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "InnerMixedSand2")
+                        .WithMany()
+                        .HasForeignKey("InnerMixedSand2Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "InnerPin")
+                        .WithMany()
+                        .HasForeignKey("InnerPinId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "InnerPlug1")
+                        .WithMany()
+                        .HasForeignKey("InnerPlug1Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "InnerPlug2")
+                        .WithMany()
+                        .HasForeignKey("InnerPlug2Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "InnerSand")
+                        .WithMany()
+                        .HasForeignKey("InnerSandId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "InnerSheet")
+                        .WithMany()
+                        .HasForeignKey("InnerSheetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "InnerSocket1")
+                        .WithMany()
+                        .HasForeignKey("InnerSocket1Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "InnerSocket2")
+                        .WithMany()
+                        .HasForeignKey("InnerSocket2Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OhmERP.Domain.Entities.TechnicalParameter", "InnerVoltParameter")
+                        .WithMany()
+                        .HasForeignKey("InnerVoltParameterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.TechnicalParameter", "InnerWattParameter")
+                        .WithMany()
+                        .HasForeignKey("InnerWattParameterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Item", "InnerWire")
+                        .WithMany()
+                        .HasForeignKey("InnerWireId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.Product", "Product")
+                        .WithOne("InnerDetail")
+                        .HasForeignKey("OhmERP.Domain.Entities.ProductInnerDetail", "ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InnerGas");
+
+                    b.Navigation("InnerMixedSand1");
+
+                    b.Navigation("InnerMixedSand2");
+
+                    b.Navigation("InnerPin");
+
+                    b.Navigation("InnerPlug1");
+
+                    b.Navigation("InnerPlug2");
+
+                    b.Navigation("InnerSand");
+
+                    b.Navigation("InnerSheet");
+
+                    b.Navigation("InnerSocket1");
+
+                    b.Navigation("InnerSocket2");
+
+                    b.Navigation("InnerVoltParameter");
+
+                    b.Navigation("InnerWattParameter");
+
+                    b.Navigation("InnerWire");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("OhmERP.Domain.Entities.ProductOperation", b =>
+                {
+                    b.HasOne("OhmERP.Domain.Entities.Product", "Product")
+                        .WithMany("Operations")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OhmERP.Domain.Entities.WorkCenter", "WorkCenter")
+                        .WithMany()
+                        .HasForeignKey("WorkCenterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("WorkCenter");
+                });
+
             modelBuilder.Entity("OhmERP.Domain.Entities.RolePermission", b =>
                 {
                     b.HasOne("OhmERP.Domain.Entities.Role", "Role")
@@ -1732,6 +2489,15 @@ namespace OhmERP.Infrastructure.Migrations
                     b.Navigation("Items");
 
                     b.Navigation("SubCategories");
+                });
+
+            modelBuilder.Entity("OhmERP.Domain.Entities.Product", b =>
+                {
+                    b.Navigation("Images");
+
+                    b.Navigation("InnerDetail");
+
+                    b.Navigation("Operations");
                 });
 
             modelBuilder.Entity("OhmERP.Domain.Entities.Role", b =>
