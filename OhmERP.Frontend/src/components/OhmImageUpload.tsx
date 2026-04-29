@@ -121,6 +121,18 @@ const OhmImageUpload: React.FC<OhmImageUploadProps> = ({ value = [], onChange, m
           return false;
         }}
         accept="image/png, image/jpeg, image/webp"
+        onRemove={() => {
+          return new Promise((resolve) => {
+            Modal.confirm({
+              title: 'Bu resmi silmek istediğinize emin misiniz?',
+              okText: 'Evet',
+              okType: 'danger',
+              cancelText: 'Hayır',
+              onOk: () => resolve(true),
+              onCancel: () => resolve(false),
+            });
+          });
+        }}
       >
         {fileList.length >= maxCount ? null : (
           <div>
@@ -146,6 +158,33 @@ const OhmImageUpload: React.FC<OhmImageUploadProps> = ({ value = [], onChange, m
       >
         <img alt="preview" style={{ width: '100%', objectFit: 'contain', maxHeight: '70vh' }} src={previewImage} />
       </Modal>
+      <style>{`
+        .ant-upload-list-item-actions .ant-btn {
+          margin: 0 8px;
+        }
+        .ant-upload-list-item-actions .anticon-delete {
+          color: #ff4d4f !important;
+          font-size: 18px;
+          padding: 4px;
+          border-radius: 4px;
+          background: rgba(255, 255, 255, 0.2);
+        }
+        .ant-upload-list-item-actions .anticon-delete:hover {
+          background: rgba(255, 77, 79, 0.5);
+          transform: scale(1.1);
+        }
+        .ant-upload-list-item-actions .anticon-eye {
+          color: #1890ff !important;
+          font-size: 18px;
+          padding: 4px;
+          border-radius: 4px;
+          background: rgba(255, 255, 255, 0.2);
+        }
+        .ant-upload-list-item-actions .anticon-eye:hover {
+          background: rgba(24, 144, 255, 0.5);
+          transform: scale(1.1);
+        }
+      `}</style>
     </>
   );
 };

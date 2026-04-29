@@ -17,8 +17,19 @@ public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequ
         RuleFor(x => x.GasId).NotEmpty().WithMessage("Kaynak Gazı seçilmelidir.");
         RuleFor(x => x.PinId).NotEmpty().WithMessage("Pim seçilmelidir.");
         RuleFor(x => x.Plug1Id).NotEmpty().WithMessage("1. Tapa seçilmelidir.");
+        RuleFor(x => x.Plug1Qty).GreaterThan(0).WithMessage("1. Tapa adeti 0'dan büyük olmalıdır.");
         RuleFor(x => x.Socket1Id).NotEmpty().WithMessage("1. Soket seçilmelidir.");
-        
+        RuleFor(x => x.Socket1Qty).GreaterThan(0).WithMessage("1. Soket adeti 0'dan büyük olmalıdır.");
+
+        RuleFor(x => x.Plug2Qty).GreaterThan(0).When(x => x.Plug2Id != null).WithMessage("2. Tapa seçildiğinde adet 0'dan büyük olmalıdır.");
+        RuleFor(x => x.Socket2Qty).GreaterThan(0).When(x => x.Socket2Id != null).WithMessage("2. Soket seçildiğinde adet 0'dan büyük olmalıdır.");
+        RuleFor(x => x.FlangeQty).GreaterThan(0).When(x => x.FlangeId != null).WithMessage("Flanş seçildiğinde adet 0'dan büyük olmalıdır.");
+        RuleFor(x => x.ClampQty).GreaterThan(0).When(x => x.ClampId != null).WithMessage("Kelepçe seçildiğinde adet 0'dan büyük olmalıdır.");
+        RuleFor(x => x.OmegaQty).GreaterThan(0).When(x => x.OmegaId != null).WithMessage("Omega seçildiğinde adet 0'dan büyük olmalıdır.");
+        RuleFor(x => x.ConnectionSheetQty).GreaterThan(0).When(x => x.ConnectionSheetId != null).WithMessage("Bağlantı sacı seçildiğinde adet 0'dan büyük olmalıdır.");
+        RuleFor(x => x.ConnectionWireQty).GreaterThan(0).When(x => x.ConnectionWireId != null).WithMessage("Bağlantı teli seçildiğinde adet 0'dan büyük olmalıdır.");
+        RuleFor(x => x.ConnectionWireLength).GreaterThan(0).When(x => x.ConnectionWireId != null).WithMessage("Bağlantı teli seçildiğinde boyu 0'dan büyük olmalıdır.");
+
         When(x => x.IsMixedSand, () =>
         {
             RuleFor(x => x.MixedSand1Id).NotEmpty().WithMessage("Karışık kum aktifken 1. Kum seçilmelidir.");
@@ -39,6 +50,10 @@ public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequ
             RuleFor(x => x.InnerDetail!.InnerSheetId).NotEmpty().When(x => x.InnerDetail != null).WithMessage("İç ürün: Sac seçilmelidir.");
             RuleFor(x => x.InnerDetail!.InnerGasId).NotEmpty().When(x => x.InnerDetail != null).WithMessage("İç ürün: Kaynak Gazı seçilmelidir.");
             RuleFor(x => x.InnerDetail!.InnerPlug1Id).NotEmpty().When(x => x.InnerDetail != null).WithMessage("İç ürün: 1. Tapa seçilmelidir.");
+            RuleFor(x => x.InnerDetail!.InnerPlug1Qty).GreaterThan(0).When(x => x.InnerDetail != null).WithMessage("İç ürün: 1. Tapa adeti 0'dan büyük olmalıdır.");
+            RuleFor(x => x.InnerDetail!.InnerSocket1Qty).GreaterThan(0).When(x => x.InnerDetail != null).WithMessage("İç ürün: 1. Soket adeti 0'dan büyük olmalıdır.");
+            RuleFor(x => x.InnerDetail!.InnerPlug2Qty).GreaterThan(0).When(x => x.InnerDetail != null && x.InnerDetail.InnerPlug2Id != null).WithMessage("İç ürün: 2. Tapa seçildiğinde adet 0'dan büyük olmalıdır.");
+            RuleFor(x => x.InnerDetail!.InnerSocket2Qty).GreaterThan(0).When(x => x.InnerDetail != null && x.InnerDetail.InnerSocket2Id != null).WithMessage("İç ürün: 2. Soket seçildiğinde adet 0'dan büyük olmalıdır.");
             
             When(x => x.InnerDetail != null && x.InnerDetail.InnerIsMixedSand, () =>
             {

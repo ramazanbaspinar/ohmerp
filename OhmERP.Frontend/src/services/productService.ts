@@ -17,7 +17,9 @@ export interface ProductDto {
   gasId: string;
   pinId: string;
   plug1Id: string;
+  plug1Qty: number;
   plug2Id?: string;
+  plug2Qty?: number;
   socket1Id: string;
   socket1Qty: number;
   socket2Id?: string;

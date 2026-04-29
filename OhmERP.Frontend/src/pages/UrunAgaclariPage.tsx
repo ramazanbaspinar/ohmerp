@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { 
-  Button, Card, Form, Input, Select, Switch, Space, Row, Col, Tabs, Drawer, message, Popconfirm, Checkbox 
+  Button, Card, Form, Input, Select, Switch, Space, Row, Col, Tabs, Drawer, message, Popconfirm, Checkbox, Modal, Tag, Typography, Descriptions, Steps, Divider, Radio 
 } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, AppstoreAddOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useEnterpriseTabs } from '../hooks/useEnterpriseTabs';
 
 import { OhmTable } from '../components/OhmTable';
@@ -12,8 +12,15 @@ import { productService } from '../services/productService';
 import type { ProductDto } from '../services/productService';
 import api from '../services/api';
 
+const formatNum = (num: any) => {
+  if (num === null || num === undefined || num === '') return '-';
+  return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(num));
+};
+
 const { Option } = Select;
 const { TabPane } = Tabs;
+const { Text } = Typography;
+const { Step } = Steps;
 
 const UrunAgaclariPage: React.FC = () => {
   const [products, setProducts] = useState<ProductDto[]>([]);
@@ -21,6 +28,17 @@ const UrunAgaclariPage: React.FC = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [quickViewVisible, setQuickViewVisible] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<ProductDto | null>(null);
+  const [originalRecord, setOriginalRecord] = useState<any>(null);
+  const [searchText, setSearchText] = useState('');
+  const [appliedSearchText, setAppliedSearchText] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('active');
+  
+  useEffect(() => {
+    if (searchText.length === 0 || searchText.length >= 3) {
+      const timer = setTimeout(() => setAppliedSearchText(searchText), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [searchText]);
   
   const handleQuickView = async (record: ProductDto) => {
     try {
@@ -117,11 +135,18 @@ const UrunAgaclariPage: React.FC = () => {
   
   const handleCloseDrawer = () => {
     if (form.isFieldsTouched()) {
-      if (window.confirm('Kaydedilmemiş değişiklikleriniz var! Çıkmak istediğinize emin misiniz?')) {
-        setDrawerVisible(false);
-      }
+      Modal.confirm({
+        title: 'Kaydedilmemiş Değişiklikler',
+        content: 'Formda kaydedilmemiş değişiklikler var. Çıkmak istediğinize emin misiniz?',
+        okText: 'Evet, Çık',
+        cancelText: 'Hayır, Kal',
+        onOk: () => {
+          setDrawerVisible(false);
+        }
+      });
     } else {
       setDrawerVisible(false);
+      form.resetFields();
     }
   };
 
@@ -139,11 +164,13 @@ const UrunAgaclariPage: React.FC = () => {
         setIsMixedSand(detailRecord.isMixedSand);
         setHasInnerProduct(!!detailRecord.innerDetail);
         
-        form.setFieldsValue({
+        const formData = {
           ...detailRecord,
           images: detailRecord.images?.map((i: any) => i.imagePath),
           hasInnerProduct: !!detailRecord.innerDetail
-        });
+        };
+        form.setFieldsValue(formData);
+        setOriginalRecord(formData);
         setIsCodeManualAllowed(false);
       } catch (error) {
         message.error('Ürün detayları yüklenirken bir hata oluştu.');
@@ -155,21 +182,39 @@ const UrunAgaclariPage: React.FC = () => {
       setCurrentId(null);
       setIsMixedSand(false);
       setHasInnerProduct(false);
-      form.setFieldsValue({
-        code: 'Yükleniyor...',
-        isActive: true,
-        isMixedSand: false,
-        hasInnerProduct: false,
-        plug1Qty: 2,
-        innerDetail: { innerPlug1Qty: 2 }
-      });
-      setIsCodeManualAllowed(false);
       try {
-        const numRes = await api.get('/Numerator/PreviewNextCode/6');
-        form.setFieldValue('code', numRes.data.nextCode);
-        setIsCodeManualAllowed(numRes.data.isManualEntryAllowed);
+        const fetchRes = await api.get('/Numerator/PreviewNextCode/6');
+        const initialNewRecord = {
+          code: fetchRes.data.nextCode,
+          isActive: true,
+          isMixedSand: false,
+          hasInnerProduct: false,
+          plug1Qty: 2,
+          socket1Qty: 1,
+          isOvened: 'Hayır',
+          marking: 'Markasız',
+          packageType: 'Standart',
+          innerDetail: { innerPlug1Qty: 2, innerSocket1Qty: 1, innerIsMixedSand: false, innerIsOvened: 'Hayır', innerMarking: 'Markasız', innerPackageType: 'Standart' }
+        };
+        form.setFieldsValue(initialNewRecord);
+        setOriginalRecord(initialNewRecord);
+        setIsCodeManualAllowed(fetchRes.data.isManualEntryAllowed);
       } catch {
-        form.setFieldValue('code', '');
+        const fallbackRecord = {
+          code: '',
+          isActive: true,
+          isMixedSand: false,
+          hasInnerProduct: false,
+          plug1Qty: 2,
+          socket1Qty: 1,
+          isOvened: 'Hayır',
+          marking: 'Markasız',
+          packageType: 'Standart',
+          innerDetail: { innerPlug1Qty: 2, innerSocket1Qty: 1, innerIsMixedSand: false, innerIsOvened: 'Hayır', innerMarking: 'Markasız', innerPackageType: 'Standart' }
+        };
+        form.setFieldsValue(fallbackRecord);
+        setOriginalRecord(fallbackRecord);
+        setIsCodeManualAllowed(false);
       }
     }
     setDrawerVisible(true);
@@ -178,14 +223,15 @@ const UrunAgaclariPage: React.FC = () => {
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
-      if (!values.hasInnerProduct) {
+      if (!hasInnerProduct || !values.hasInnerProduct) {
         values.innerDetail = null;
+        values.hasInnerProduct = false;
       }
       if (values.images && Array.isArray(values.images)) {
         values.images = values.images.map((data: string, idx: number) => {
           const isBase64 = data.startsWith('data:image');
           return {
-            imageData: isBase64 ? data : null,
+            imageData: isBase64 ? data : '',
             imagePath: isBase64 ? null : data,
             sequenceOrder: idx + 1
           };
@@ -237,10 +283,14 @@ const UrunAgaclariPage: React.FC = () => {
   };
 
   const columns = [
-    { title: 'Ürün Kodu', dataIndex: 'code', key: 'code', sorter: true },
-    { title: 'Ürün Adı', dataIndex: 'name', key: 'name', sorter: true },
-    { title: 'Ohm Değeri', dataIndex: 'ohmValue', key: 'ohmValue' },
-    { title: 'Durum', dataIndex: 'isActive', key: 'isActive', render: (val: boolean) => (val ? 'Aktif' : 'Pasif') },
+    { title: 'Firma (Müşteri)', key: 'firmName', sorter: (a: ProductDto, b: ProductDto) => { const fA = companies.find(c => c.id === a.firmId)?.name || ''; const fB = companies.find(c => c.id === b.firmId)?.name || ''; return fA.localeCompare(fB); }, render: (_: any, record: ProductDto) => companies.find(c => c.id === record.firmId)?.name || '-' },
+    { title: 'Ürün Kodu', dataIndex: 'code', key: 'code', sorter: (a: ProductDto, b: ProductDto) => a.code?.localeCompare(b.code || '') || 0 },
+    { title: 'Ürün Adı', dataIndex: 'name', key: 'name', sorter: (a: ProductDto, b: ProductDto) => a.name?.localeCompare(b.name || '') || 0 },
+    { title: 'Volt', key: 'volt', render: (_: any, record: ProductDto) => voltParams.find(v => v.id === record.voltParameterId)?.numericValue ? `${voltParams.find(v => v.id === record.voltParameterId)?.numericValue}V` : '-' },
+    { title: 'Watt', key: 'watt', render: (_: any, record: ProductDto) => wattParams.find(w => w.id === record.wattParameterId)?.numericValue ? `${wattParams.find(w => w.id === record.wattParameterId)?.numericValue}W` : '-' },
+    { title: 'Boru Boyu (mm)', key: 'pipeLength', render: (_: any, record: ProductDto) => formatNum(record.pipeLength) },
+    { title: 'Haddeli Boy (mm)', key: 'rolledLength', render: (_: any, record: ProductDto) => record.rolledLength ? formatNum(record.rolledLength) : '-' },
+    { title: 'Durum', dataIndex: 'isActive', key: 'isActive', render: (val: boolean) => <Tag color={val ? 'green' : 'red'}>{val ? 'Aktif' : 'Pasif'}</Tag> },
     {
       title: 'İşlemler',
       key: 'actions',
@@ -262,11 +312,9 @@ const UrunAgaclariPage: React.FC = () => {
     const ops = form.getFieldValue('operations') || [];
     const updatedOps = [...ops];
     
-    // Check if the target sequence already exists in the same route
     const conflictIndex = updatedOps.findIndex((o, i) => i !== index && o?.isInnerProductRoute === isInner && o?.sequenceOrder === newSeq);
     
     if (conflictIndex !== -1) {
-      // Shift logic: anything >= newSeq in the same route gets +1
       for (let i = 0; i < updatedOps.length; i++) {
         if (i !== index && updatedOps[i]?.isInnerProductRoute === isInner && updatedOps[i]?.sequenceOrder >= newSeq) {
           updatedOps[i] = { ...updatedOps[i], sequenceOrder: updatedOps[i].sequenceOrder + 1 };
@@ -274,7 +322,13 @@ const UrunAgaclariPage: React.FC = () => {
       }
     }
     
-    // Sort array just to be safe
+    updatedOps.sort((a, b) => {
+      if (a.isInnerProductRoute !== b.isInnerProductRoute) {
+         return a.isInnerProductRoute ? 1 : -1;
+      }
+      return (a.sequenceOrder || 0) - (b.sequenceOrder || 0);
+    });
+
     form.setFieldValue('operations', updatedOps);
   };
 
@@ -282,21 +336,74 @@ const UrunAgaclariPage: React.FC = () => {
     return items.filter(i => i.categoryCode === categoryCode);
   };
 
+  const filteredData = products.filter(p => {
+    if (appliedSearchText) {
+      const lowerSearch = appliedSearchText.toLowerCase();
+      const cName = companies.find(c => c.id === p.firmId)?.name?.toLowerCase() || '';
+      if (!p.code.toLowerCase().includes(lowerSearch) && !p.name.toLowerCase().includes(lowerSearch) && !cName.includes(lowerSearch)) {
+        return false;
+      }
+    }
+
+    if (filterStatus === 'active' && !p.isActive) return false;
+    if (filterStatus === 'passive' && p.isActive) return false;
+
+    return true;
+  });
+
   return (
     <>
-      <Card title="Ürün Ağaçları">
-        <Space style={{ marginBottom: 16 }}>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenDrawer()}>
-            Yeni Ürün Ekle
-          </Button>
-        </Space>
-        
+      <div style={{ marginBottom: 16, padding: '16px', background: '#fff', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+        <Row gutter={16} align="middle">
+          <Col span={16}>
+            <Space size="middle">
+              <Input.Search 
+                placeholder="Ara (En az 3 karakter)..." 
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                onSearch={(value) => setAppliedSearchText(value)}
+                allowClear
+                enterButton
+                style={{ width: 300 }}
+              />
+              <Radio.Group 
+                value={filterStatus} 
+                onChange={(e: any) => setFilterStatus(e.target.value)}
+                buttonStyle="solid"
+              >
+                <Radio.Button value="all">Tümü</Radio.Button>
+                <Radio.Button value="active">Aktifler</Radio.Button>
+                <Radio.Button value="passive">Pasifler</Radio.Button>
+              </Radio.Group>
+            </Space>
+          </Col>
+          <Col span={8} style={{ textAlign: 'right' }}>
+             <Space>
+                <Button icon={<ReloadOutlined />} onClick={fetchData}>Yenile</Button>
+                <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenDrawer()}>Yeni Ürün Ekle</Button>
+              </Space>
+          </Col>
+        </Row>
+      </div>
+
+      <div style={{ marginTop: 16 }}>
         <OhmTable
+          tableName="UrunAgaclari"
+          tableTitle="Ürün Ağaçları"
+          titleIcon={<AppstoreAddOutlined />}
           columns={columns}
-          dataSource={products.filter(p => p.isActive)}
+          dataSource={filteredData}
           loading={loading}
           rowKey="id"
-          pagination={{ pageSize: 10 }}
+          onRow={(record) => ({
+            onDoubleClick: () => handleQuickView(record),
+            style: { cursor: 'pointer' }
+          })}
+          pagination={{ 
+            pageSize: 10,
+            showSizeChanger: true,
+            showTotal: (total, range) => `${range[0]}-${range[1]} arası gösteriliyor. Toplam: ${total} kayıt`
+          }}
         />
 
         <Drawer
@@ -306,7 +413,17 @@ const UrunAgaclariPage: React.FC = () => {
           open={drawerVisible}
           extra={
             <Space>
-              <Button danger onClick={() => form.resetFields()}>Geri Al</Button>
+              <Button danger onClick={() => {
+                if (isEdit && originalRecord) {
+                  form.setFieldsValue(originalRecord);
+                  setIsMixedSand(originalRecord.isMixedSand || false);
+                  setHasInnerProduct(originalRecord.hasInnerProduct || false);
+                } else {
+                  form.resetFields();
+                  setIsMixedSand(false);
+                  setHasInnerProduct(false);
+                }
+              }}>Geri Al</Button>
               <Button onClick={() => handleCloseDrawer()}>İptal</Button>
               <Button type="primary" onClick={handleSave} loading={loading}>Kaydet</Button>
             </Space>
@@ -373,12 +490,12 @@ const UrunAgaclariPage: React.FC = () => {
                   <Row gutter={16}>
                     <Col span={8}>
                       <Form.Item name="pipeLength" label="Boru Boyu (mm)" rules={[{ required: true, message: 'Zorunlu' }]}>
-                        <OhmInputNumber style={{ width: '100%' }} />
+                        <OhmInputNumber precision={2} style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
                     <Col span={8}>
                       <Form.Item name="rolledLength" label="Haddeli Boy (mm)">
-                        <OhmInputNumber style={{ width: '100%' }} />
+                        <OhmInputNumber precision={2} style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
                   </Row>
@@ -435,7 +552,7 @@ const UrunAgaclariPage: React.FC = () => {
                       </Form.Item>
                     </Col>
                     <Col span={2}>
-                      <Form.Item name="plug2Qty" label="Adet">
+                      <Form.Item name="plug2Qty" label="Adet" dependencies={['plug2Id']} rules={[({ getFieldValue }) => ({ required: !!getFieldValue('plug2Id'), message: 'Zorunlu' })]}>
                         <OhmInputNumber min={1} style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
@@ -462,7 +579,7 @@ const UrunAgaclariPage: React.FC = () => {
                       </Form.Item>
                     </Col>
                     <Col span={2}>
-                      <Form.Item name="socket2Qty" label="Adet">
+                      <Form.Item name="socket2Qty" label="Adet" dependencies={['socket2Id']} rules={[({ getFieldValue }) => ({ required: !!getFieldValue('socket2Id'), message: 'Zorunlu' })]}>
                         <OhmInputNumber min={1} style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
@@ -485,7 +602,7 @@ const UrunAgaclariPage: React.FC = () => {
                       </Form.Item>
                     </Col>
                     <Col span={2}>
-                      <Form.Item name="flangeQty" label="Adet">
+                      <Form.Item name="flangeQty" label="Adet" dependencies={['flangeId']} rules={[({ getFieldValue }) => ({ required: !!getFieldValue('flangeId'), message: 'Zorunlu' })]}>
                         <OhmInputNumber min={1} style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
@@ -497,7 +614,7 @@ const UrunAgaclariPage: React.FC = () => {
                       </Form.Item>
                     </Col>
                     <Col span={2}>
-                      <Form.Item name="clampQty" label="Adet">
+                      <Form.Item name="clampQty" label="Adet" dependencies={['clampId']} rules={[({ getFieldValue }) => ({ required: !!getFieldValue('clampId'), message: 'Zorunlu' })]}>
                         <OhmInputNumber min={1} style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
@@ -520,19 +637,19 @@ const UrunAgaclariPage: React.FC = () => {
                       </Form.Item>
                     </Col>
                     <Col span={2}>
-                      <Form.Item name="omegaQty" label="Adet">
+                      <Form.Item name="omegaQty" label="Adet" dependencies={['omegaId']} rules={[({ getFieldValue }) => ({ required: !!getFieldValue('omegaId'), message: 'Zorunlu' })]}>
                         <OhmInputNumber min={1} style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
                     <Col span={6}>
                       <Form.Item name="connectionSheetId" label="Bağlantı Sacı">
                         <Select showSearch optionFilterProp="children" allowClear>
-                          {filterItemsByCategory("BAGLANTI_SACI").map(i => <Option key={i.id} value={i.id}>{i.name}</Option>)}
+                          {filterItemsByCategory("BAGLANTISACI").map(i => <Option key={i.id} value={i.id}>{i.name}</Option>)}
                         </Select>
                       </Form.Item>
                     </Col>
                     <Col span={2}>
-                      <Form.Item name="connectionSheetQty" label="Adet">
+                      <Form.Item name="connectionSheetQty" label="Adet" dependencies={['connectionSheetId']} rules={[({ getFieldValue }) => ({ required: !!getFieldValue('connectionSheetId'), message: 'Zorunlu' })]}>
                         <OhmInputNumber min={1} style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
@@ -547,17 +664,17 @@ const UrunAgaclariPage: React.FC = () => {
                     <Col span={6}>
                       <Form.Item name="connectionWireId" label="Bağlantı Teli">
                         <Select showSearch optionFilterProp="children" allowClear>
-                          {filterItemsByCategory("BAGLANTI_TELI").map(i => <Option key={i.id} value={i.id}>{i.name}</Option>)}
+                          {filterItemsByCategory("BAGLANTITELI").map(i => <Option key={i.id} value={i.id}>{i.name}</Option>)}
                         </Select>
                       </Form.Item>
                     </Col>
                     <Col span={2}>
-                      <Form.Item name="connectionWireQty" label="Adet">
+                      <Form.Item name="connectionWireQty" label="Adet" dependencies={['connectionWireId']} rules={[({ getFieldValue }) => ({ required: !!getFieldValue('connectionWireId'), message: 'Zorunlu' })]}>
                         <OhmInputNumber min={1} style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
                     <Col span={8}>
-                      <Form.Item name="connectionWireLength" label="Bağlantı Teli Boyu (mm)">
+                      <Form.Item name="connectionWireLength" label="Bağlantı Teli Boyu (mm)" dependencies={['connectionWireId']} rules={[({ getFieldValue }) => ({ required: !!getFieldValue('connectionWireId'), message: 'Zorunlu' })]}>
                         <OhmInputNumber precision={2} style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
@@ -588,7 +705,7 @@ const UrunAgaclariPage: React.FC = () => {
                         </Col>
                         <Col span={12}>
                           <Form.Item name="mixedSand1Ratio" label="1. Kum Oranı (%)" rules={[{ required: true, message: 'Zorunlu' }]}>
-                            <OhmInputNumber style={{ width: '100%' }} />
+                            <OhmInputNumber precision={2} style={{ width: '100%' }} />
                           </Form.Item>
                         </Col>
                         <Col span={12}>
@@ -600,7 +717,7 @@ const UrunAgaclariPage: React.FC = () => {
                         </Col>
                         <Col span={12}>
                           <Form.Item name="mixedSand2Ratio" label="2. Kum Oranı (%)" rules={[{ required: true, message: 'Zorunlu' }]}>
-                            <OhmInputNumber style={{ width: '100%' }} />
+                            <OhmInputNumber precision={2} style={{ width: '100%' }} />
                           </Form.Item>
                         </Col>
                       </Row>
@@ -648,12 +765,12 @@ const UrunAgaclariPage: React.FC = () => {
                       <Row gutter={16}>
                         <Col span={8}>
                           <Form.Item name={['innerDetail', 'innerPipeLength']} label="İç Boru Boyu (mm)" rules={[{ required: true, message: 'Zorunlu' }]}>
-                            <OhmInputNumber style={{ width: '100%' }} />
+                            <OhmInputNumber precision={2} style={{ width: '100%' }} />
                           </Form.Item>
                         </Col>
                         <Col span={8}>
                           <Form.Item name={['innerDetail', 'innerRolledLength']} label="İç Haddeli Boy (mm)">
-                            <OhmInputNumber style={{ width: '100%' }} />
+                            <OhmInputNumber precision={2} style={{ width: '100%' }} />
                           </Form.Item>
                         </Col>
                       </Row>
@@ -710,7 +827,7 @@ const UrunAgaclariPage: React.FC = () => {
                           </Form.Item>
                         </Col>
                         <Col span={2}>
-                          <Form.Item name={['innerDetail', 'innerPlug2Qty']} label="Adet">
+                          <Form.Item name={['innerDetail', 'innerPlug2Qty']} label="Adet" dependencies={[['innerDetail', 'innerPlug2Id']]} rules={[({ getFieldValue }) => ({ required: !!getFieldValue(['innerDetail', 'innerPlug2Id']), message: 'Zorunlu' })]}>
                             <OhmInputNumber min={1} style={{ width: '100%' }} />
                           </Form.Item>
                         </Col>
@@ -737,7 +854,7 @@ const UrunAgaclariPage: React.FC = () => {
                           </Form.Item>
                         </Col>
                         <Col span={2}>
-                          <Form.Item name={['innerDetail', 'innerSocket2Qty']} label="Adet">
+                          <Form.Item name={['innerDetail', 'innerSocket2Qty']} label="Adet" dependencies={[['innerDetail', 'innerSocket2Id']]} rules={[({ getFieldValue }) => ({ required: !!getFieldValue(['innerDetail', 'innerSocket2Id']), message: 'Zorunlu' })]}>
                             <OhmInputNumber min={1} style={{ width: '100%' }} />
                           </Form.Item>
                         </Col>
@@ -784,7 +901,7 @@ const UrunAgaclariPage: React.FC = () => {
                                   </Col>
                                   <Col span={12}>
                                     <Form.Item name={['innerDetail', 'innerMixedSand1Ratio']} label="İç 1. Kum Oranı (%)" rules={[{ required: true, message: 'Zorunlu' }]}>
-                                      <OhmInputNumber style={{ width: '100%' }} />
+                                      <OhmInputNumber precision={2} style={{ width: '100%' }} />
                                     </Form.Item>
                                   </Col>
                                   <Col span={12}>
@@ -796,7 +913,7 @@ const UrunAgaclariPage: React.FC = () => {
                                   </Col>
                                   <Col span={12}>
                                     <Form.Item name={['innerDetail', 'innerMixedSand2Ratio']} label="İç 2. Kum Oranı (%)" rules={[{ required: true, message: 'Zorunlu' }]}>
-                                      <OhmInputNumber style={{ width: '100%' }} />
+                                      <OhmInputNumber precision={2} style={{ width: '100%' }} />
                                     </Form.Item>
                                   </Col>
                                     </Row>
@@ -833,18 +950,18 @@ const UrunAgaclariPage: React.FC = () => {
                                 <Row gutter={8} key={key} style={{ marginBottom: 8 }}>
                                   <Col span={3}>
                                     <Form.Item {...restField} name={[name, 'sequenceOrder']} noStyle>
-                                      <OhmInputNumber placeholder="Sıra" style={{ width: '100%' }} onChange={(val) => handleSequenceChange(name, val as number, isInner)} />
+                                      <OhmInputNumber min={1} placeholder="Sıra" style={{ width: '100%' }} onChange={(val) => handleSequenceChange(name, val as number, isInner)} />
                                     </Form.Item>
                                   </Col>
                                   <Col span={12}>
-                                    <Form.Item {...restField} name={[name, 'workCenterId']} noStyle>
-                                      <Select placeholder="Makine (İş Merkezi)" style={{ width: '100%' }}>
+                                    <Form.Item {...restField} name={[name, 'workCenterId']} noStyle rules={[{ required: true, message: 'Zorunlu' }]}>
+                                      <Select showSearch optionFilterProp="children" placeholder="Makine (İş Merkezi)" style={{ width: '100%' }}>
                                         {workCenters.map(wc => <Option key={wc.id} value={wc.id}>{wc.name}</Option>)}
                                       </Select>
                                     </Form.Item>
                                   </Col>
                                   <Col span={6}>
-                                    <Form.Item {...restField} name={[name, 'operationTimeMinutes']} noStyle>
+                                    <Form.Item {...restField} name={[name, 'operationTimeMinutes']} noStyle rules={[{ required: true, message: 'Zorunlu' }]}>
                                       <OhmInputNumber placeholder="Süre (Dk)" style={{ width: '100%' }} />
                                     </Form.Item>
                                   </Col>
@@ -854,7 +971,12 @@ const UrunAgaclariPage: React.FC = () => {
                                 </Row>
                               );
                             })}
-                            <Button type="dashed" onClick={() => add({ isInnerProductRoute: false })} block icon={<PlusOutlined />}>
+                            <Button type="dashed" onClick={() => {
+                              const ops = form.getFieldValue('operations') || [];
+                              const outerOps = ops.filter((o: any) => !o.isInnerProductRoute);
+                              const maxSeq = outerOps.length > 0 ? Math.max(...outerOps.map((o: any) => o.sequenceOrder || 0)) : 0;
+                              add({ isInnerProductRoute: false, sequenceOrder: maxSeq + 1 });
+                            }} block icon={<PlusOutlined />}>
                               Rota Satırı Ekle
                             </Button>
                           </>
@@ -875,18 +997,18 @@ const UrunAgaclariPage: React.FC = () => {
                                   <Row gutter={8} key={key} style={{ marginBottom: 8 }}>
                                     <Col span={3}>
                                       <Form.Item {...restField} name={[name, 'sequenceOrder']} noStyle>
-                                        <OhmInputNumber placeholder="Sıra" style={{ width: '100%' }} onChange={(val) => handleSequenceChange(name, val as number, isInner)} />
+                                        <OhmInputNumber min={1} placeholder="Sıra" style={{ width: '100%' }} onChange={(val) => handleSequenceChange(name, val as number, isInner)} />
                                       </Form.Item>
                                     </Col>
                                     <Col span={12}>
-                                      <Form.Item {...restField} name={[name, 'workCenterId']} noStyle>
-                                        <Select placeholder="Makine (İş Merkezi)" style={{ width: '100%' }}>
+                                      <Form.Item {...restField} name={[name, 'workCenterId']} noStyle rules={[{ required: true, message: 'Zorunlu' }]}>
+                                        <Select showSearch optionFilterProp="children" placeholder="Makine (İş Merkezi)" style={{ width: '100%' }}>
                                           {workCenters.map(wc => <Option key={wc.id} value={wc.id}>{wc.name}</Option>)}
                                         </Select>
                                       </Form.Item>
                                     </Col>
                                     <Col span={6}>
-                                      <Form.Item {...restField} name={[name, 'operationTimeMinutes']} noStyle>
+                                      <Form.Item {...restField} name={[name, 'operationTimeMinutes']} noStyle rules={[{ required: true, message: 'Zorunlu' }]}>
                                         <OhmInputNumber placeholder="Süre (Dk)" style={{ width: '100%' }} />
                                       </Form.Item>
                                     </Col>
@@ -896,7 +1018,12 @@ const UrunAgaclariPage: React.FC = () => {
                                   </Row>
                                 );
                               })}
-                              <Button type="dashed" onClick={() => add({ isInnerProductRoute: true })} block icon={<PlusOutlined />}>
+                              <Button type="dashed" onClick={() => {
+                                const ops = form.getFieldValue('operations') || [];
+                                const innerOps = ops.filter((o: any) => o.isInnerProductRoute);
+                                const maxSeq = innerOps.length > 0 ? Math.max(...innerOps.map((o: any) => o.sequenceOrder || 0)) : 0;
+                                add({ isInnerProductRoute: true, sequenceOrder: maxSeq + 1 });
+                              }} block icon={<PlusOutlined />}>
                                 İç Rota Satırı Ekle
                               </Button>
                             </>
@@ -911,60 +1038,130 @@ const UrunAgaclariPage: React.FC = () => {
           </Form>
         </Drawer>
 
-      <Drawer
-        title="Hızlı Bakış - Ürün Özeti"
-        width={700}
-        onClose={() => setQuickViewVisible(false)}
+      <Modal
+        title={<div style={{ fontSize: 20, fontWeight: 'bold', borderBottom: '2px solid #1890ff', paddingBottom: 8, marginBottom: 16 }}>📋 Ürün Ağacı</div>}
+        width={1000}
         open={quickViewVisible}
+        onCancel={() => setQuickViewVisible(false)}
+        footer={<Button type="primary" size="large" onClick={() => setQuickViewVisible(false)}>Kapat</Button>}
+        centered
+        style={{ top: 20 }}
+        styles={{ body: { padding: '12px 24px', maxHeight: '75vh', overflowY: 'auto' } }}
       >
         {quickViewProduct && (
-          <div style={{ padding: 16 }}>
-            <h3>Temel Bilgiler</h3>
-            <p><strong>Kodu:</strong> {quickViewProduct.code}</p>
-            <p><strong>Adı:</strong> {quickViewProduct.name}</p>
-            <p><strong>Ohm:</strong> {quickViewProduct.ohmValue}</p>
-            <p><strong>Durum:</strong> {quickViewProduct.isActive ? 'Aktif' : 'Pasif'}</p>
-            
-            <h3 style={{ marginTop: 24 }}>Kullanılan Malzemeler</h3>
-            <ul>
-              <li><strong>Tel:</strong> {items.find(x => x.id === quickViewProduct.wireId)?.name || '-'}</li>
-              <li><strong>Sac:</strong> {items.find(x => x.id === quickViewProduct.sheetId)?.name || '-'}</li>
-              <li><strong>Kum:</strong> {quickViewProduct.isMixedSand ? 'Karışık Kum' : (items.find(x => x.id === quickViewProduct.sandId)?.name || '-')}</li>
-            </ul>
+          <div>
+            <Row gutter={[24, 24]}>
+              <Col span={24}>
+                <Card size="small" type="inner" title={<span style={{ color: '#1890ff', fontSize: 16 }}>Genel Bilgiler</span>} styles={{ header: { background: '#e6f7ff', textAlign: 'center' } }}>
+                  <Descriptions column={2} size="small" bordered>
+                    <Descriptions.Item label="Ürün Kodu"><Text strong>{quickViewProduct.code}</Text></Descriptions.Item>
+                    <Descriptions.Item label="Ürün Adı"><Text strong>{quickViewProduct.name}</Text></Descriptions.Item>
+                    <Descriptions.Item label="Firma (Müşteri)"><Text strong>{companies.find(c => c.id === quickViewProduct.firmId)?.name || '-'}</Text></Descriptions.Item>
+                    <Descriptions.Item label="Ohm Değeri"><Text type="success" strong>{formatNum(quickViewProduct.ohmValue)} Ω</Text></Descriptions.Item>
+                  </Descriptions>
+                </Card>
+              </Col>
 
-            {quickViewProduct.innerDetail && (
-              <>
-                <h3 style={{ marginTop: 24 }}>İç Ürün Malzemeleri</h3>
-                <ul>
-                  <li><strong>İç Tel:</strong> {items.find(x => x.id === quickViewProduct.innerDetail?.innerWireId)?.name || '-'}</li>
-                  <li><strong>İç Sac:</strong> {items.find(x => x.id === quickViewProduct.innerDetail?.innerSheetId)?.name || '-'}</li>
-                  <li><strong>İç Kum:</strong> {quickViewProduct.innerDetail?.innerIsMixedSand ? 'Karışık Kum' : (items.find(x => x.id === quickViewProduct.innerDetail?.innerSandId)?.name || '-')}</li>
-                </ul>
-              </>
-            )}
+              <Col span={quickViewProduct.innerDetail ? 12 : 24}>
+                 <Card size="small" type="inner" title={<span style={{ color: '#fa8c16', fontSize: 16 }}>Dış Ürün Teknik Reçetesi</span>} styles={{ header: { background: '#fff7e6' } }}>
+                    <Descriptions column={1} size="small" layout="horizontal" bordered>
+                       <Descriptions.Item label="Volt / Watt"><Text strong>{voltParams.find(v => v.id === quickViewProduct.voltParameterId)?.numericValue}V / {wattParams.find(w => w.id === quickViewProduct.wattParameterId)?.numericValue}W</Text></Descriptions.Item>
+                       <Descriptions.Item label="Boru Boyu">{formatNum(quickViewProduct.pipeLength)} mm</Descriptions.Item>
+                       <Descriptions.Item label="Haddeli Boy">{quickViewProduct.rolledLength ? `${formatNum(quickViewProduct.rolledLength)} mm` : '-'}</Descriptions.Item>
+                       <Descriptions.Item label="Tel">{items.find(x => x.id === quickViewProduct.wireId)?.name || '-'} {quickViewProduct.isDoubleWound ? <Text type="danger">(Çift Sarım)</Text> : ''}</Descriptions.Item>
+                       <Descriptions.Item label="Sac">{items.find(x => x.id === quickViewProduct.sheetId)?.name || '-'}</Descriptions.Item>
+                       <Descriptions.Item label="Kaynak Gazı">{items.find(x => x.id === quickViewProduct.gasId)?.name || '-'}</Descriptions.Item>
+                       <Descriptions.Item label="Pim">{items.find(x => x.id === quickViewProduct.pinId)?.name || '-'}</Descriptions.Item>
+                       <Descriptions.Item label="Tapalar">
+                         {items.find(x => x.id === quickViewProduct.plug1Id)?.name || '-'} <Text strong>({quickViewProduct.plug1Qty} Adet)</Text>
+                         {quickViewProduct.plug2Id ? <span> | {items.find(x => x.id === quickViewProduct.plug2Id)?.name} <Text strong>({quickViewProduct.plug2Qty} Adet)</Text></span> : ''}
+                       </Descriptions.Item>
+                       <Descriptions.Item label="Soketler">
+                         {items.find(x => x.id === quickViewProduct.socket1Id)?.name || '-'} <Text strong>({quickViewProduct.socket1Qty} Adet)</Text>
+                         {quickViewProduct.socket2Id ? <span> | {items.find(x => x.id === quickViewProduct.socket2Id)?.name} <Text strong>({quickViewProduct.socket2Qty} Adet)</Text></span> : ''}
+                       </Descriptions.Item>
+                       <Descriptions.Item label="Flanş / Kelepçe / Omega">
+                         Flanş: {items.find(x => x.id === quickViewProduct.flangeId)?.name || '-'} {quickViewProduct.flangeId ? <Text strong>({quickViewProduct.flangeQty} Adet)</Text> : ''} | 
+                         Kelepçe: {items.find(x => x.id === quickViewProduct.clampId)?.name || '-'} {quickViewProduct.clampId ? <Text strong>({quickViewProduct.clampQty} Adet)</Text> : ''} | 
+                         Omega: {items.find(x => x.id === quickViewProduct.omegaId)?.name || '-'} {quickViewProduct.omegaId ? <Text strong>({quickViewProduct.omegaQty} Adet)</Text> : ''}
+                       </Descriptions.Item>
+                       <Descriptions.Item label="Bağlantı Grubu">
+                         Sac: {items.find(x => x.id === quickViewProduct.connectionSheetId)?.name || '-'} {quickViewProduct.connectionSheetId ? <Text strong>({quickViewProduct.connectionSheetQty} Adet)</Text> : ''} | 
+                         Tel: {items.find(x => x.id === quickViewProduct.connectionWireId)?.name || '-'} {quickViewProduct.connectionWireId ? <Text strong>({quickViewProduct.connectionWireQty} Adet / {formatNum(quickViewProduct.connectionWireLength)} mm)</Text> : ''}
+                       </Descriptions.Item>
+                       <Descriptions.Item label="Kum">
+                         {quickViewProduct.isMixedSand ? 
+                           <span>Karışık Kum: <Text strong>{items.find(x => x.id === quickViewProduct.mixedSand1Id)?.name} (%{formatNum(quickViewProduct.mixedSand1Ratio)})</Text> + <Text strong>{items.find(x => x.id === quickViewProduct.mixedSand2Id)?.name} (%{formatNum(quickViewProduct.mixedSand2Ratio)})</Text></span> 
+                           : (items.find(x => x.id === quickViewProduct.sandId)?.name || '-')}
+                       </Descriptions.Item>
+                       <Descriptions.Item label="Son İşlemler">
+                         Fırın: <Text strong>{quickViewProduct.isOvened}</Text> | 
+                         Markalama: <Text strong>{quickViewProduct.marking}</Text> | 
+                         Paket: <Text strong>{quickViewProduct.packageType || '-'}</Text>
+                       </Descriptions.Item>
+                       {quickViewProduct.description && (
+                         <Descriptions.Item label="Açıklama"><Text type="secondary">{quickViewProduct.description}</Text></Descriptions.Item>
+                       )}
+                    </Descriptions>
 
-            <h3 style={{ marginTop: 24 }}>Üretim Rotası (Dış)</h3>
-            <ol>
-              {quickViewProduct.operations?.filter(o => !o.isInnerProductRoute).sort((a,b) => a.sequenceOrder - b.sequenceOrder).map(o => (
-                <li key={o.id}>{workCenters.find(w => w.id === o.workCenterId)?.name || '-'} ({o.operationTimeMinutes} dk)</li>
-              ))}
-            </ol>
-            
-            {quickViewProduct.innerDetail && (
-              <>
-                <h3 style={{ marginTop: 24 }}>Üretim Rotası (İç)</h3>
-                <ol>
-                  {quickViewProduct.operations?.filter(o => o.isInnerProductRoute).sort((a,b) => a.sequenceOrder - b.sequenceOrder).map(o => (
-                    <li key={o.id}>{workCenters.find(w => w.id === o.workCenterId)?.name || '-'} ({o.operationTimeMinutes} dk)</li>
-                  ))}
-                </ol>
-              </>
-            )}
+                    <Divider style={{ margin: '16px 0' }}><span style={{ color: '#8c8c8c', fontSize: 14 }}>Üretim Rotası (İş Merkezleri)</span></Divider>
+                    <div style={{ padding: '16px', background: '#fafafa', borderRadius: 8, border: '1px solid #f0f0f0', maxHeight: 220, overflowY: 'auto' }}>
+                      <Steps direction="vertical" size="small" current={quickViewProduct.operations?.filter(o => !o.isInnerProductRoute).length}>
+                         {quickViewProduct.operations?.filter(o => !o.isInnerProductRoute).sort((a,b) => a.sequenceOrder - b.sequenceOrder).map(o => (
+                           <Step key={o.id} title={<Text strong>{workCenters.find(w => w.id === o.workCenterId)?.name || '-'}</Text>} description={<span style={{ color: '#1890ff' }}>İşlem Süresi: {o.operationTimeMinutes} Dk.</span>} />
+                         ))}
+                      </Steps>
+                    </div>
+                 </Card>
+              </Col>
+
+              {quickViewProduct.innerDetail && (
+                 <Col span={12}>
+                    <Card size="small" type="inner" title={<span style={{ color: '#52c41a', fontSize: 16 }}>İç Ürün Teknik Reçetesi</span>} styles={{ header: { background: '#f6ffed' } }}>
+                       <Descriptions column={1} size="small" layout="horizontal" bordered>
+                          <Descriptions.Item label="Volt / Watt"><Text strong>{voltParams.find(v => v.id === quickViewProduct.innerDetail.innerVoltParameterId)?.numericValue}V / {wattParams.find(w => w.id === quickViewProduct.innerDetail.innerWattParameterId)?.numericValue}W</Text></Descriptions.Item>
+                          <Descriptions.Item label="Boru Boyu">{formatNum(quickViewProduct.innerDetail.innerPipeLength)} mm</Descriptions.Item>
+                          <Descriptions.Item label="Haddeli Boy">{quickViewProduct.innerDetail.innerRolledLength ? `${formatNum(quickViewProduct.innerDetail.innerRolledLength)} mm` : '-'}</Descriptions.Item>
+                          <Descriptions.Item label="Tel">{items.find(x => x.id === quickViewProduct.innerDetail.innerWireId)?.name || '-'} {quickViewProduct.innerDetail.innerIsDoubleWound ? <Text type="danger">(Çift Sarım)</Text> : ''}</Descriptions.Item>
+                          <Descriptions.Item label="Sac">{items.find(x => x.id === quickViewProduct.innerDetail.innerSheetId)?.name || '-'}</Descriptions.Item>
+                          <Descriptions.Item label="Kaynak Gazı">{items.find(x => x.id === quickViewProduct.innerDetail.innerGasId)?.name || '-'}</Descriptions.Item>
+                          <Descriptions.Item label="Pim">{items.find(x => x.id === quickViewProduct.innerDetail.innerPinId)?.name || '-'}</Descriptions.Item>
+                          <Descriptions.Item label="Tapalar">
+                            {items.find(x => x.id === quickViewProduct.innerDetail.innerPlug1Id)?.name || '-'} <Text strong>({quickViewProduct.innerDetail.innerPlug1Qty} Adet)</Text>
+                            {quickViewProduct.innerDetail.innerPlug2Id ? <span> | {items.find(x => x.id === quickViewProduct.innerDetail.innerPlug2Id)?.name} <Text strong>({quickViewProduct.innerDetail.innerPlug2Qty} Adet)</Text></span> : ''}
+                          </Descriptions.Item>
+                          <Descriptions.Item label="Soketler">
+                            {items.find(x => x.id === quickViewProduct.innerDetail.innerSocket1Id)?.name || '-'} <Text strong>({quickViewProduct.innerDetail.innerSocket1Qty} Adet)</Text>
+                            {quickViewProduct.innerDetail.innerSocket2Id ? <span> | {items.find(x => x.id === quickViewProduct.innerDetail.innerSocket2Id)?.name} <Text strong>({quickViewProduct.innerDetail.innerSocket2Qty} Adet)</Text></span> : ''}
+                          </Descriptions.Item>
+                          <Descriptions.Item label="Kum">
+                            {quickViewProduct.innerDetail.innerIsMixedSand ? 
+                              <span>Karışık Kum: <Text strong>{items.find(x => x.id === quickViewProduct.innerDetail.innerMixedSand1Id)?.name} (%{formatNum(quickViewProduct.innerDetail.innerMixedSand1Ratio)})</Text> + <Text strong>{items.find(x => x.id === quickViewProduct.innerDetail.innerMixedSand2Id)?.name} (%{formatNum(quickViewProduct.innerDetail.innerMixedSand2Ratio)})</Text></span> 
+                              : (items.find(x => x.id === quickViewProduct.innerDetail.innerSandId)?.name || '-')}
+                          </Descriptions.Item>
+                          <Descriptions.Item label="Son İşlemler">
+                            Fırın: <Text strong>{quickViewProduct.innerDetail.innerIsOvened}</Text> | Markalama: <Text strong>{quickViewProduct.innerDetail.innerMarking}</Text>
+                          </Descriptions.Item>
+                       </Descriptions>
+
+                       <Divider style={{ margin: '16px 0' }}><span style={{ color: '#8c8c8c', fontSize: 14 }}>İç Ürün Üretim Rotası</span></Divider>
+                       <div style={{ padding: '16px', background: '#fafafa', borderRadius: 8, border: '1px solid #f0f0f0', maxHeight: 220, overflowY: 'auto' }}>
+                         <Steps direction="vertical" size="small" current={quickViewProduct.operations?.filter(o => o.isInnerProductRoute).length}>
+                            {quickViewProduct.operations?.filter(o => o.isInnerProductRoute).sort((a,b) => a.sequenceOrder - b.sequenceOrder).map(o => (
+                              <Step key={o.id} title={<Text strong>{workCenters.find(w => w.id === o.workCenterId)?.name || '-'}</Text>} description={<span style={{ color: '#1890ff' }}>İşlem Süresi: {o.operationTimeMinutes} Dk.</span>} />
+                            ))}
+                         </Steps>
+                       </div>
+                    </Card>
+                 </Col>
+              )}
+
+            </Row>
           </div>
         )}
-      </Drawer>
+      </Modal>
 
-      </Card>
+      </div>
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; }
