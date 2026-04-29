@@ -9,8 +9,6 @@ public class OperationCostDetail
     public decimal SetupTime { get; set; }
     public decimal RunTime { get; set; }
     public decimal TotalTimeMinutes { get; set; }
-    public decimal HourlyMachineCost { get; set; }
-    public decimal HourlyLaborCost { get; set; }
-    public int Currency { get; set; }
+
     public decimal TotalCost { get; set; }
 }

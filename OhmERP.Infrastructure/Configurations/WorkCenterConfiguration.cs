@@ -21,10 +21,14 @@ public class WorkCenterConfiguration : IEntityTypeConfiguration<WorkCenter>
             .IsRequired()
             .HasMaxLength(150);
 
-        builder.Property(x => x.HourlyMachineCost)
+        builder.Property(x => x.Category)
+            .HasMaxLength(100);
+
+
+        builder.Property(x => x.SetupTime)
             .HasPrecision(18, 4);
 
-        builder.Property(x => x.HourlyLaborCost)
+        builder.Property(x => x.UnitProcessTime)
             .HasPrecision(18, 4);
     }
 }

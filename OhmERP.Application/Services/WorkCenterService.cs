@@ -58,9 +58,7 @@ public class WorkCenterService : BaseService<WorkCenter, WorkCenterListDto, Crea
             {
                 "code" => filter.SortDesc ? q.OrderByDescending(x => x.Code) : q.OrderBy(x => x.Code),
                 "name" => filter.SortDesc ? q.OrderByDescending(x => x.Name) : q.OrderBy(x => x.Name),
-                "hourlymachinecost" => filter.SortDesc ? q.OrderByDescending(x => x.HourlyMachineCost) : q.OrderBy(x => x.HourlyMachineCost),
-                "hourlylaborcost" => filter.SortDesc ? q.OrderByDescending(x => x.HourlyLaborCost) : q.OrderBy(x => x.HourlyLaborCost),
-                "currency" => filter.SortDesc ? q.OrderByDescending(x => x.Currency) : q.OrderBy(x => x.Currency),
+
                 _ => q.OrderByDescending(x => x.CreatedDate)
             };
         }
@@ -104,7 +102,7 @@ public class WorkCenterService : BaseService<WorkCenter, WorkCenterListDto, Crea
 
             if (filter.Type.HasValue)
             {
-                query = query.Where(x => x.Type == (OhmERP.Domain.Enums.WorkCenterType)filter.Type.Value);
+                query = query.Where(x => x.CalculationType == (OhmERP.Domain.Enums.MachineCalculationType)filter.Type.Value);
             }
 
             return query;
@@ -175,10 +173,7 @@ public class WorkCenterService : BaseService<WorkCenter, WorkCenterListDto, Crea
                             {
                                 textValue = b ? "Aktif" : "Pasif";
                             }
-                            else if ((prop.Name == "HourlyMachineCost" || prop.Name == "HourlyLaborCost") && value is decimal decimalValue)
-                            {
-                                textValue = decimalValue.ToString("0.####", new CultureInfo("tr-TR"));
-                            }
+
                             else
                             {
                                 textValue = value?.ToString() ?? string.Empty;
@@ -206,15 +201,13 @@ public class WorkCenterService : BaseService<WorkCenter, WorkCenterListDto, Crea
         return document.GeneratePdf();
     }
 
-    protected override async Task ValidateCreateAsync(CreateWorkCenterRequest request)
+    protected override Task ValidateCreateAsync(CreateWorkCenterRequest request)
     {
-        if (await _repository.AnyAsync(x => x.Code == request.Code.Trim() && !x.IsDeleted))
-            throw new BusinessException("Aynı Kodla başka makine olamaz.");
+        return Task.CompletedTask;
     }
 
-    protected override async Task ValidateUpdateAsync(Guid id, UpdateWorkCenterRequest request, WorkCenter entity)
+    protected override Task ValidateUpdateAsync(Guid id, UpdateWorkCenterRequest request, WorkCenter entity)
     {
-        if (await _repository.AnyAsync(x => x.Code == request.Code.Trim() && x.Id != id && !x.IsDeleted))
-            throw new BusinessException("Aynı Kodla başka makine olamaz.");
+        return Task.CompletedTask;
     }
 }

@@ -69,14 +69,9 @@ public class CostEngineService : ICostEngineService
             if (op.WorkCenter == null) continue;
 
             decimal totalTimeMinutes = op.SetupTime + op.RunTime;
-            decimal hourlyRate = op.WorkCenter.HourlyMachineCost + op.WorkCenter.HourlyLaborCost;
-            int wcCurrency = (int)op.WorkCenter.Currency;
 
-            decimal tlHourlyRate = hourlyRate;
-            if (wcCurrency == (int)CurrencyType.USD) tlHourlyRate = hourlyRate * request.CurrentUsdRate;
-            else if (wcCurrency == (int)CurrencyType.EUR) tlHourlyRate = hourlyRate * request.CurrentEurRate;
-
-            decimal opTotalCost = (totalTimeMinutes / 60m) * tlHourlyRate;
+            // Costs are now managed in an independent Cost module. Set to 0 here.
+            decimal opTotalCost = 0;
 
             result.OperationDetails.Add(new OperationCostDetail
             {
@@ -87,9 +82,6 @@ public class CostEngineService : ICostEngineService
                 SetupTime = op.SetupTime,
                 RunTime = op.RunTime,
                 TotalTimeMinutes = totalTimeMinutes,
-                HourlyMachineCost = op.WorkCenter.HourlyMachineCost,
-                HourlyLaborCost = op.WorkCenter.HourlyLaborCost,
-                Currency = wcCurrency,
                 TotalCost = opTotalCost
             });
 

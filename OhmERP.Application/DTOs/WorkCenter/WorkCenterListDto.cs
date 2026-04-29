@@ -13,17 +13,23 @@ public class WorkCenterListDto
     [Display(Name = "Makine Adı")]
     public string Name { get; set; } = string.Empty;
 
-    [Display(Name = "Tipi", AutoGenerateField = false)]
-    public WorkCenterType Type { get; set; }
+    [Display(Name = "Kategori")]
+    public string Category { get; set; } = string.Empty;
 
-    [Display(Name = "Saatlik Makine Maliyeti")]
-    public decimal HourlyMachineCost { get; set; }
+    [Display(Name = "Hesaplama Tipi", AutoGenerateField = false)]
+    public MachineCalculationType CalculationType { get; set; }
 
-    [Display(Name = "Saatlik İşçilik Maliyeti")]
-    public decimal HourlyLaborCost { get; set; }
 
-    [Display(Name = "Para Birimi")]
-    public CurrencyType Currency { get; set; }
+    [Display(Name = "Hazırlık Süresi")]
+    public decimal SetupTime { get; set; }
+
+    [Display(Name = "Birim İşlem Süresi")]
+    public decimal UnitProcessTime { get; set; }
+
+    [Display(Name = "Parti Kapasite Sınırı")]
+    public int? BatchCapacityLimit { get; set; }
+
+
 
     [Display(Name = "Durum")]
     public bool IsActive { get; set; }

@@ -17,7 +17,7 @@ const BirimTanimlari = React.lazy(() => import('./pages/BirimTanimlari'));
 const KategoriTanimlari = React.lazy(() => import('./pages/KategoriTanimlari'));
 const CategorySettings = React.lazy(() => import('./pages/CategorySettings'));
 const NumaratorYonetimi = React.lazy(() => import('./pages/NumaratorYonetimi'));
-const WorkCenters = React.lazy(() => import('./pages/WorkCenters'));
+const IsMerkezleriPage = React.lazy(() => import('./pages/IsMerkezleriPage'));
 const CostSimulation = React.lazy(() => import('./pages/CostSimulation'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const TelTanimlari = React.lazy(() => import('./pages/TelTanimlari'));
@@ -115,7 +115,7 @@ const App: React.FC = () => {
               <Route path="/tanimlar/volt" element={<VoltTanimlariPage />} />
               <Route path="/tanimlar/watt" element={<WattTanimlariPage />} />
 
-              <Route path="/is-merkezleri" element={<WorkCenters />} />
+              <Route path="/is-merkezleri" element={<IsMerkezleriPage />} />
               <Route path="/urun-agaclari" element={<UrunAgaclariPage />} />
               <Route path="/maliyet-simulatoru" element={<CostSimulation />} />
 
